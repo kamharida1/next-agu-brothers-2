@@ -34,6 +34,7 @@ const base = process.env.MONNIFY_BASE_URL || 'https://sandbox.monnify.com'
            ]
          }),
        })
+       
        return handleResponse(response)
      },
    }
@@ -52,7 +53,7 @@ const base = process.env.MONNIFY_BASE_URL || 'https://sandbox.monnify.com'
      })
 
      const jsonData = await handleResponse(response)
-     return jsonData.access_token
+     return jsonData.responseBody.accessToken
    }
 
    async function handleResponse(response: any) {

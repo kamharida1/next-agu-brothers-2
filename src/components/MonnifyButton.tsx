@@ -12,13 +12,24 @@ const MonnifyButton: React.FC<MonnifyButtonProps> = ({ orderId }) => {
       headers: {
         'Content-Type': 'application/json',
       },
-    }).then((response: any) => {
-      if (response.status === 200) {
-        response.json().then((data: any) => { 
-          data
+    }).then((response) => {
+      if (response.ok) {
+        response.json().then((data) => {
+          const { checkoutUrl } = data.responseBody
+          toast.success(`Redirecting to payment`)
+          const newWindow = window.open(checkoutUrl, '_blank')
+          if (newWindow) {
+            newWindow.focus();
+          } else {
+            toast.error('Failed to open payment window')
+          }
+          return
         })
+      } else {
+        return response.json().then((data) => {
+          toast.error(data.message)
+         })
       }
-      return toast.error('Failed to receive checkout url')
     })
   }
 
