@@ -26,6 +26,7 @@ const initialState: Cart = {
     city: '',
     postalCode: '',
     country: '',
+    email: ''
   },
 }
 
@@ -95,7 +96,8 @@ export default function useCartService() {
       cartStore.setState({
         items:[],
       })
-    }
+    },
+    init: () => cartStore.setState(initialState),
   }
 }
 

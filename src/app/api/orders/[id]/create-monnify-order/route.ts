@@ -21,7 +21,7 @@ export const POST = auth(async (...request: any) => {
       const monnifyOrder = await monnify.initialiseTransaction(
         order.totalPrice,
         order.shippingAddress.fullName,
-        'nnamdiagu470@gmail.com',
+        order.shippingAddress.email,
         'Order payment',
       )
        return Response.json(monnifyOrder)

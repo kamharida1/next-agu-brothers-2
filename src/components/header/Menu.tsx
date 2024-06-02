@@ -12,6 +12,11 @@ const Menu = () => {
   }, [])
 
   const { data: session } = useSession()
+  const { init } = useCartService()
+
+  const handleClick = () => {
+    ;(document.activeElement as HTMLElement).blur()
+  }
 
   const signoutHandler = () => {
     signOut({ callbackUrl: '/signin' })
@@ -59,6 +64,9 @@ const Menu = () => {
                     <button type="button" onClick={signoutHandler}>
                       Sign out
                     </button>
+                  </li>
+                  <li onClick={handleClick}>
+                    <Link href="/order-history">Order history </Link>
                   </li>
                 </ul>
               </div>

@@ -18,6 +18,7 @@ const Form = () => {
     defaultValues: {
       fullName: '',
       address: '',
+      email: '',
       city: '',
       postalCode: '',
       country: '',
@@ -30,6 +31,7 @@ const Form = () => {
     setValue('city', shippingAddress.city || '')
     setValue('postalCode', shippingAddress.postalCode || '')
     setValue('country', shippingAddress.country || '')
+    setValue('email', shippingAddress.email || '')
   }, [setValue, shippingAddress])
 
   const formSubmit: SubmitHandler<ShippingAddress> = async (form) => {
@@ -80,6 +82,15 @@ const Form = () => {
             <FormInput name="City" id="city" required />
             <FormInput name="Postal Code" id="postalCode" required />
             <FormInput name="Country" id="country" required />
+            <FormInput
+              name="Email"
+              id="email"
+              required
+              pattern={{
+                value: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
+                message: 'Invalid email address',
+              }}
+            />
             <div className="my-2">
               <button
                 type="submit"

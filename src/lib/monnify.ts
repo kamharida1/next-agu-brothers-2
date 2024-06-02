@@ -37,6 +37,9 @@ const base = process.env.MONNIFY_BASE_URL || 'https://sandbox.monnify.com'
        
        return handleResponse(response)
      },
+     captureWebhook: async function captureWebhook(order: any, event: any) {
+      
+     }
    }
 
    async function generateAccessToken() {

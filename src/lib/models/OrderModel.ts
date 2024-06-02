@@ -1,4 +1,5 @@
    import mongoose from 'mongoose'
+import email from 'next-auth/providers/email'
 
    const orderSchema = new mongoose.Schema(
      {
@@ -27,6 +28,7 @@
          city: { type: String, required: true },
          postalCode: { type: String, required: true },
          country: { type: String, required: true },
+         email: { type: String, required: true },
        },
        paymentMethod: { type: String, required: true },
        paymentResult: {
@@ -63,6 +65,7 @@ export type Order = {
     city: string
     postalCode: string
     country: string
+    email: string 
   }
   paymentMethod: string
   paymentResult?: {
@@ -93,9 +96,10 @@ export type OrderItem = {
 }
 
 export type ShippingAddress = {
-     fullName: string
-     address: string
-     city: string
-     postalCode: string
-     country: string
-   }
+  fullName: string
+  address: string
+  city: string
+  postalCode: string
+  country: string
+  email: string
+}
