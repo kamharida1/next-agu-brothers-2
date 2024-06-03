@@ -36,4 +36,4 @@ import { auth } from '@/lib/auth'
          }
        )
      }
-   })
+   }) as any

@@ -15,4 +15,4 @@ import dbConnect from '@/lib/dbConnect'
      await dbConnect()
      const order = await OrderModel.findById(params.id)
      return Response.json(order)
-   })
+   }) as any

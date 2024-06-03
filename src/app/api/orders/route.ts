@@ -60,7 +60,7 @@
          }
        )
      }
-   })
+   }) as any
 
    const calcPrices = (orderItems: OrderItem[]) => {
      // Calculate the items price
