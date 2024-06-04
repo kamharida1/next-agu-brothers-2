@@ -4,6 +4,8 @@ import "./globals.css";
 import Header from "@/components/header/header";
 import Providers from "@/components/Providers";
 import Script from 'next/script'
+import DrawerButton from "@/components/DrawerButton";
+import Sidebar from "@/components/Sidebar";
 
 
 const inter = Inter({ subsets: ["latin"] });
@@ -25,12 +27,25 @@ export default function RootLayout({
       <body className={inter.className}>
         <Script src="https://sdk.monnify.com/plugin/monnify.js" />
         <Providers>
-          <div className="min-h-screen flex flex-col">
-            <Header />
-            {children}
-            <footer className="footer footer-center p-4 bg-base-300 text-base-content">
-              <p>Copyright © 2024 - All right reserved by Agu Brothers</p>
-            </footer>
+          <div className="drawer">
+            <DrawerButton />
+            <div className="drawer-content">
+              <div className="min-h-screen flex flex-col">
+                <Header />
+                {children}
+                <footer className="footer footer-center p-4 bg-base-300 text-base-content">
+                  <p>Copyright © 2024 - All right reserved by Agu Brothers</p>
+                </footer>
+              </div>
+            </div>
+            <div className="drawer-side">
+              <label
+                htmlFor="my-drawer"
+                aria-label="close sidebar"
+                className="drawer-overlay"
+              ></label>
+              <Sidebar />
+            </div>
           </div>
         </Providers>
       </body>

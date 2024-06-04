@@ -132,7 +132,7 @@ export default function OrderDetails({
           </div>
         </div>
         <div>
-          <div className="card bg-base-300">
+          <div className="card bg-base-300 mt-4" >
             <div className="card-body">
               <h2 className="card-title">Order Summary</h2>
               <div className="mb-2 flex justify-between">
