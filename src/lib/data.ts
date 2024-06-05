@@ -19,7 +19,7 @@ const data = {
     {
       name: 'Kenstar Cooker 6090',
       slug: 'kenstar-cooker-6090',
-      category: ' Gas Cookers',
+      category: 'Gas Cookers',
       image: '/images/Kcooker1.jpeg',
       price: 70,
       brand: 'Kenstar',

@@ -7,6 +7,7 @@ import Image from "next/image"
 import Link from "next/link"
 import toast from "react-hot-toast"
 import useSWR from "swr"
+import useSWRMutation from "swr/mutation"
 
 export default function OrderDetails({
   orderId,
@@ -15,6 +16,23 @@ export default function OrderDetails({
   orderId: string
   paypalClientId: string
   }) {
+  
+  const { trigger: deliverOrder, isMutating: isDelivering } = useSWRMutation(
+    `/api/orders/${orderId}`,
+    async (url) => {
+      const res = await fetch(`/api/admin/orders/${orderId}/deliver`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      const data = await res.json()
+      res.ok
+        ? toast.success('Order delivered successfully')
+        : toast.error(data.message)
+    }
+  )
+
   const { data: session } = useSession()
 
   function createPayPalOrder() {
@@ -132,7 +150,7 @@ export default function OrderDetails({
           </div>
         </div>
         <div>
-          <div className="card bg-base-300 mt-4" >
+          <div className="card bg-base-300 mt-4">
             <div className="card-body">
               <h2 className="card-title">Order Summary</h2>
               <div className="mb-2 flex justify-between">
@@ -175,6 +193,20 @@ export default function OrderDetails({
                     </li>
                   </ul>
                 </div>
+              )}
+              {session?.user.isAdmin && (
+                <li>
+                  <button
+                    className="btn w-full my-2"
+                    onClick={() => deliverOrder()}
+                    disabled={isDelivering}
+                  >
+                    {isDelivering && (
+                      <span className="loading loading-spinner"></span>
+                    )}
+                    Mark as delivered
+                  </button>
+                </li>
               )}
             </div>
           </div>
