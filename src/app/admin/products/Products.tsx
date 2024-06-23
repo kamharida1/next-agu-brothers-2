@@ -32,22 +32,7 @@
        }
      )
 
-     const { trigger: createProduct, isMutating: isCreating } = useSWRMutation(
-       `/api/admin/products`,
-       async (url) => {
-         const res = await fetch(url, {
-           method: 'POST',
-           headers: {
-             'Content-Type': 'application/json',
-           },
-         })
-         const data = await res.json()
-         if (!res.ok) return toast.error(data.message)
-
-         toast.success('Product created successfully')
-         router.push(`/admin/products/${data.product._id}`)
-       }
-     )
+     
 
      if (error) return 'An error has occurred.'
      if (!products) return 'Loading...'
@@ -56,14 +41,9 @@
        <div>
          <div className="flex justify-between items-center">
            <h1 className="py-4 text-2xl">Products</h1>
-           <button
-             disabled={isCreating}
-             onClick={() => createProduct()}
-             className="btn btn-primary btn-sm"
-           >
-             {isCreating && <span className="loading loading-spinner"></span>}
-             Create
-           </button>
+           <Link href="/admin/products/create" className="btn btn-primary">
+             Create Product
+          </Link>
          </div>
 
          <div className="overflow-x-auto">

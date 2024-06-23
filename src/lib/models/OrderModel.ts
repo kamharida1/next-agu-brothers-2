@@ -1,6 +1,4 @@
    import mongoose from 'mongoose'
-import email from 'next-auth/providers/email'
-
    const orderSchema = new mongoose.Schema(
      {
        user: {

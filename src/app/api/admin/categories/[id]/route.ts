@@ -1,6 +1,6 @@
-import { auth } from '@/lib/auth'
-import dbConnect from '@/lib/dbConnect'
-import ProductModel from '@/lib/models/ProductModel'
+import { auth } from "@/lib/auth"
+import dbConnect from "@/lib/dbConnect"
+import CategoryModel from "@/lib/models/CategoryModel"
 
 export const GET = auth(async (...args: any) => {
   const [req, { params }] = args
@@ -13,16 +13,16 @@ export const GET = auth(async (...args: any) => {
     )
   }
   await dbConnect()
-  const product = await ProductModel.findById(params.id)
-  if (!product) {
+  const category = await CategoryModel.findById(params.id)
+  if (!category) {
     return Response.json(
-      { message: 'product not found' },
+      { message: 'category not found' },
       {
         status: 404,
       }
     )
   }
-  return Response.json(product)
+  return Response.json(category)
 }) as any
 
 export const PUT = auth(async (...p: any) => {
@@ -38,36 +38,40 @@ export const PUT = auth(async (...p: any) => {
 
   const {
     name,
-    slug,
-    price,
-    category,
-    image,
-    brand,
-    countInStock,
-    description,
+    parent,
     properties,
   } = await req.json()
 
   try {
     await dbConnect()
 
-    const product = await ProductModel.findById(params.id)
-    if (product) {
-      product.name = name
-      product.slug = slug
-      product.price = price
-      product.category = category
-      product.image = image
-      product.brand = brand
-      product.countInStock = countInStock
-      product.description = description
-      product.properties = properties
-
-      const updatedProduct = await product.save()
-      return Response.json(updatedProduct)
+    // const category = await CategoryModel.findById(params.id)
+    // if (category) {
+    //   category.name = name
+    //   category.parent = parentCategory || undefined
+    //   category.properties = properties
+    //   const updatedCategory = await category.save()
+    //   return Response.json(updatedCategory)
+    // } else {
+    //   return Response.json(
+    //     { message: 'Category not found' },
+    //     {
+    //       status: 404,
+    //     }
+    //   )
+    // }
+    const categoryDoc = await CategoryModel.findOneAndUpdate({
+      _id: params.id
+    }, {
+      name,
+      parent: parent || undefined,
+      properties
+    }, { new: true })
+    if (categoryDoc) {
+      return Response.json(categoryDoc)
     } else {
       return Response.json(
-        { message: 'Product not found' },
+        { message: 'Category not found' },
         {
           status: 404,
         }
@@ -97,13 +101,13 @@ export const DELETE = auth(async (...args: any) => {
 
   try {
     await dbConnect()
-    const product = await ProductModel.findById(params.id)
-    if (product) {
-      await product.deleteOne()
-      return Response.json({ message: 'Product deleted successfully' })
+    const category = await CategoryModel.findById(params.id)
+    if (category) {
+      await category.deleteOne()
+      return Response.json({ message: 'Category deleted successfully' })
     } else {
       return Response.json(
-        { message: 'Product not found' },
+        { message: 'Category not found' },
         {
           status: 404,
         }

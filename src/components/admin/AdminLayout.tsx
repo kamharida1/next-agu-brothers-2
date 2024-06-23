@@ -38,6 +38,14 @@ const AdminLayout = ({
             </li>
             <li>
               <Link
+                className={'categories' === activeItem ? 'active' : ''}
+                href="/admin/categories"
+              >
+                Categories
+              </Link>
+            </li>
+            <li>
+              <Link
                 className={'orders' === activeItem ? 'active' : ''}
                 href="/admin/orders"
               >

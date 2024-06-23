@@ -3,7 +3,7 @@ import dbConnect from '@/lib/dbConnect'
 import UserModel from '@/lib/models/UserModel'
 
 export const GET = auth(async (req: any) => {
-  if (!req.auth) {
+  if (!req.auth || !req.auth.user?.isAdmin) {
     return Response.json(
       { message: 'unauthorized' },
       {

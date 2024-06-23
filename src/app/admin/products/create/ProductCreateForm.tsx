@@ -34,17 +34,14 @@ interface ProductFormProps {
   banner?: string
 }
 
-export default function ProductEditForm({ productId }: { productId: string }) {
-  const { data: productData } = useSWR(`/api/admin/products/${productId}`)
+
+export default function ProductCreateForm() {
   const [categories, setCategories] = useState<Category[]>([])
-  const [category, setCategory] = useState<string>(productData?.category || '')
-  const [productProperties, setProductProperties] = useState<any>(
-    productData?.properties || {}
-  )
+  const [category, setCategory] = useState<string>('')
+  const [productProperties, setProductProperties] = useState<any>({})
   const [productImages, setProductImages] = useState<string[]>([])
   const [isUploading, setIsUploading] = useState(false)
   const router = useRouter()
-
   const { data: categoriesData } = useSWR('/api/admin/categories')
 
   useEffect(() => {
@@ -53,46 +50,18 @@ export default function ProductEditForm({ productId }: { productId: string }) {
     }
   }, [categoriesData])
 
-  const {
-    register,
-    handleSubmit,
-    watch,
-    formState: { errors },
-    setValue,
-  } = useForm<ProductFormProps>(
-    {
-      defaultValues: {
-        name: productData?.name,
-        slug: productData?.slug,
-        category: productData?.category,
-        price: productData?.price,
-        brand: productData?.brand,
-        description: productData?.description,
-        countInStock: productData?.countInStock,
-        images: productData?.images,
-      },
-    }
-  )
-
-  useEffect(() => {
-    if (productData) {
-      setValue('name', productData.name)
-      setValue('slug', productData.slug)
-      //setValue('category', productData.category)
-      setValue('price', productData.price)
-      setValue('brand', productData.brand)
-      setValue('description', productData.description)
-      setValue('countInStock', productData.countInStock)
-      setProductProperties(productData.properties || {})
-      setProductImages(productData.images || [])
-    }
-  }, [productData, setValue])
-
+      const {
+      register,
+      handleSubmit,
+      watch,
+      formState: { errors },
+      setValue,
+    } = useForm<ProductFormProps>()
 
   const uploadHandler = async (e: any) => {
     e.preventDefault()
     const toastId = toast.loading('Uploading image...')
-    setIsUploading(true)
+    setIsUploading(true)  
     const uploadedUrls: string[] = []
     try {
       const resSign = await fetch('/api/cloudinary-sign', {
@@ -118,40 +87,44 @@ export default function ProductEditForm({ productId }: { productId: string }) {
             body: formData,
           }
         )
-        const { secure_url } = await res.json()
+        const {secure_url} = await res.json()
         uploadedUrls.push(secure_url)
         toast.success('Files uploaded successfully', {
           id: toastId,
         })
       }
+      console.log('productImages', productImages) 
       setValue('images', productImages)
       setIsUploading(false)
-    } catch (err: any) {
-      toast.error(err.message, {
-        id: toastId,
-      })
+      } catch (err: any) {
+        toast.error(err.message, {
+          id: toastId,
+        })
     }
 
-    setProductImages((prev) => [...prev, ...uploadedUrls])
+    setProductImages(prev => [...prev, ...uploadedUrls])
   }
 
   const handleDeleteProductImage = async (index: number) => {
+    console.log('image index', index)
+
     const newProductImages = [...productImages]
     newProductImages.splice(index, 1)
+
     setProductImages([...newProductImages])
   }
 
   const handleCategoryChange = (e: any) => {
-    const value = e.target.value
-    setCategory(value)
-    setValue('category', value)
-  }
+     const value = e.target.value
+     setCategory(value)
+     setValue('category', value) // Synchronize the value with React Hook Form
+   }
 
-  const { trigger: updateProduct, isMutating: isUpdating } = useSWRMutation(
-    `/api/admin/products/${productId}`,
+  const { trigger: createProduct , isMutating: isCreating } = useSWRMutation(
+    `/api/admin/products`,
     async (url, { arg }) => {
       const res = await fetch(`${url}`, {
-        method: 'PUT',
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -160,7 +133,7 @@ export default function ProductEditForm({ productId }: { productId: string }) {
       const data = await res.json()
       if (!res.ok) return toast.error(data.message)
 
-      toast.success('Product updated successfully')
+      toast.success('Product created successfully')
       router.push('/admin/products')
     }
   )
@@ -169,42 +142,45 @@ export default function ProductEditForm({ productId }: { productId: string }) {
     setProductImages(productImages)
   }
 
-    function setProductProp(propName: string, value: string) {
+  function setProductProp(propName: string, value: string) {
     setProductProperties((prev: any) => {
       const newProductProps = { ...prev }
       newProductProps[propName] = value
       return newProductProps
     })
     setValue('properties', productProperties)
-    }
+  }
   
-  const propertiesToFill = []
+  const propertiesToFill= []
   if (categories.length > 0 && category) {
     let catInfo = categories.find(({ _id }) => _id === category)
-    if (catInfo) {
-      propertiesToFill.push(...catInfo.properties)
-      while (catInfo.parent?._id) {
-        const parentCat = categories.find(
-          (cat) => cat._id === catInfo?.parent?._id
-        )
-        if (parentCat) {
-          propertiesToFill.push(...parentCat.properties)
-          catInfo = parentCat
-        } else {
-          break
-        }
-      }
-    }
+   if (catInfo) {
+     propertiesToFill.push(...catInfo.properties)
+     while (catInfo.parent?._id) {
+       const parentCat = categories.find(
+         (cat) => cat._id === catInfo?.parent?._id
+       )
+       if (parentCat) {
+         propertiesToFill.push(...parentCat.properties)
+         catInfo = parentCat
+       } else {
+         break
+       }
+     }
+   }
   }
 
-  const formSubmit: SubmitHandler<ProductFormProps> = async (formData: any) => {
+  const formSubmit: SubmitHandler<ProductFormProps> = async (
+    formData: any
+  ) => {
     const productData: Product = {
       ...formData,
+      // slug: formData.slug.toLowerCase().replace(/ /g, '-'),
       slug: slugify(formData.name),
       images: productImages,
       properties: productProperties,
     }
-    await updateProduct(productData as any)
+    await createProduct(productData as any)
   }
 
   const FormInput = ({
@@ -254,7 +230,7 @@ export default function ProductEditForm({ productId }: { productId: string }) {
 
   return (
     <div>
-      <h1 className="text-2xl py-4">Update Product</h1>
+      <h1 className="text-2xl py-4">Create Product</h1>
       <div>
         <form onSubmit={handleSubmit(formSubmit)}>
           <FormInput name="Name" id="name" required />
@@ -265,10 +241,11 @@ export default function ProductEditForm({ productId }: { productId: string }) {
             </label>
             <div className="md:w-4/5">
               <select
-                value={category}
+                value={watch('category')}
                 id="category"
+                // onChange={handleCategoryChange}
                 className="select select-bordered w-full max-w-md"
-                // {...register('category', { required: 'Category is required' })}
+                {...register('category', { required: 'Category is required' })}
                 onChange={handleCategoryChange}
               >
                 <option value="">Select a category</option>
@@ -438,11 +415,11 @@ export default function ProductEditForm({ productId }: { productId: string }) {
 
           <button
             type="submit"
-            disabled={isUpdating}
+            disabled={isCreating}
             className="btn btn-primary"
           >
-            {isUpdating && <span className="loading loading-spinner"></span>}
-            Update
+            {isCreating && <span className="loading loading-spinner"></span>}
+            Create
           </button>
           <Link className="btn ml-4 " href="/admin/products">
             Cancel
