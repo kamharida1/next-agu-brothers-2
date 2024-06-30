@@ -1,7 +1,7 @@
 'use client'
 
+import CldImage from "@/components/CldImage"
 import useCartService from "@/lib/hooks/useCartStore"
-import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -43,23 +43,31 @@ export default function CartDetails() {
                         href={`/product/${item.slug}`}
                         className="flex items-center"
                       >
-                        <Image
-                          src={item.image}
+                        <CldImage
+                          src={item.images[0]}
                           alt={item.name}
                           width={50}
                           height={50}
-                        ></Image>
+                        />
                         <span className="px-2">
                           {item.name} ({item.color} {item.size}Other)
                         </span>
                       </Link>
                     </td>
                     <td>
-                      <button type="button" className="btn" onClick={() => decrease(item)}>
+                      <button
+                        type="button"
+                        className="btn"
+                        onClick={() => decrease(item)}
+                      >
                         -
                       </button>
                       <span className="px-2">{item.qty}</span>
-                      <button type="button" className="btn" onClick={() => increase(item)}>
+                      <button
+                        type="button"
+                        className="btn"
+                        onClick={() => increase(item)}
+                      >
                         +
                       </button>
                     </td>

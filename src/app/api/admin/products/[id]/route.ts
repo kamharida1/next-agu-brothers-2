@@ -1,5 +1,6 @@
 import { auth } from '@/lib/auth'
 import dbConnect from '@/lib/dbConnect'
+import CategoryModel from '@/lib/models/CategoryModel'
 import ProductModel from '@/lib/models/ProductModel'
 
 export const GET = auth(async (...args: any) => {
@@ -42,6 +43,7 @@ export const PUT = auth(async (...p: any) => {
     price,
     category,
     image,
+    images,
     brand,
     countInStock,
     description,
@@ -50,6 +52,17 @@ export const PUT = auth(async (...p: any) => {
 
   try {
     await dbConnect()
+    // Fetch the category by ID to get its name
+    const categoryObject = await CategoryModel.findById(category);
+    if (!categoryObject) {
+      return Response.json(
+        { message: 'Category not found' },
+        {
+          status: 404,
+        }
+      );
+    }
+    const categoryName = categoryObject.name; 
 
     const product = await ProductModel.findById(params.id)
     if (product) {
@@ -57,7 +70,9 @@ export const PUT = auth(async (...p: any) => {
       product.slug = slug
       product.price = price
       product.category = category
+      product.cat = categoryName
       product.image = image
+      product.images = images
       product.brand = brand
       product.countInStock = countInStock
       product.description = description

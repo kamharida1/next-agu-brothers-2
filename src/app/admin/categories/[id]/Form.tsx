@@ -29,9 +29,7 @@ export default function CategoryCreateOrEditForm({
 
   const { data: categories } = useSWR(`/api/admin/categories`)
 
-  const { data: editedCategory } = useSWR(
-    `/api/admin/categories/${categoryId}`
-  )
+  const { data: editedCategory } = useSWR(`/api/admin/categories/${categoryId}`)
 
   const { trigger: updateCategory, isMutating: isUpdating } = useSWRMutation(
     `/api/admin/categories/${categoryId}`,
@@ -67,20 +65,27 @@ export default function CategoryCreateOrEditForm({
           },
         }
       : {}
-    )
-  
-  useEffect(() => { 
+  )
+
+  useEffect(() => {
     if (!editedCategory) return
     setValue('name', editedCategory.name)
     setValue('parent', editedCategory.parent?._id)
     setValue('properties', editedCategory.properties)
   }, [editedCategory, setValue])
+
   const formSubmit: SubmitHandler<CategoryFormValues> = async (
     formData: any
   ) => {
-    if (categoryId) {
-      await updateCategory(formData)
+    const cat: CategoryFormValues = {
+      name: formData.name,
+      parent: formData.parent,
+      properties: formData.properties.map((p: Property) => ({
+        name: p.name,
+        values: typeof p.values === 'string' ? p.values.split(',') : p.values,
+      })),
     }
+    await updateCategory(cat)
   }
 
   const { fields, append, remove } = useFieldArray({
@@ -95,9 +100,9 @@ export default function CategoryCreateOrEditForm({
   const handlePropertyChange = (
     index: number,
     field: 'name' | 'values',
-    value: string
+    values: string
   ) => {
-    setValue(`properties.${index}.${field}`, value as any)
+    setValue(`properties.${index}.${field}`, values as any)
   }
 
   const removeProperty = (index: number) => {
@@ -105,7 +110,6 @@ export default function CategoryCreateOrEditForm({
   }
 
   if (!editedCategory) return 'Loading...'
-
 
   return (
     <div className="flex-col">
@@ -136,7 +140,7 @@ export default function CategoryCreateOrEditForm({
                 {...register('parent')}
               >
                 <option value="" disabled selected>
-                 {editedCategory.parent?.name || 'Select parent category'}
+                  {editedCategory.parent?.name || 'Select parent category'}
                 </option>
                 {categories?.length > 0 &&
                   categories.map((category: Category) => (

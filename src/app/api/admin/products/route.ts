@@ -14,7 +14,7 @@ export const GET = auth(async (req: any) => {
     )
   }
   await dbConnect()
-  const products = await ProductModel.find()
+  const products = await ProductModel.find().populate('category')
   return Response.json(products)
 }) as any
 
@@ -32,6 +32,7 @@ export const POST = auth(async (req: any) => {
     name,
     slug,
     category,
+    image,
     images,
     price,
     brand,
@@ -45,11 +46,25 @@ export const POST = auth(async (req: any) => {
   } = await req.json()
   
   try {
+    // Fetch the category by ID to get its name
+    const categoryObject = await CategoryModel.findById(category);
+    if (!categoryObject) {
+      return Response.json(
+        { message: 'Category not found' },
+        {
+          status: 404,
+        }
+      );
+    }
+    const categoryName = categoryObject.name; 
+
     const product = new ProductModel({
       name,
       slug,
       category,
+      cat: categoryName,
       images,
+      image,
       price,
       brand,
       rating,

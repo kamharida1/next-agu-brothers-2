@@ -53,7 +53,7 @@ const getByQuery = cache(
             },
           }
         : {}
-    const categoryFilter = category && category !== 'all' ? { category } : {}
+    const categoryFilter = category && category !== 'all' ? { cat: category } : {}
     const ratingFilter =
       rating && rating !== 'all'
         ? {
@@ -81,7 +81,7 @@ const getByQuery = cache(
         ? { rating: -1 }
         : { _id: -1 }
 
-    const categories = await ProductModel.find().distinct('category')
+    const categories = await ProductModel.find().distinct('cat')
     const products = await ProductModel.find(
       {
         ...queryFilter,
@@ -115,7 +115,7 @@ const getByQuery = cache(
 
 const getCategories = cache(async () => {
   await dbConnect()
-  const categories = await ProductModel.find().distinct('category')
+  const categories = await ProductModel.find().distinct('cat')
   return categories
 })
 

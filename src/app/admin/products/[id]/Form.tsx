@@ -59,20 +59,7 @@ export default function ProductEditForm({ productId }: { productId: string }) {
     watch,
     formState: { errors },
     setValue,
-  } = useForm<ProductFormProps>(
-    {
-      defaultValues: {
-        name: productData?.name,
-        slug: productData?.slug,
-        category: productData?.category,
-        price: productData?.price,
-        brand: productData?.brand,
-        description: productData?.description,
-        countInStock: productData?.countInStock,
-        images: productData?.images,
-      },
-    }
-  )
+  } = useForm<ProductFormProps>()
 
   useEffect(() => {
     if (productData) {
@@ -200,8 +187,9 @@ export default function ProductEditForm({ productId }: { productId: string }) {
   const formSubmit: SubmitHandler<ProductFormProps> = async (formData: any) => {
     const productData: Product = {
       ...formData,
-      slug: slugify(formData.name),
+      slug: formData.name.toLowerCase().replace(/ /g, '-'),
       images: productImages,
+      image: productImages[0],
       properties: productProperties,
     }
     await updateProduct(productData as any)

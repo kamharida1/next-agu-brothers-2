@@ -22,6 +22,7 @@ interface ProductFormProps {
   name?: string
   slug?: string
   category?: string
+  cat?: string
   images?: string[]
   price?: number
   brand?: string
@@ -175,9 +176,10 @@ export default function ProductCreateForm() {
   ) => {
     const productData: Product = {
       ...formData,
-      // slug: formData.slug.toLowerCase().replace(/ /g, '-'),
-      slug: slugify(formData.name),
+      slug: formData.name.toLowerCase().replace(/ /g, '-'),
+      // slug: slugify(formData.name),
       images: productImages,
+      image: productImages[0],
       properties: productProperties,
     }
     await createProduct(productData as any)
@@ -234,7 +236,7 @@ export default function ProductCreateForm() {
       <div>
         <form onSubmit={handleSubmit(formSubmit)}>
           <FormInput name="Name" id="name" required />
-          <FormInput name="Slug" id="slug" required />
+          {/* <FormInput name="Slug" id="slug" required /> */}
           <div className="md:flex mb-6">
             <label className="label md:w-1/5" htmlFor="category">
               Category

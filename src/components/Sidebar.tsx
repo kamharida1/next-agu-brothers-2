@@ -8,6 +8,7 @@ const Sidebar = () => {
   const { toggleDrawer } = useLayoutService()
   const { data: categories, error } = useSWR('/api/products/categories')
 
+
   if (error) return error.message
   if (!categories) return 'Loading...'
 

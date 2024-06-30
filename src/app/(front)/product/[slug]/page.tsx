@@ -2,7 +2,7 @@ import AddToCart from '@/components/products/AddToCart'
 import data from '@/lib/data'
 import { convertDocToObj } from '@/lib/utils'
 import productServices from '@/lib/services/productService'
-import Image from 'next/image'
+import CldImage from '@/components/CldImage'
 import Link from 'next/link'
 import React from 'react'
 import { Rating } from '@/components/products/Rating'
@@ -40,17 +40,17 @@ export default async function ProductDetails({
       </div>
       <div className="grid md:grid-cols-4 md:gap-3">
         <div className="md:col-span-2">
-          <Image
+          <CldImage
             src={product?.images[0]}
             alt={product.name}
             width={640}
             height={640}
             sizes="100vw"
             style={{
-              width: "100%",
-              height: "auto",
+              width: '100%',
+              height: 'auto',
             }}
-          ></Image>
+          />
         </div>
         <div>
           <ul className="space-y-4">
@@ -82,13 +82,18 @@ export default async function ProductDetails({
               <div className="mb-2 flex justify-between">
                 <div>Status</div>
                 <div>
-                  {product.countInStock > 0 ? "In stock" : "Unavailable"}
+                  {product.countInStock > 0 ? 'In stock' : 'Unavailable'}
                 </div>
               </div>
               {product.countInStock !== 0 && (
-                <div className='card-actions justify-center'>
+                <div className="card-actions justify-center">
                   <AddToCart
-                    item={{...convertDocToObj(product), qty: 0, color: '', size: ''}}
+                    item={{
+                      ...convertDocToObj(product),
+                      qty: 0,
+                      color: '',
+                      size: '',
+                    }}
                   />
                 </div>
               )}
@@ -97,5 +102,5 @@ export default async function ProductDetails({
         </div>
       </div>
     </>
-  );
+  )
 }

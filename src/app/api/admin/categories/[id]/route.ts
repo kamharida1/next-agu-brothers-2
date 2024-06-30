@@ -44,31 +44,13 @@ export const PUT = auth(async (...p: any) => {
 
   try {
     await dbConnect()
-
-    // const category = await CategoryModel.findById(params.id)
-    // if (category) {
-    //   category.name = name
-    //   category.parent = parentCategory || undefined
-    //   category.properties = properties
-    //   const updatedCategory = await category.save()
-    //   return Response.json(updatedCategory)
-    // } else {
-    //   return Response.json(
-    //     { message: 'Category not found' },
-    //     {
-    //       status: 404,
-    //     }
-    //   )
-    // }
-    const categoryDoc = await CategoryModel.findOneAndUpdate({
-      _id: params.id
-    }, {
-      name,
-      parent: parent || undefined,
-      properties
-    }, { new: true })
-    if (categoryDoc) {
-      return Response.json(categoryDoc)
+    const category = await CategoryModel.findById(params.id)
+    if (category) {
+      category.name = name
+      category.parent = parent
+      category.properties = properties
+      await category.save()
+      return Response.json({ message: 'Category updated successfully' })
     } else {
       return Response.json(
         { message: 'Category not found' },

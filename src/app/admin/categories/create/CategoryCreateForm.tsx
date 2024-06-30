@@ -63,9 +63,9 @@ export default function CategoryCreateForm() {
       const cat: CategoryFormValues = {
         name: formData.name,
         parent: formData.parent,
-        properties: formData.properties.map((p: any) => ({
+        properties: formData.properties.map((p: Property) => ({
           name: p.name,
-          values: p.values.split(',')
+          values: p.values.split(','),
         })),
       }
       await createCategory(cat)

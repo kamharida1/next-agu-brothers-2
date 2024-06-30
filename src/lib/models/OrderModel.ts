@@ -13,6 +13,7 @@
              ref: 'Product',
              required: true,
            },
+           
            name: { type: String, required: true },
            slug: { type: String, required: true },
            qty: { type: Number, required: true },
@@ -88,6 +89,7 @@ export type OrderItem = {
   slug: string
   qty: number
   image: string
+  images: string[]
   price: number
   color: string
   size: string
