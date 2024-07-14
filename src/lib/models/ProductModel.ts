@@ -1,5 +1,4 @@
 import mongoose from 'mongoose'
-
 const productSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
@@ -11,6 +10,7 @@ const productSchema = new mongoose.Schema(
     price: { type: Number, required: true },
     brand: { type: String, required: true },
     rating: { type: Number, required: true, default: 0 },
+    reviews: [{ type: mongoose.Types.ObjectId, ref: 'Review' }],
     numReviews: { type: Number, required: true, default: 0 },
     countInStock: { type: Number, required: true, default: 0 },
     description: { type: String, required: true },
@@ -39,11 +39,11 @@ export type Product = {
   price: number
   brand: string
   description: string
+  reviews: any
   category: string
   rating: number
+  isFeatured: boolean
   numReviews: number
   countInStock: number
-  colors?: []
-  sizes?: []
   properties: {name: string, value: string}
 }

@@ -1,6 +1,7 @@
 import dbConnect from '@/lib/dbConnect'
 import ProductModel, { Product } from '@/lib/models/ProductModel'
 import { cache } from 'react'
+import ReviewModel from '../models/ReviewModel'
 
 export const revalidate = 3600 // revalidate the data at most every hour
 
@@ -15,13 +16,13 @@ const getLatest = cache(async () => {
 
 const getFeatured = cache(async () => {
   await dbConnect()
-  const products = await ProductModel.find({ isFeatured: true })
+  const products = await ProductModel.find({ isFeatured: true }).lean()
   return products as Product[]
 })
 
 const getBySlug = cache(async (slug: string) => {
   await dbConnect()
-  const product = await ProductModel.findOne({ slug }).lean()
+  const product = await ProductModel.findOne({ slug }).populate({ path: 'reviews', model: ReviewModel }).lean()
   return product as Product
 })
 

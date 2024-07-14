@@ -7,6 +7,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import toast from 'react-hot-toast'
 import useSWRMutation from 'swr/mutation'
+import { formatPrice } from '@/lib/utils'
 
 const Form = () => {
   const router = useRouter()
@@ -134,7 +135,7 @@ const Form = () => {
                       <td>
                         <span>{item.qty}</span>
                       </td>
-                      <td>${item.price}</td>
+                      <td>{formatPrice(item.price)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -155,25 +156,25 @@ const Form = () => {
                 <li>
                   <div className=" flex justify-between">
                     <div>Items</div>
-                    <div>${itemsPrice}</div>
+                    <div>{formatPrice(itemsPrice)}</div>
                   </div>
                 </li>
                 <li>
                   <div className=" flex justify-between">
                     <div>Tax</div>
-                    <div>${taxPrice}</div>
+                    <div>{formatPrice(taxPrice)}</div>
                   </div>
                 </li>
                 <li>
                   <div className=" flex justify-between">
                     <div>Shipping</div>
-                    <div>${shippingPrice}</div>
+                    <div>{formatPrice(shippingPrice)}</div>
                   </div>
                 </li>
                 <li>
                   <div className=" flex justify-between">
                     <div>Total</div>
-                    <div>${totalPrice}</div>
+                    <div>{formatPrice(totalPrice)}</div>
                   </div>
                 </li>
 

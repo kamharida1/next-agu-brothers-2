@@ -7,16 +7,16 @@ import React from 'react'
 const sortOrders = ['newest', 'lowest', 'highest', 'rating']
 const prices = [
   {
-    name: '$1 to $50',
-    value: '1-50',
+    name: '\u20A6 1000 to \u20A6 100000',
+    value: '1000-100000',
   },
   {
-    name: '$51 to $200',
-    value: '51-200',
+    name: '\u20A6 101000 to \u20A6 1000000',
+    value: '101000-1000000',
   },
   {
-    name: '$201 to $1000',
-    value: '201-1000',
+    name: '\u20A6 1000000 to \u20A6 20000000',
+    value: '1000000-20000000',
   },
 ]
 

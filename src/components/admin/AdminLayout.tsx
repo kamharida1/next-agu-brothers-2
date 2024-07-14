@@ -68,6 +68,14 @@ const AdminLayout = ({
                 Users
               </Link>
             </li>
+            <li>
+              <Link
+                className={'blog' === activeItem ? 'active' : ''}
+                href="/admin/blog"
+              >
+                Blog
+              </Link>
+            </li>
           </ul>
         </div>
         <div className="md:col-span-4 px-4">{children} </div>

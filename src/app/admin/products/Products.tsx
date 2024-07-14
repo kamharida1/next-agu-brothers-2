@@ -1,5 +1,4 @@
 'use client'
-   import { Product } from '@/lib/models/ProductModel'
    import { formatId } from '@/lib/utils'
    import Link from 'next/link'
    import { useRouter } from 'next/navigation'

@@ -37,18 +37,22 @@ export default function MyOrders() {
               <td>{order._id.substring(20, 24)}</td>
               <td>{order.createdAt.substring(0, 10)}</td>
               <td>${order.totalPrice}</td>
-              <td>
+              <td className='text-green-800'>
                 {order.isPaid && order.paidAt
                   ? `${order.paidAt.substring(0, 10)}`
                   : 'not paid'}
               </td>
-              <td>
+              <td className='text-red-800'>
                 {order.isDelivered && order.deliveredAt
                   ? `${order.deliveredAt.substring(0, 10)}`
                   : 'not delivered'}
               </td>
               <td>
-                <Link href={`/order/${order._id}`} passHref>
+                <Link
+                  className="text-blue-500 hover:underline cursor-pointer"
+                  href={`/order/${order._id}`}
+                  passHref
+                >
                   Details
                 </Link>
               </td>

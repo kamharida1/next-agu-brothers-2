@@ -8,12 +8,11 @@ import Sidebar from "@/components/Sidebar";
 import Link from "next/link";
 import Header from "@/components/header/header";
 
-
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Agu Brothers",
-  description: "Official Store",
+  description: "Official Store for all electronics and gadgets",
 };
 
 export default function RootLayout({
@@ -25,7 +24,7 @@ export default function RootLayout({
 
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={`${inter.className} antialiased`}>
         <Script src="https://sdk.monnify.com/plugin/monnify.js" />
         <Providers>
           <div className="drawer">
@@ -55,7 +54,7 @@ export default function RootLayout({
                   </aside>
                   <nav>
                     <h6 className="footer-title">Services</h6>
-                    <a className="link link-hover">Branding</a>
+                    <Link href="/blog" className="">Blog</Link>
                     <a className="link link-hover">Design</a>
                     <a className="link link-hover">Marketing</a>
                     <a className="link link-hover">Advertisement</a>

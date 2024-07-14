@@ -82,7 +82,7 @@ export default function ProductEditForm({ productId }: { productId: string }) {
     setIsUploading(true)
     const uploadedUrls: string[] = []
     try {
-      const resSign = await fetch('/api/cloudinary-sign', {
+      const resSign = await fetch('/api/cloudinary/cloudinary-sign', {
         method: 'POST',
       })
       const { signature, timestamp } = await resSign.json()
@@ -94,7 +94,7 @@ export default function ProductEditForm({ productId }: { productId: string }) {
         formData.append('file', file)
         formData.append('signature', signature)
         formData.append('timestamp', timestamp)
-        formData.append('eager', 'c_pad,h_300,w_400|c_crop,h_200,w_260')
+        //formData.append('eager', 'c_pad,h_300,w_400|c_crop,h_200,w_260')
         formData.append('folder', 'signed_upload_product_form')
         formData.append('api_key', process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY!)
 

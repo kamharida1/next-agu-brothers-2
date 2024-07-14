@@ -5,6 +5,7 @@ import useCartService from "@/lib/hooks/useCartStore"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
+import { formatPrice } from "@/lib/utils"
 
 export default function CartDetails() { 
   const router = useRouter()
@@ -54,10 +55,10 @@ export default function CartDetails() {
                         </span>
                       </Link>
                     </td>
-                    <td>
+                    <td className="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-2">
                       <button
                         type="button"
-                        className="btn"
+                        className="btn btn-sm sm:btn-md"
                         onClick={() => decrease(item)}
                       >
                         -
@@ -65,13 +66,13 @@ export default function CartDetails() {
                       <span className="px-2">{item.qty}</span>
                       <button
                         type="button"
-                        className="btn"
+                        className="btn btn-sm sm:btn-md"
                         onClick={() => increase(item)}
                       >
                         +
                       </button>
                     </td>
-                    <td>${item.price}</td>
+                    <td>{formatPrice(item.price)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -84,7 +85,7 @@ export default function CartDetails() {
                   <li>
                     <div className="pb-3 text-xl">
                       Subtotal ({items.reduce((acc, item) => acc + item.qty, 0)}{' '}
-                      items): ${itemsPrice}
+                      items): {formatPrice(itemsPrice)}
                     </div>
                   </li>
                   <li>
