@@ -54,14 +54,18 @@ export default function RootLayout({
                   </aside>
                   <nav>
                     <h6 className="footer-title">Services</h6>
-                    <Link href="/blog" className="">Blog</Link>
-                    <a className="link link-hover">Design</a>
+                    <Link href="/blog" className="link link-hover">
+                      Blog
+                    </Link>
+                    {/* <a className="link link-hover">Design</a>
                     <a className="link link-hover">Marketing</a>
-                    <a className="link link-hover">Advertisement</a>
+                    <a className="link link-hover">Advertisement</a> */}
                   </nav>
                   <nav>
                     <h6 className="footer-title">Company</h6>
-                    <a className="link link-hover">About us</a>
+                    <Link href="/about-us" className="link link-hover">
+                      About us
+                    </Link>
                     <a className="link link-hover">Contact</a>
                     <a className="link link-hover">Jobs</a>
                     <a className="link link-hover">Press kit</a>

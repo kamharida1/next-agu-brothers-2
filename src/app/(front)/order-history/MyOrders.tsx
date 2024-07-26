@@ -1,5 +1,6 @@
 'use client'
 import { Order } from '@/lib/models/OrderModel'
+import { formatPrice } from '@/lib/utils'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -36,13 +37,19 @@ export default function MyOrders() {
             <tr key={order._id}>
               <td>{order._id.substring(20, 24)}</td>
               <td>{order.createdAt.substring(0, 10)}</td>
-              <td>${order.totalPrice}</td>
-              <td className='text-green-800'>
+              <td>{formatPrice(order.totalPrice)}</td>
+              <td
+                className={
+                  order.isPaid && order.paidAt
+                    ? 'text-green-800'
+                    : 'text-red-800'
+                }
+              >
                 {order.isPaid && order.paidAt
                   ? `${order.paidAt.substring(0, 10)}`
                   : 'not paid'}
               </td>
-              <td className='text-red-800'>
+              <td className={order.isDelivered && order.deliveredAt ? 'text-green-800' : 'text-red-800'}>
                 {order.isDelivered && order.deliveredAt
                   ? `${order.deliveredAt.substring(0, 10)}`
                   : 'not delivered'}

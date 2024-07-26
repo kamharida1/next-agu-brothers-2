@@ -13,9 +13,18 @@ const getBlogs = cache(async (): Promise<Blog[]> => {
 })
 
 
-const getBlogById = cache(async (id: string): Promise<Blog | null> => {
+const getBlogBySlug = cache(async (slug: string): Promise<Blog | null> => {
   await dbConnect()
-  const post = await BlogModel.findOne({ id }).exec()
+  const post = await BlogModel.findOne({ slug }).exec()
+  if (!post) {
+    throw notFound()
+  }
+  return post as Blog
+})
+
+const deleteBlogBySlug = cache(async (slug: string): Promise<Blog | null> => {
+  await dbConnect()
+  const post = await BlogModel.findOneAndDelete({ slug }).exec()
   if (!post) {
     throw notFound()
   }
@@ -23,7 +32,8 @@ const getBlogById = cache(async (id: string): Promise<Blog | null> => {
 })
 
 const blogServices = {
-  getBlogById,
+  deleteBlogBySlug,
+  getBlogBySlug,
   getBlogs,
 }
 

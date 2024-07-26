@@ -15,7 +15,8 @@ const productSchema = new mongoose.Schema(
     countInStock: { type: Number, required: true, default: 0 },
     description: { type: String, required: true },
     isFeatured: { type: Boolean, default: false },
-    properties: { type: Object},
+    properties: { type: Object },
+    weight: { type: Number },
     banner: String,
   },
   {
@@ -45,5 +46,6 @@ export type Product = {
   isFeatured: boolean
   numReviews: number
   countInStock: number
+  weight: number
   properties: {name: string, value: string}
 }

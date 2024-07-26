@@ -19,6 +19,7 @@
            qty: { type: Number, required: true },
            image: { type: String, required: true },
            price: { type: Number, required: true },
+           weight: { type: Number, required: true },
          },
        ],
        shippingAddress: {
@@ -93,6 +94,7 @@ export type OrderItem = {
   price: number
   color: string
   size: string
+  weight: number
 }
 
 export type ShippingAddress = {

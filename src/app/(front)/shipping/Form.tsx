@@ -5,6 +5,7 @@ import { useForm, SubmitHandler, ValidationRule } from 'react-hook-form'
 import useCartService from '@/lib/hooks/useCartStore'
 import { CheckoutSteps } from '@/components/CheckoutSteps'
 import { ShippingAddress } from '@/lib/models/OrderModel'
+import { shippingRates } from '@/lib/shipping'
 
 const Form = () => {
   const router = useRouter()
@@ -69,6 +70,39 @@ const Form = () => {
     </div>
   )
 
+  const CitySelect = ({
+    id,
+    name,
+    required,
+  }: {
+    id: keyof ShippingAddress
+    name: string
+    required?: boolean
+  }) => (
+    <div className="mb-2">
+      <label className="label" htmlFor={id}>
+        {name}
+      </label>
+      <select
+        id={id}
+        {...register(id, {
+          required: required && `${name} is required`,
+        })}
+        className="input input-bordered w-full max-w-sm"
+      >
+        <option value="">Select a city</option>
+        {Object.keys(shippingRates).map((city) => (
+          <option key={city} value={city}>
+            {city}
+          </option>
+        ))}
+      </select>
+      {errors[id]?.message && (
+        <div className="text-error">{errors[id]?.message}</div>
+      )}
+    </div>
+  )
+
   return (
     <div>
       <CheckoutSteps current={1} />
@@ -79,7 +113,8 @@ const Form = () => {
           <form onSubmit={handleSubmit(formSubmit)}>
             <FormInput name="Full Name" id="fullName" required />
             <FormInput name="Address" id="address" required />
-            <FormInput name="City" id="city" required />
+            {/* <FormInput name="City" id="city" required /> */}
+            <CitySelect name="City" id="city" required />
             <FormInput name="Postal Code" id="postalCode" required />
             <FormInput name="Country" id="country" required />
             <FormInput

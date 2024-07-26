@@ -21,11 +21,12 @@ const Form = () => {
     totalPrice,
     clear,
   } = useCartService()
+  console.log(shippingPrice, totalPrice)
 
   const { trigger: placeOrder, isMutating: isPlacing } = useSWRMutation(
-    `/api/orders/mine`,
+    `/api/orders`,
     async (url) => {
-      const res = await fetch('/api/orders', {
+      const res = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

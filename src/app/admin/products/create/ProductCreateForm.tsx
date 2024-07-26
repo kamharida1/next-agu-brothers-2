@@ -33,6 +33,7 @@ interface ProductFormProps {
   isFeatured?: boolean
   properties?: Property
   banner?: string
+  weight?: number
 }
 
 
@@ -296,23 +297,6 @@ export default function ProductCreateForm() {
                 ))}
             </div>
           </div>
-          {/* <div className="md:flex mb-6">
-            <label className="label md:w-1/5" htmlFor="imageFile">
-              Upload Image
-            </label>
-            <div className="md:w-4/5">
-              <div className="md:flex items-center md:w-3/5">
-                <input
-                  type="file"
-                  name="files[]"
-                  multiple
-                  className="max-w-md btn btn-primary"
-                  id="imageFile"
-                  onChange={uploadHandler}
-                />
-              </div>
-            </div>
-          </div> */}
           <div className="md:flex mb-6">
             <span className="label md:w-1/5">Upload Image</span>
             <div className="flex flex-wrap gap-1 md:w-4/5">
@@ -414,6 +398,7 @@ export default function ProductCreateForm() {
           <FormInput name="Brand" id="brand" required />
           <FormInput name="Description" id="description" required />
           <FormInput name="Count In Stock" id="countInStock" required />
+          <FormInput name="Weight(kg)" id="weight" />
 
           <button
             type="submit"

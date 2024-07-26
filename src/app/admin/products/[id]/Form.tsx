@@ -32,6 +32,7 @@ interface ProductFormProps {
   isFeatured?: boolean
   properties?: Property
   banner?: string
+  weight?: number
 }
 
 export default function ProductEditForm({ productId }: { productId: string }) {
@@ -69,6 +70,8 @@ export default function ProductEditForm({ productId }: { productId: string }) {
       setValue('price', productData.price)
       setValue('brand', productData.brand)
       setValue('description', productData.description)
+      setValue('isFeatured', productData.isFeatured)
+      setValue('weight', productData.weight)
       setValue('countInStock', productData.countInStock)
       setProductProperties(productData.properties || {})
       setProductImages(productData.images || [])
@@ -419,7 +422,7 @@ export default function ProductEditForm({ productId }: { productId: string }) {
             </div>
           </div> */}
           <FormInput name="Price" id="price" required />
-
+          <FormInput name="Weight" id="weight" />
           <FormInput name="Brand" id="brand" required />
           <FormInput name="Description" id="description" required />
           <FormInput name="Count In Stock" id="countInStock" required />

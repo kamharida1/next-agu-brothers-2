@@ -4,14 +4,14 @@ import ProductModel from "@/lib/models/ProductModel"
 
 export const GET = auth(async (...args: any) => {
   const [req, { params }] = args
-  if (!req.auth) {
-    return Response.json(
-      { message: 'unauthorized' },
-      {
-        status: 401,
-      }
-    )
-  }
+  // if (!req.auth) {
+  //   return Response.json(
+  //     { message: 'unauthorized' },
+  //     {
+  //       status: 401,
+  //     }
+  //   )
+  // }
   await dbConnect()
   const product = await ProductModel.findOne({ slug: params.slug }).populate('reviews').lean();
 

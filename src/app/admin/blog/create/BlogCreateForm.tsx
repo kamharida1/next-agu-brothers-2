@@ -165,7 +165,7 @@ export default function BlogCreateForm() {
               ) : null}
             </div>
           </div>
-          <div className="md:flex mb-6">
+          {/* <div className="md:flex mb-6">
             <label className="label md:w-1/5" htmlFor="imageFile">
               Content
             </label>
@@ -174,9 +174,9 @@ export default function BlogCreateForm() {
                 <Tiptap content={content} setContent={setContent}  />
               </div>
             </div>
-          </div>
+          </div> */}
 
-          {/* <FormInput name="Content" id="content" required /> */}
+          <FormInput name="Content" id="content" required />
 
           <button
             type="submit"

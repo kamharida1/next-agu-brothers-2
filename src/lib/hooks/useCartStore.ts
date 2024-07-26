@@ -2,6 +2,7 @@ import { OrderItem, ShippingAddress } from "../models/OrderModel"
 import {create} from 'zustand'
 import { round2 } from "../utils"
 import { persist } from "zustand/middleware"
+import { shippingRates } from "../shipping"
 
 type Cart = {
   items: OrderItem[]
@@ -57,7 +58,7 @@ export default function useCartService() {
         shippingPrice,
         taxPrice,
         totalPrice
-      } = calcPrice(updatedCartItems)
+      } = calcPrice(updatedCartItems, shippingAddress)
       cartStore.setState({
         items: updatedCartItems,
         itemsPrice,
@@ -77,7 +78,7 @@ export default function useCartService() {
         shippingPrice,
         taxPrice,
         totalPrice
-      } = calcPrice(updatedCartItems)
+      } = calcPrice(updatedCartItems, shippingAddress)
       cartStore.setState({
         items: updatedCartItems,
         itemsPrice,
@@ -100,13 +101,27 @@ export default function useCartService() {
     init: () => cartStore.setState(initialState),
   }
 }
-
-const calcPrice = (items: OrderItem[]) => { 
+const calcPrice = (items: OrderItem[], shippingAddress: ShippingAddress) => {
   const itemsPrice = round2(
     items.reduce((acc, item) => acc + item.price * item.qty, 0)
-  ),
-    shippingPrice = round2(itemsPrice > 100 ? 0 : 10),
-    taxPrice = round2(Number(0.15 * itemsPrice)),
-    totalPrice = round2(itemsPrice + shippingPrice + taxPrice)
-  return { itemsPrice, shippingPrice, taxPrice, totalPrice }
-}
+  );
+
+  const totalWeight = items.reduce((acc, item) => acc + item.weight * item.qty, 0);
+
+  const cityRates = shippingRates[shippingAddress.city as keyof typeof shippingRates];
+  const shippingPrice = cityRates ? round2(cityRates.baseRate + cityRates.perKg * totalWeight) : 0;
+
+  const taxPrice = round2(Number(0.05 * itemsPrice));
+  const totalPrice = round2(itemsPrice + shippingPrice + taxPrice);
+
+  return { itemsPrice, shippingPrice, taxPrice, totalPrice };
+};
+// const calcPrice = (items: OrderItem[]) => { 
+//   const itemsPrice = round2(
+//     items.reduce((acc, item) => acc + item.price * item.qty, 0)
+//   ),
+//     shippingPrice = round2(itemsPrice > 100 ? 0 : 10),
+//     taxPrice = round2(Number(0.15 * itemsPrice)),
+//     totalPrice = round2(itemsPrice + shippingPrice + taxPrice)
+//   return { itemsPrice, shippingPrice, taxPrice, totalPrice }
+// }

@@ -1,6 +1,7 @@
 'use client'
 import MonnifyButton from "@/components/MonnifyButton"
 import { OrderItem } from "@/lib/models/OrderModel"
+import { formatPrice } from "@/lib/utils"
 import { PayPalButtons, PayPalScriptProvider } from "@paypal/react-paypal-js"
 import { useSession } from "next-auth/react"
 import Image from "next/image"
@@ -128,7 +129,7 @@ export default function OrderDetails({
                     <tr key={item.slug}>
                       <td>
                         <Link
-                          href={`/products/${item.slug}`}
+                          href={`/product/${item.slug}`}
                           className="flex items-center"
                         >
                           <Image
@@ -141,7 +142,7 @@ export default function OrderDetails({
                         </Link>
                       </td>
                       <td>{item.qty}</td>
-                      <td>{item.price}</td>
+                      <td>{formatPrice(item.price)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -155,19 +156,19 @@ export default function OrderDetails({
               <h2 className="card-title">Order Summary</h2>
               <div className="mb-2 flex justify-between">
                 <span>Items</span>
-                <span>${itemsPrice}</span>
+                <span>{formatPrice(itemsPrice)}</span>
               </div>
               <div className="flex justify-between">
                 <span>Shipping</span>
-                <span>${shippingPrice}</span>
+                <span>{formatPrice(shippingPrice)}</span>
               </div>
               <div className="flex justify-between">
                 <span>Tax</span>
-                <span>${taxPrice}</span>
+                <span>{formatPrice(taxPrice)}</span>
               </div>
               <div className="flex justify-between">
                 <span>Total</span>
-                <span>${totalPrice}</span>
+                <span>{formatPrice(totalPrice)}</span>
               </div>
               {!isPaid && paymentMethod === 'PayPal' && (
                 <div className="flex">
@@ -194,19 +195,22 @@ export default function OrderDetails({
                   </ul>
                 </div>
               )}
-              {session?.user.isAdmin && (
-                <li>
+              {session?.user.isAdmin && !isDelivered && (
                   <button
                     className="btn w-full my-2"
                     onClick={() => deliverOrder()}
-                    disabled={isDelivering}
+                    disabled={isDelivering || isDelivered}
                   >
                     {isDelivering && (
                       <span className="loading loading-spinner"></span>
                     )}
                     Mark as delivered
-                  </button>
-                </li>
+                  </button>  
+              )}
+              {isDelivered && (
+                  <Link className="btn w-full my-2 btn-primary" href={`/`} passHref>
+                    Shop for more items
+                  </Link>
               )}
             </div>
           </div>

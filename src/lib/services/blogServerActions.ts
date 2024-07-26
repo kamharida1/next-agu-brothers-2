@@ -81,7 +81,7 @@ export async function createPost(
     }
 
     // Revalidate the path and redirect to the home page
-    revalidatePath('/')
+    revalidatePath('/admin/blog')
     redirect('/admin/blog') 
 }
 
@@ -128,16 +128,16 @@ export async function updatePost(
         }
     }
 
-    revalidatePath('/')
+    revalidatePath('/admin/blog')
    redirect('/admin/blog')
 }
 
 export async function deletePost(
-    id: string,
+    slug: string,
 ): Promise<PostFormState> {
     let post: Blog | null
     try {
-      post = await BlogModel.findByIdAndDelete(id)
+      post = await BlogModel.findOneAndDelete({slug})
     } catch (error: unknown) {
         if (error instanceof Error) {
             return {
@@ -155,6 +155,6 @@ export async function deletePost(
         }
     }
 
-   revalidatePath('/')
+   revalidatePath('/admin/blog')
    redirect('/admin/blog')
 }

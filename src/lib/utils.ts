@@ -16,6 +16,14 @@ export const formatId = (x: string) => {
   return `..${x.substring(20, 24)}`
 }
 
+export const truncateText = (text: string, wordLimit: number) => {
+  const words = text.split(' ');
+  if (words.length > wordLimit) {
+    return words.slice(0, wordLimit).join(' ') + '...';
+  }
+  return text;
+};
+
 export function toPlainObject(obj: any): any {
   if (obj === null || obj === undefined) return obj;
   if (Array.isArray(obj)) return obj.map(toPlainObject);

@@ -11,14 +11,12 @@ const blogSchema = new mongoose.Schema({
 
 const BlogModel = mongoose.models.Blog || mongoose.model('Blog', blogSchema)
 
-export interface Blog { 
-  id?: string;
+export default BlogModel
+
+export type Blog = { 
   title: string;
   slug: string;
   image: string;
   content: string;
-  createdAt: Date;
-  updatedAt: Date;
 }
 
-export default BlogModel

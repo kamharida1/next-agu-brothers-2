@@ -39,7 +39,7 @@ export const POST = auth(async (...p: any) => {
     await dbConnect()
     const blog = new BlogModel({
       title,
-      slug,
+      slug: slug.toLowerCase(),
       image: image || '',
       content,
     })

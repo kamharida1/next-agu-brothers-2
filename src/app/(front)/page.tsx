@@ -1,4 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
+import Breadcrumb from "@/components/Breadcrumb";
 import CldImage from "@/components/CldImage";
 import ProductItem from "@/components/products/ProductItem";
 import data from "@/lib/data";
@@ -103,6 +104,9 @@ export default async function Home() {
           </div>
         ))}
       </div> */}
+      <div className="flex items-center">
+        <Breadcrumb homeElement={'Home'} />
+      </div>
       <h2 className="text-2xl py-2">Latest Products</h2>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4">

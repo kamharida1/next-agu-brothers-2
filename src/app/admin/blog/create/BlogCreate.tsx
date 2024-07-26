@@ -1,11 +1,9 @@
 'use client'
-import useSWRMutation from 'swr/mutation'
-import useSWR from 'swr'
+
 import toast from 'react-hot-toast'
 import Link from 'next/link'
 import { Controller, useForm } from 'react-hook-form'
-import { useEffect, useState } from 'react'
-import { formatId } from '@/lib/utils'
+import {  useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Blog } from '@/lib/models/BlogModel'
 import slugify from 'slugify'
@@ -92,7 +90,12 @@ export default function BlogCreate() {
                 name="title"
                 control={control}
                 render={({ field }) => (
-                  <input type="text" {...field} id="title" className="input" />
+                  <input
+                    type="text"
+                    {...field}
+                    id="title"
+                    className="input input-bordered w-full max-w-md"
+                  />
                 )}
               />
             </div>
@@ -159,11 +162,7 @@ export default function BlogCreate() {
             </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn btn-primary"
-          >
+          <button type="submit" disabled={loading} className="btn btn-primary">
             {loading && <span className="loading loading-spinner"></span>}
             Create
           </button>

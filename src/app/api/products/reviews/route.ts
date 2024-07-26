@@ -4,14 +4,14 @@ import ProductModel from "@/lib/models/ProductModel"
 import ReviewModel from "@/lib/models/ReviewModel"
 
 export const GET = auth(async (req: any) => {
-  if (!req.auth) {
-    return Response.json(
-      { message: 'unauthorized' },
-      {
-        status: 401,
-      }
-    )
-  }
+  // if (!req.auth) {
+  //   return Response.json(
+  //     { message: 'unauthorized' },
+  //     {
+  //       status: 401,
+  //     }
+  //   )
+  // }
   const { productId } = req.json
   await dbConnect()
   //Get all reviews for the product

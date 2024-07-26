@@ -1,5 +1,5 @@
 import AddToCart from '@/components/products/AddToCart'
-import { convertDocToObj } from '@/lib/utils'
+import { convertDocToObj, formatPrice } from '@/lib/utils'
 import productServices from '@/lib/services/productService'
 import { FaStar } from 'react-icons/fa'
 import Link from 'next/link'
@@ -9,6 +9,7 @@ import ProductImages from '@/components/products/ProductImages'
 import ReviewForm from '@/components/products/ReviewForm'
 import { format } from 'date-fns'
 import { Review } from '@/lib/models/ReviewModel'
+import Breadcrumb from '@/components/Breadcrumb'
 
 const formatDate = (dateString: any) => {
   return format(new Date(dateString), 'MMMM do yyyy, h:mm:ss a')
@@ -43,6 +44,7 @@ export default async function ProductDetails({
   return (
     <>
       <div className="my-2">
+        <Breadcrumb homeElement={'Home'} />
         <Link href="/" className="text-blue-500 hover:underline cursor-pointer">
           back to products
         </Link>
@@ -78,7 +80,27 @@ export default async function ProductDetails({
               <div className="divider"></div>
             </li>
             <li>
-              Description: <p>{product.description}</p>
+              {/* Description: <p>{product.description}</p> */}
+              <div>
+                <h3 className="text-lg font-bold">Description</h3>
+                <p>{product.description}</p>
+              </div>
+            </li>
+            <li>
+              <div className="divider"></div>
+            </li>
+            <li>
+              <div className="mt-4">
+                <h3 className="text-lg font-bold">Additional Properties</h3>
+                <ul className="list-inside text-gray-600">
+                  {product.properties &&
+                    Object.entries(product.properties).map(([key, value]) => (
+                      <li key={key}>
+                        {key}: {value}
+                      </li>
+                    ))}
+                </ul>
+              </div>
             </li>
           </ul>
         </div>
@@ -87,7 +109,7 @@ export default async function ProductDetails({
             <div className="card-body">
               <div className="mb-2 flex justify-between">
                 <div>Price</div>
-                <div>${product.price}</div>
+                <div>{formatPrice(product.price)}</div>
               </div>
               <div className="mb-2 flex justify-between">
                 <div>Status</div>
