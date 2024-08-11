@@ -5,39 +5,42 @@ import CldImage from '../CldImage'
 import type { Blog } from '@/lib/models/BlogModel'
 import { useSession } from 'next-auth/react'
 import PostDelete from './PostDelete'
-import HtmlRenderer from './Htmlparser'
 import { truncateText } from '@/lib/utils'
+import HtmlRenderer from './Htmlparser'
 
-export default function BlogItem({ blog }: {blog: Blog }) {
-   const { data: session } = useSession()
+export default function BlogItem({ blog }: { blog: Blog }) {
+  const { data: session } = useSession()
+
   return (
-    <div className="card compact w-70 bg-base-300 shadow-xl mb-4">
-      <figure>
-        <Link href={`/blog/${blog.slug}`}>
+    <div className="card w-full card-compact bg-base-100 shadow-xl mb-6 transition-transform transform hover:scale-105">
+      <figure className="relative overflow-hidden">
+        <Link href={`/blog/${blog.slug}`} passHref>
           <CldImage
             src={blog.image}
             alt={blog.title}
-            width={300}
-            height={300}
-            className="object-cover overflow-hidden mt-6 rounded-md h-64 w-full"
+            width={400}
+            height={350}
+            className="object-cover w-full h-64 overflow-hidden rounded-xl transition-transform transform hover:scale-110"
           />
         </Link>
       </figure>
-      <div className="card-body">
-        <Link href={`/blog/${blog.slug}`}>
-          <h2 className="card-title mt-4">{blog.title}</h2>
+      <div className="card-body p-4">
+        <Link href={`/blog/${blog.slug}`} passHref>
+          <h2 className="card-title text-2xl font-semibold ">
+            {blog.title}
+          </h2>
         </Link>
-        {/* <p className="mb-2">{truncateText(blog.content, 100)}</p> */}
-        <HtmlRenderer htmlString={truncateText(blog.content, 20)} />
+        <p className="text-sm mb-2">
+          {new Date(blog.createdAt).toLocaleDateString()}
+        </p>
+        <article className="prose prose-sm ">
+          <HtmlRenderer htmlString={blog.content} />
+        </article>
         {session?.user?.isAdmin && (
-          <div className="card-actions flex items-center justify-between">
-            <Link href={`/admin/blog/${blog.slug}/`}>
-              <button className="btn btn-sm">Edit</button>
+          <div className="card-actions flex items-center justify-between mt-4">
+            <Link href={`/admin/blog/${blog.slug}/edit`} passHref>
+              <p className="btn btn-outline btn-primary btn-sm">Edit</p>
             </Link>
-            {/* <button
-              className="btn w-full my-2"
-              onClick={() => onDelete(blog.slug)}
-            ></button> */}
             <PostDelete slug={blog.slug} />
           </div>
         )}

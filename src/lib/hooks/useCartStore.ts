@@ -102,26 +102,29 @@ export default function useCartService() {
   }
 }
 const calcPrice = (items: OrderItem[], shippingAddress: ShippingAddress) => {
+  // Calculate the total price of all items
   const itemsPrice = round2(
     items.reduce((acc, item) => acc + item.price * item.qty, 0)
   );
 
+  // Calculate the total weight of all items
   const totalWeight = items.reduce((acc, item) => acc + item.weight * item.qty, 0);
 
+  // Calculate the total quantity of all items
+  const totalQty = items.reduce((acc, item) => acc + item.qty, 0);
+
+  // Calculate the average shipping weight
+  const averageWeight = totalQty > 0 ? round2(totalWeight / totalQty) : 0;
+
+  // Calculate the shipping price based on the shipping address city rates
   const cityRates = shippingRates[shippingAddress.city as keyof typeof shippingRates];
   const shippingPrice = cityRates ? round2(cityRates.baseRate + cityRates.perKg * totalWeight) : 0;
 
+  // Calculate the tax price (5% of items price)
   const taxPrice = round2(Number(0.05 * itemsPrice));
+
+  // Calculate the total price (items price + shipping price + tax price)
   const totalPrice = round2(itemsPrice + shippingPrice + taxPrice);
 
-  return { itemsPrice, shippingPrice, taxPrice, totalPrice };
+  return { itemsPrice, shippingPrice, taxPrice, totalPrice,  };
 };
-// const calcPrice = (items: OrderItem[]) => { 
-//   const itemsPrice = round2(
-//     items.reduce((acc, item) => acc + item.price * item.qty, 0)
-//   ),
-//     shippingPrice = round2(itemsPrice > 100 ? 0 : 10),
-//     taxPrice = round2(Number(0.15 * itemsPrice)),
-//     totalPrice = round2(itemsPrice + shippingPrice + taxPrice)
-//   return { itemsPrice, shippingPrice, taxPrice, totalPrice }
-// }

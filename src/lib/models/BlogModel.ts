@@ -18,5 +18,7 @@ export type Blog = {
   slug: string;
   image: string;
   content: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 

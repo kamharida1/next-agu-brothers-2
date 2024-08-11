@@ -5,9 +5,11 @@ import { signIn, signOut, useSession } from "next-auth/react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { SearchBox } from "./SearchBox"
+import useWishListStore from "@/lib/hooks/useWishListStore"
 
 const Menu = () => {
   const { items } = useCartService()
+  const {items: wishlist} = useWishListStore()
   const [mounted, setMounted] = useState(false)
   useEffect(() => { 
     setMounted(true)
@@ -63,6 +65,17 @@ const Menu = () => {
                 </svg>
               </label>
             )}
+          </li>
+          {/* Favorites link*/}
+          <li>
+            <Link className="btn btn-ghost rounded-btn" href="/wishlist">
+              Favorites
+              {mounted && wishlist.length != 0 && (
+                <div className="badge badge-primary">
+                  {wishlist.length}
+                </div>
+              )}
+            </Link>
           </li>
           <li>
             <Link className="btn btn-ghost rounded-btn" href="/cart">

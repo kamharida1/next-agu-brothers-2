@@ -34,6 +34,7 @@ interface ProductFormProps {
   properties?: Property
   banner?: string
   weight?: number
+  notes?: string
 }
 
 
@@ -201,7 +202,7 @@ export default function ProductCreateForm() {
       <label className="label md:w-1/5" htmlFor={id}>
         {name}
       </label>
-      {id === 'description' ? (
+      {id === 'description' || id === 'notes' ? (
         <div className="md:w-4/5">
           <textarea
             id={id}
@@ -361,41 +362,10 @@ export default function ProductCreateForm() {
               </label>
             </div>
           </div>
-          {/* <div className="md:flex mb-6">
-            <span className="label md:w-1/5"></span>
-            <div className="md:w-4/5">
-              {productImages[0] ? (
-                <div className="flex flex-wrap">
-                  {productImages &&
-                    productImages.map((image, index) => (
-                      <div
-                        key={index}
-                        className="relative border border-gray-200 w-20 h-20 mr-4 mb-4 rounded-lg shadow-md overflow-hidden"
-                      >
-                        <button
-                          onClick={() => handleDeleteProductImage(index)}
-                          className="absolute top-0 right-0 p-1 text-white rounded-full hover:bg-red-600 focus:outline-none w-6 h-6 flex items-center justify-center"
-                        >
-                          <IoIosCloseCircle />
-                        </button>
-                        <CldImage
-                          src={image}
-                          alt="product image"
-                          width={400}
-                          height={300}
-                          className="object-cover w-full h-full"
-                        />
-                      </div>
-                    ))}
-                </div>
-              ) : (
-                <div className="text-gray-500">No images uploaded</div>
-              )}
-            </div>
-          </div> */}
           <FormInput name="Price" id="price" required />
 
           <FormInput name="Brand" id="brand" required />
+          <FormInput name="Notes" id="notes" />
           <FormInput name="Description" id="description" required />
           <FormInput name="Count In Stock" id="countInStock" required />
           <FormInput name="Weight(kg)" id="weight" />

@@ -1,4 +1,4 @@
-   import mongoose from 'mongoose'
+   import mongoose, { Types } from 'mongoose'
    const orderSchema = new mongoose.Schema(
      {
        user: {
@@ -15,6 +15,7 @@
            },
            
            name: { type: String, required: true },
+           images: [{ type: String, required: true }],
            slug: { type: String, required: true },
            qty: { type: Number, required: true },
            image: { type: String, required: true },
@@ -86,14 +87,13 @@ export type Order = {
 }
 
 export type OrderItem = {
+  product: string
   name: string
   slug: string
   qty: number
   image: string
   images: string[]
   price: number
-  color: string
-  size: string
   weight: number
 }
 

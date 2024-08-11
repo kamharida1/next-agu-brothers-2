@@ -129,7 +129,7 @@ const Form = () => {
                             height={50}
                           ></Image>
                           <span className="px-2">
-                            {item.name}({item.color} {item.size})
+                            {item.name}
                           </span>
                         </Link>
                       </td>

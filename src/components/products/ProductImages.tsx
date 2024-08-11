@@ -2,6 +2,7 @@
 import Image from 'next/image'
 import { useState } from 'react'
 import CldImage from '../CldImage'
+import Link from 'next/link'
 
 interface ProductImagesProps {
   images: string[]
@@ -13,14 +14,16 @@ export default function ProductImages({ images }: ProductImagesProps) {
   return (
     <>
       <div className="text-center justify-center">
-        <CldImage
-          src={activeImage}
-          width={300}
-          height={300}
-          className="object-cover w-[500px] h-[520px] rounded-lg"
-          //className="max-w-full max-h-100"
-          alt="Product"
-        />
+        <Link href={`/product/${activeImage}`} passHref>
+          <CldImage
+            src={activeImage}
+            width={300}
+            height={300}
+            className="object-cover w-[500px] h-[520px] rounded-lg"
+            //className="max-w-full max-h-100"
+            alt="Product"
+          />
+        </Link>
       </div>
       <div className="flex gap-2 mt-4">
         {images.map((image) => (

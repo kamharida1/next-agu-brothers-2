@@ -21,7 +21,7 @@ export default function PostDelete({ slug }: PostDeleteProps) {
   // and the deleteAction is performed.
   return (
     <form onSubmit={deleteAction}>
-      <button type="submit" className="text-sm opacity-30 text-red-500">
+      <button type="submit" className="btn btn-outline btn-error btn-sm">
         Delete
       </button>
     </form>

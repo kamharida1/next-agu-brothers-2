@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Poppins } from 'next/font/google'
 import "./globals.css";
 import Providers from "@/components/Providers";
 import Script from 'next/script'
@@ -10,22 +10,32 @@ import Header from "@/components/header/header";
 
 const inter = Inter({ subsets: ["latin"] });
 
+const poppins = Poppins({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800', '900'],
+})
+
 export const metadata: Metadata = {
-  title: "Agu Brothers",
-  description: "Official Store for all electronics and gadgets",
-};
+  metadataBase: new URL(`${process.env.NEXT_PUBLIC_BASE_URL}`),
+  title: {
+    default: 'Agu Brothers',
+    template: '%s | Agu Brothers',
+  },
+  description:
+    'Discover the best in premium electronics and stylish furniture. Explore our diverse selection of high-quality products, ranging from the latest consumer electronics and gadgets to modern living room, bedroom, and office furniture. Benefit from affordable prices, exclusive deals, and exceptional customer service. Whether seeking cutting-edge technology or elegant home furnishings, our online store provides everything you need. Elevate your lifestyle with our top-rated electronics and bespoke furniture collections. Enjoy a seamless shopping experience for all your home electronics and furniture requirements.',
+  verification: {
+    // google: "1234567890",
+  },
+}
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Remove the unnecessary import statement here
-
   return (
     <html lang="en">
-      <body className={`${inter.className} antialiased`}>
-        <Script src="https://sdk.monnify.com/plugin/monnify.js" />
+      <body className={`${poppins.className} antialiased`}>
         <Providers>
           <div className="drawer">
             <DrawerButton />
@@ -66,15 +76,24 @@ export default function RootLayout({
                     <Link href="/about-us" className="link link-hover">
                       About us
                     </Link>
-                    <a className="link link-hover">Contact</a>
-                    <a className="link link-hover">Jobs</a>
-                    <a className="link link-hover">Press kit</a>
+                    <Link href="/contact-us" className="link link-hover">
+                      Contact us
+                    </Link>
+                    <Link href="/careers" className="link link-hover">
+                      Careers
+                    </Link>
                   </nav>
                   <nav>
                     <h6 className="footer-title">Legal</h6>
-                    <a className="link link-hover">Terms of use</a>
-                    <a className="link link-hover">Privacy policy</a>
-                    <a className="link link-hover">Cookie policy</a>
+                    <Link
+                      href="/terms-and-conditions"
+                      className="link link-hover"
+                    >
+                      Terms of use
+                    </Link>
+                    <Link href="/privacy-policy" className="link link-hover">
+                      Privacy Policy
+                    </Link>
                   </nav>
                 </footer>
               </div>

@@ -3,6 +3,11 @@ import Dashboard from './Dashboard'
 
 export const metadata = {
   title: 'Admin Dashboard',
+  robots: {
+    index: false,
+    follow: true,
+    nocache: true,
+  }
 }
 const DashboardPage = () => {
   return (

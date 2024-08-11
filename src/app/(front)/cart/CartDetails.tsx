@@ -48,10 +48,11 @@ export default function CartDetails() {
                           src={item.images[0]}
                           alt={item.name}
                           width={50}
-                          height={50}
+                          height={70}
+                          className="rounded-md object-cover object-center"
                         />
-                        <span className="px-2">
-                          {item.name} ({item.color} {item.size}Other)
+                        <span className="px-2 font-medium text-md">
+                          {item.name} 
                         </span>
                       </Link>
                     </td>

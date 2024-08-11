@@ -33,6 +33,7 @@ interface ProductFormProps {
   properties?: Property
   banner?: string
   weight?: number
+  notes?: string
 }
 
 export default function ProductEditForm({ productId }: { productId: string }) {
@@ -73,6 +74,7 @@ export default function ProductEditForm({ productId }: { productId: string }) {
       setValue('isFeatured', productData.isFeatured)
       setValue('weight', productData.weight)
       setValue('countInStock', productData.countInStock)
+      setValue('notes', productData.notes)
       setProductProperties(productData.properties || {})
       setProductImages(productData.images || [])
     }
@@ -213,7 +215,7 @@ export default function ProductEditForm({ productId }: { productId: string }) {
       <label className="label md:w-1/5" htmlFor={id}>
         {name}
       </label>
-      {id === 'description' ? (
+      {id === 'description' || id === 'notes' ? (
         <div className="md:w-4/5">
           <textarea
             id={id}
@@ -308,23 +310,6 @@ export default function ProductEditForm({ productId }: { productId: string }) {
                 ))}
             </div>
           </div>
-          {/* <div className="md:flex mb-6">
-            <label className="label md:w-1/5" htmlFor="imageFile">
-              Upload Image
-            </label>
-            <div className="md:w-4/5">
-              <div className="md:flex items-center md:w-3/5">
-                <input
-                  type="file"
-                  name="files[]"
-                  multiple
-                  className="max-w-md btn btn-primary"
-                  id="imageFile"
-                  onChange={uploadHandler}
-                />
-              </div>
-            </div>
-          </div> */}
           <div className="md:flex mb-6">
             <span className="label md:w-1/5">Upload Image</span>
             <div className="flex flex-wrap gap-1 md:w-4/5">
@@ -389,44 +374,12 @@ export default function ProductEditForm({ productId }: { productId: string }) {
               </label>
             </div>
           </div>
-          {/* <div className="md:flex mb-6">
-            <span className="label md:w-1/5"></span>
-            <div className="md:w-4/5">
-              {productImages[0] ? (
-                <div className="flex flex-wrap">
-                  {productImages &&
-                    productImages.map((image, index) => (
-                      <div
-                        key={index}
-                        className="relative border border-gray-200 w-20 h-20 mr-4 mb-4 rounded-lg shadow-md overflow-hidden"
-                      >
-                        <button
-                          onClick={() => handleDeleteProductImage(index)}
-                          className="absolute top-0 right-0 p-1 text-white rounded-full hover:bg-red-600 focus:outline-none w-6 h-6 flex items-center justify-center"
-                        >
-                          <IoIosCloseCircle />
-                        </button>
-                        <CldImage
-                          src={image}
-                          alt="product image"
-                          width={400}
-                          height={300}
-                          className="object-cover w-full h-full"
-                        />
-                      </div>
-                    ))}
-                </div>
-              ) : (
-                <div className="text-gray-500">No images uploaded</div>
-              )}
-            </div>
-          </div> */}
           <FormInput name="Price" id="price" required />
           <FormInput name="Weight" id="weight" />
           <FormInput name="Brand" id="brand" required />
           <FormInput name="Description" id="description" required />
           <FormInput name="Count In Stock" id="countInStock" required />
-
+          <FormInput name="Notes" id="notes" />
           <button
             type="submit"
             disabled={isUpdating}

@@ -45,7 +45,7 @@
      const productsData = await ProductModel.aggregate([
        {
          $group: {
-           _id: '$category',
+           _id: '$cat',
            totalProducts: { $sum: 1 },
          },
        },

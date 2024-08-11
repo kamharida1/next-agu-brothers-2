@@ -1,12 +1,13 @@
 
 export default function FrontLayout({
   children,
+  modal,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
+  modal: React.ReactNode
 }) {
   return (
-    <main className="flex-grow container mx-auto px-4">
-
+    <main className="flex-grow container mx-auto ">
       {children}
     </main>
   )

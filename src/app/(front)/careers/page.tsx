@@ -1,0 +1,67 @@
+// Code Generated with love by Agu
+import { Job } from '@/lib/models/JobModel'
+import jobServices from '@/lib/services/jobService'
+import Head from 'next/head'
+
+export default async function Careers() {
+  const jobs = await jobServices.getJobs()
+  return (
+    <>
+      <Head>
+        <title>Careers | Agu Brothers</title>
+        <meta
+          name="description"
+          content="Careers at Agu Brothers. Join our team and help us grow."
+        />
+      </Head>
+      <div className="container mx-auto p-6 prose">
+        <h1 className="text-3xl font-bold mb-4">Careers at Agu Brothers</h1>
+        <p>
+          At Agu Brothers, we are always looking for talented individuals to
+          join our team. If you are passionate about technology and customer
+          service, we would love to hear from you. Check out our current job
+          openings below and apply today.
+        </p>
+        <h2 className="text-2xl font-semibold mt-8">Current Job Openings</h2>
+        <ul className="list-disc ml-6 space-y-4">
+          {jobs.map((job) => (
+            <JobItem key={job._id} job={job} />
+          ))}
+        </ul>
+        <p className="mt-4 text-slate-700">
+          Thank you for your interest in joining Agu Brothers. We look forward
+          to reviewing your application!
+        </p>
+      </div>
+    </>
+  )
+}
+
+const JobItem = ({ job }: { job: Job }) => {
+  return (
+    <li>
+      <h3 className="text-xl font-semibold">{job.title}</h3>
+      <p className="font-bold">
+        Location: <span className='font-normal'>{job.location}</span>
+      </p>
+      <p className="font-bold">Responsibilities:</p>
+      <ul className="list-disc ml-6">
+        {job.responsibilities.map((r, i) => (
+          <li key={i}>{r}</li>
+        ))}
+      </ul>
+      <p className="font-bold">Requirements:</p>
+      <ul className="list-disc ml-6">
+        {job.requirements.map((r, i) => (
+          <li key={i}>{r}</li>
+        ))}
+      </ul>
+      <p>
+        If you are interested in this position, please send your resume and
+        cover letter to{' '}
+        <a href={`mailto:careers@agubrothers.com`}>careers@agubrothers.com</a>.
+      </p>
+    </li>
+  )
+}
+

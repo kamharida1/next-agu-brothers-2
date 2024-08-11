@@ -12,7 +12,7 @@ import dbConnect from '@/lib/dbConnect'
        )
      }
      await dbConnect()
-     const orders = await OrderModel.find()
+     const orders = await OrderModel.find({})
        .sort({ createdAt: -1 })
        .populate('user', 'name')
 

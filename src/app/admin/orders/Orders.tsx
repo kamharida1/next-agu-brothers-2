@@ -13,7 +13,7 @@ export default function Orders() {
     <div>
       <h1 className="py-4 text-2xl">Orders</h1>
       <div className="overflow-x-auto">
-        <table className="table">
+        <table className="table table-compact w-full table-zebra">
           <thead>
             <tr>
               <th>ID</th>
@@ -32,18 +32,34 @@ export default function Orders() {
                 <td>{order.user?.name || 'Deleted user'}</td>
                 <td>{order.createdAt.substring(0, 10)}</td>
                 <td>{formatPrice(order.totalPrice)}</td>
-                <td>
+                <td
+                  className={
+                    order.isPaid && order.paidAt
+                      ? 'text-green-500'
+                      : 'text-red-500'
+                  }
+                >
                   {order.isPaid && order.paidAt
                     ? `${order.paidAt.substring(0, 10)}`
                     : 'not paid'}
                 </td>
-                <td>
+                <td
+                  className={
+                    order.isDelivered && order.deliveredAt
+                      ? 'text-green-500'
+                      : 'text-red-500'
+                  }
+                >
                   {order.isDelivered && order.deliveredAt
                     ? `${order.deliveredAt.substring(0, 10)}`
                     : 'not delivered'}
                 </td>
                 <td>
-                  <Link href={`/order/${order._id}`} passHref>
+                  <Link
+                    className="btn btn-primary btn-sm"
+                    href={`/order/${order._id}`}
+                    passHref
+                  >
                     Details
                   </Link>
                 </td>

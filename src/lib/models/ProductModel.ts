@@ -47,5 +47,7 @@ export type Product = {
   numReviews: number
   countInStock: number
   weight: number
-  properties: {name: string, value: string}
+  properties: { name: string, value: string }
+  createdAt: string
+  updatedAt: string
 }

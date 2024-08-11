@@ -3,6 +3,11 @@ import Orders from './Orders'
 
 export const metadata = {
   title: 'Admin Orders',
+  robots: {
+    index: false,
+    follow: true,
+    nocache: true,
+  },
 }
 
 const AdminOrdersPage = () => {
