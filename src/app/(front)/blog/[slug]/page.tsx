@@ -17,6 +17,16 @@ export async function generateMetadata({
     alternates: {
       canonical: `/blog/${blog.slug}`,
     },
+    openGraph: {
+      title: blog.title,
+      description: blog.content,
+      images: [
+        {
+          url: blog.image,
+          alt: blog.title,
+        },
+      ],
+    },
   }
 }
 

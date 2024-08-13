@@ -14,6 +14,7 @@ const BlogModel = mongoose.models.Blog || mongoose.model('Blog', blogSchema)
 export default BlogModel
 
 export type Blog = { 
+  _id: string;
   title: string;
   slug: string;
   image: string;

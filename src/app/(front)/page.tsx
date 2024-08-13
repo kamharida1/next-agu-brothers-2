@@ -22,12 +22,12 @@ export default async function Home() {
 
   return (
     <>
-      <div className="w-full carousel rounded-box mt-4">
+      <div className="w-full carousel mt-2">
         {featuredProducts.map((product: Product, index: number) => (
           <div
             key={product._id}
             id={`slide-${index}`}
-            className="carousel-item relative w-full h-[500px]"
+            className="carousel-item relative w-full md:h-[500px] "
           >
             <Link href={`/product/${product.slug}`}>
               <div className="grid grid-cols-1 md:grid-cols-2 w-full px-24 items-center">
@@ -72,15 +72,19 @@ export default async function Home() {
         ))}
       </div>
 
-      <h2 className="text-2xl font-medium py-2 px-2">Latest Products</h2>
+      <h2 className="text-2xl font-medium py-2 px-2 text-center">
+        Latest Products
+      </h2>
 
-      <div className="grid grid-cols-1 gap-16 md:grid-cols-3 lg:grid-cols-4">
-        {latestProducts.map((product: Product) => (
-          <ProductItem
-            product={convertDocToObj(product)}
-            key={product.slug}
-          />
-        ))}
+      <div className="p-5 flex flex-col gap-6 items-center">
+        <div className="flex flex-wrap justify-center gap-6">
+          {latestProducts.map((product: Product) => (
+            <ProductItem
+              product={convertDocToObj(product)}
+              key={product.slug}
+            />
+          ))}
+        </div>
       </div>
     </>
   )

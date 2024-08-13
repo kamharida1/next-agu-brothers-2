@@ -1,20 +1,54 @@
 // File: pages/privacy-policy.js
 
-import Head from 'next/head'
+import { Metadata } from 'next'
+import Link from 'next/link'
+import { FaTheaterMasks } from 'react-icons/fa'
+
+export const metadata: Metadata = {
+  title: 'Privacy Policy | Agu Brothers',
+  description: 'Privacy Policy for Agu Brothers.',
+  openGraph: {
+    title: 'Privacy Policy | Agu Brothers',
+    description: 'Privacy Policy for Agu Brothers.',
+    type: 'website',
+  }
+}
 
 const PrivacyPolicy = () => {
   return (
     <>
-      <Head>
-        <title>Privacy Policy | Agu Brothers</title>
-        <meta name="description" content="Privacy Policy for Agu Brothers." />
-      </Head>
+      <div className="text-sm breadcrumbs  border-b-2 border-b-orange-600">
+        <ul className="dark:text-black">
+          <li>
+            <Link href={'/'}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                className="w-4 h-4 mr-2 stroke-current"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
+                ></path>
+              </svg>
+              Home
+            </Link>
+          </li>
+          <li>
+            <FaTheaterMasks className="w-4 h-4 mr-2 stroke-current" />
+            Privacy Policy
+          </li>
+        </ul>
+      </div>
       <div className="container mx-auto p-6 prose">
         <h1 className="text-4xl font-bold mb-4">Privacy Policy</h1>
         <p className="">
           This Privacy Policy describes how Agu Brothers (&quot;we&quot;,
-          &quot;us&quot;, or &quot;our&quot;) collects, uses, and shares
-          your personal information when you visit or make a purchase from our
+          &quot;us&quot;, or &quot;our&quot;) collects, uses, and shares your
+          personal information when you visit or make a purchase from our
           website.
         </p>
         <ol className="list-decimal ml-6 mt-4 space-y-4 text-base">

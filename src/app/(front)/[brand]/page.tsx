@@ -1,14 +1,20 @@
-'use client'
+import CldImage from "@/components/CldImage"
+import AddToCart from "@/components/products/AddToCart"
+import { Product } from "@/lib/models/ProductModel"
+import productServices from "@/lib/services/productService"
+import { convertDocToObj, formatPrice } from "@/lib/utils"
+import Link from "next/link"
+import { FaRegHeart } from "react-icons/fa"
 
-import Link from 'next/link'
-import { FaRegHeart } from 'react-icons/fa'
-import useWishListStore from '@/lib/hooks/useWishListStore'
-import CldImage from '@/components/CldImage'
-import { format } from 'path'
-import { formatPrice } from '@/lib/utils'
-
-export default function Wishlist() {
-  const { items, removeItem } = useWishListStore()
+export default async function ProductsByBrand({
+  params,
+}: {
+  params: { brand: string }
+}) {
+  const items = await productServices.getByBrand(params.brand)
+  if (!items) {
+    return <div>No Products Found</div>
+  }
   return (
     <div className="w-full h-screen px-3 py-2">
       <div className="text-sm breadcrumbs  border-b-2 border-b-orange-600">
@@ -33,19 +39,19 @@ export default function Wishlist() {
           </li>
           <li>
             <FaRegHeart className="w-4 h-4 mr-2 stroke-current" />
-            Favourite Products
+            {params.brand}
           </li>
         </ul>
       </div>
       <div className="w-full h-5/6 py-5">
-        <h1 className="text-2xl font-bold text-center">Favourite Products</h1>
+        <h1 className="text-2xl font-bold text-center">Products By Brand</h1>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-5">
           {items.length === 0 ? (
             <div className="text-center text-lg font-semibold">
-              No items in wishlist
+              No Products here
             </div>
           ) : (
-            items.map((item) => (
+            items.map((item: Product) => (
               <div
                 key={item._id}
                 className="card card-compact w-80 h-auto bg-base-100 shadow-xl mb-6 transition-transform transform hover:scale-105"
@@ -55,28 +61,28 @@ export default function Wishlist() {
                     <CldImage
                       width={300}
                       height={300}
-                      src={item.images[0]}
-                      alt={item.name}
+                      src={item?.images[0]}
+                      alt={item?.name}
                       className="object-cover object-center w-full h-64 rounded-t-xl transition-transform transform hover:scale-110"
                     />
                   </figure>
                 </Link>
                 <div className="card-body p-6">
-                  <Link href={`/product/${item.slug}`}>
+                  <Link href={`/product/${item?.slug}`}>
                     <h2 className="card-title font-medium hover:font-bold transition-colors">
-                      {item.name}
+                      {item?.name}
                     </h2>
                   </Link>
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center overflow-hidden">
                     <span className="text-lg font-semibold">
-                      {formatPrice(item.price)}
+                      {formatPrice(item?.price)}
                     </span>
-                    <button
-                      onClick={() => removeItem(item)}
-                      className="btn btn-sm btn-outline btn-accent"
-                    >
-                      Remove
-                    </button>
+                    <AddToCart
+                      brand={item?.brand}
+                      item={{
+                        ...convertDocToObj(item),
+                      }}
+                    />
                   </div>
                 </div>
               </div>

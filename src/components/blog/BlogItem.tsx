@@ -12,23 +12,22 @@ export default function BlogItem({ blog }: { blog: Blog }) {
   const { data: session } = useSession()
 
   return (
-    <div className="card w-full card-compact bg-base-100 shadow-xl mb-6 transition-transform transform hover:scale-105">
-      <figure className="relative overflow-hidden">
-        <Link href={`/blog/${blog.slug}`} passHref>
+    <div className="card w-120 h-auto card-compact bg-base-100 shadow-xl mb-6 transition-transform transform hover:scale-105">
+      <Link href={`/blog/${blog.slug}`} passHref>
+        <figure className="relative overflow-hidden">
           <CldImage
             src={blog.image}
             alt={blog.title}
-            width={400}
-            height={350}
-            className="object-cover w-full h-64 overflow-hidden rounded-xl transition-transform transform hover:scale-110"
+            width={300}
+            height={300}
+            className="object-cover object-center w-full h-64 rounded-t-xl transition-transform transform hover:scale-110"
           />
-        </Link>
-      </figure>
+        </figure>
+      </Link>
+
       <div className="card-body p-4">
         <Link href={`/blog/${blog.slug}`} passHref>
-          <h2 className="card-title text-2xl font-semibold ">
-            {blog.title}
-          </h2>
+          <h2 className="card-title text-2xl font-semibold ">{blog.title}</h2>
         </Link>
         <p className="text-sm mb-2">
           {new Date(blog.createdAt).toLocaleDateString()}

@@ -9,7 +9,7 @@ import ProductImages from '@/components/products/ProductImages'
 import ReviewForm from '@/components/products/ReviewForm'
 import { format } from 'date-fns'
 import { Review } from '@/lib/models/ReviewModel'
-import Breadcrumb from '@/components/Breadcrumbs'
+import { GoPackage } from 'react-icons/go'
 
 const formatDate = (dateString: any) => {
   return format(new Date(dateString), 'MMMM do yyyy, h:mm:ss a')
@@ -31,6 +31,14 @@ export async function generateMetadata({
       canonical: `/product/${product.slug}`,
     },
     category: product.category,
+    openGraph: {
+      title: product.name,
+      description: product.description,
+      images: product.images.map((image) => ({
+        url: image,
+        alt: product.name,
+      })),
+    }
   }
 }
 
@@ -47,13 +55,38 @@ export default async function ProductDetails({
   }
   return (
     <>
-      {/* <Breadcrumb homeElement='Home' parallelRoutesKey={`/${params.slug}`} /> */}
-      <div className="my-4">
+      <div className="text-sm breadcrumbs  border-b-2 border-b-orange-600">
+        <ul className="dark:text-black">
+          <li>
+            <Link href={'/'}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                className="w-4 h-4 mr-2 stroke-current"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
+                ></path>
+              </svg>
+              Home
+            </Link>
+          </li>
+          <li>
+            <GoPackage className="w-4 h-4 mr-2 stroke-current" />
+            {product.name}
+          </li>
+        </ul>
+      </div>
+      <div className="my-4 ">
         <Link href="/" className="text-blue-500 hover:underline cursor-pointer">
           Back to products
         </Link>
       </div>
-      <div className="grid md:grid-cols-5 md:gap-6">
+      <div className="grid md:grid-cols-5 md:gap-6 ">
         <div className="md:col-span-2">
           <ProductImages images={product.images} />
         </div>
@@ -108,6 +141,7 @@ export default async function ProductDetails({
                     item={{
                       ...convertDocToObj(product),
                       qty: 0,
+                      weight: product.weight,
                     }}
                   />
                 </div>

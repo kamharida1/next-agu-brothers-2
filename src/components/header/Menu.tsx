@@ -38,7 +38,7 @@ const Menu = () => {
         <ul className="flex items-stretch">
           <li>
             {mounted && (
-              <label className="swap swap-rotate">
+              <label className="swap swap-rotate invisible md:visible">
                 {/* this hidden checkbox controls the state */}
                 <input
                   type="checkbox"
@@ -71,9 +71,7 @@ const Menu = () => {
             <Link className="btn btn-ghost rounded-btn" href="/wishlist">
               Favorites
               {mounted && wishlist.length != 0 && (
-                <div className="badge badge-primary">
-                  {wishlist.length}
-                </div>
+                <div className="badge badge-primary">{wishlist.length}</div>
               )}
             </Link>
           </li>

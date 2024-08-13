@@ -1,11 +1,49 @@
 // File: pages/about.js
 
+import { Metadata } from 'next'
 import Head from 'next/head'
 import Link from 'next/link'
+import { IoIosInformation } from 'react-icons/io'
+
+export const metadata: Metadata = {
+  title: 'About Us',
+  description: 'Learn more about our company',
+  openGraph: {
+    title: 'About Us',
+    description: 'Learn more about our company',
+    type: 'website',
+  }
+}
 
 export default function About() {
   return (
     <div>
+      <div className="text-sm breadcrumbs  border-b-2 border-b-orange-600">
+        <ul className="dark:text-black">
+          <li>
+            <Link href={'/'}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                className="w-4 h-4 mr-2 stroke-current"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
+                ></path>
+              </svg>
+              Home
+            </Link>
+          </li>
+          <li>
+            <IoIosInformation className="w-4 h-4 mr-2 stroke-current" />
+            About Us
+          </li>
+        </ul>
+      </div>
       <Head>
         <title>About Us</title>
       </Head>
@@ -71,7 +109,7 @@ export default function About() {
                 className="text-blue-600 hover:text-blue-800"
                 href="https://www.facebook.com"
               >
-                  Facebook
+                Facebook
               </Link>
               <Link
                 className="text-blue-400 hover:text-blue-600"

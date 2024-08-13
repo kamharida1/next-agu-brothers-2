@@ -14,6 +14,13 @@ const getLatest = cache(async () => {
   return products as Product[]
 })
 
+// get products by brand
+const getByBrand = cache(async (brand: string ) => {
+  await dbConnect()
+  const products = await ProductModel.find({ brand }).lean()
+  return products as Product[]
+})
+
 const getFeatured = cache(async () => {
   await dbConnect()
   const products = await ProductModel.find({ isFeatured: true }).lean()
@@ -120,12 +127,14 @@ const getCategories = cache(async () => {
   return categories
 })
 
+
 const productServices = {
   getBySlug,
   getFeatured,
   getLatest,
   getByQuery,
   getCategories,
+  getByBrand
 }
 
 export default productServices

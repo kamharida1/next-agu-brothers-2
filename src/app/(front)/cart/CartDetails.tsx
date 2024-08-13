@@ -6,6 +6,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { formatPrice } from "@/lib/utils"
+import { IoIosCart } from "react-icons/io"
 
 export default function CartDetails() { 
   const router = useRouter()
@@ -19,11 +20,43 @@ export default function CartDetails() {
   if (!mounted) return <></>
 
   return (
-    <>
+    <div className="w-full h-screen px-3 py-2">
+      <div className="text-sm breadcrumbs  border-b-2 border-b-orange-600">
+        <ul>
+          <li>
+            <Link href={'/'}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                className="w-4 h-4 mr-2 stroke-current"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
+                ></path>
+              </svg>
+              Home
+            </Link>
+          </li>
+          <li>
+            <IoIosCart className="w-4 h-4 mr-2 stroke-current" />
+            Cart
+          </li>
+        </ul>
+      </div>
       <h1 className="py-4 text-2xl">Shopping Cart</h1>
       {items.length === 0 ? (
         <div className="mt-4">
-          Cart is empty. <Link className="p-4 rounded ml-6 mt-4 w-64 bg-yellow-700 text-white " href="/">Go shopping</Link>
+          Cart is empty.{' '}
+          <Link
+            className="p-4 rounded ml-6 mt-4 w-64 bg-yellow-700 text-white "
+            href="/"
+          >
+            Go shopping
+          </Link>
         </div>
       ) : (
         <div className="grid md:grid-cols-4 md:gap-5">
@@ -52,7 +85,7 @@ export default function CartDetails() {
                           className="rounded-md object-cover object-center"
                         />
                         <span className="px-2 font-medium text-md">
-                          {item.name} 
+                          {item.name}
                         </span>
                       </Link>
                     </td>
@@ -103,6 +136,6 @@ export default function CartDetails() {
           </div>
         </div>
       )}
-    </>
+    </div>
   )
 }

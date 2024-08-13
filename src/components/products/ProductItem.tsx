@@ -18,7 +18,7 @@ export default function ProductItem({ product }: { product: Product }) {
     isWishlisted ? removeItem(product) : addItem(product)
   }
   return (
-    <div className="card card-compact w-80 h-auto bg-base-100 shadow-xl mb-6 transition-transform transform hover:scale-105 ">
+    <div className="card card-compact w-80 h-auto bg-base-100 shadow-xl m-6 transition-transform transform hover:scale-60 ">
       <Link href={`/product/${product.slug}`}>
         <figure className="relative overflow-hidden">
           <CldImage
@@ -26,7 +26,7 @@ export default function ProductItem({ product }: { product: Product }) {
             alt={product.name}
             width={300}
             height={300}
-            className="object-cover object-center w-full h-64 rounded-t-xl transition-transform transform hover:scale-110"
+            className="object-cover object-center w-full h-64 rounded-t-xl transition-transform transform hover:scale-60"
           />
           <button
             type='button'

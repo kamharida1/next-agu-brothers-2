@@ -34,7 +34,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html data-theme="dark" lang="en">
       <body className={`${poppins.className} antialiased`}>
         <Providers>
           <div className="drawer">

@@ -1,19 +1,50 @@
 // Code Generated with love by Agu
 import { Job } from '@/lib/models/JobModel'
 import jobServices from '@/lib/services/jobService'
-import Head from 'next/head'
+import { Metadata } from 'next'
+import Link from 'next/link'
+import { GrUserWorker } from 'react-icons/gr'
+
+export const metadata: Metadata = {
+  title: 'Careers | Agu Brothers',
+  description: 'Careers at Agu Brothers. Join our team and help us grow.',
+  openGraph: {
+    title: 'Careers | Agu Brothers',
+    description: 'Careers at Agu Brothers. Join our team and help us grow.',
+    type: 'website',
+  },
+}
 
 export default async function Careers() {
   const jobs = await jobServices.getJobs()
   return (
     <>
-      <Head>
-        <title>Careers | Agu Brothers</title>
-        <meta
-          name="description"
-          content="Careers at Agu Brothers. Join our team and help us grow."
-        />
-      </Head>
+      <div className="text-sm breadcrumbs  border-b-2 border-b-orange-600">
+        <ul className="dark:text-black">
+          <li>
+            <Link href={'/'}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                className="w-4 h-4 mr-2 stroke-current"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
+                ></path>
+              </svg>
+              Home
+            </Link>
+          </li>
+          <li>
+            <GrUserWorker className="w-4 h-4 mr-2 stroke-current" />
+            Careers
+          </li>
+        </ul>
+      </div>
       <div className="container mx-auto p-6 prose">
         <h1 className="text-3xl font-bold mb-4">Careers at Agu Brothers</h1>
         <p>

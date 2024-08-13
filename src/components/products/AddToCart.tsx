@@ -2,10 +2,11 @@
 
 import useCartService from "@/lib/hooks/useCartStore";
 import { OrderItem } from "@/lib/models/OrderModel";
+import clsx from "clsx";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-export default function AddToCart({ item }: { item: OrderItem}) { 
+export default function AddToCart({ item, brand }: { item: OrderItem;  brand?: string }) { 
   const router = useRouter()
   const { items, increase, decrease } = useCartService()
   const [existItem, setExistItem] = useState<OrderItem | undefined>()
@@ -18,7 +19,7 @@ export default function AddToCart({ item }: { item: OrderItem}) {
     increase(item)
   }
 
-  return existItem ? (
+  return (existItem && !brand ) ? (
     <div>
       <button className="btn" type="button" onClick={() => decrease(existItem)}>
         -
@@ -32,7 +33,7 @@ export default function AddToCart({ item }: { item: OrderItem}) {
       <button
         onClick={addToCartHandler}
         type="button"
-        className="btn btn-primary w-full"
+        className={clsx('btn btn-primary', brand ? 'btn-small' : 'w-full')}
       >
         Add to Cart
       </button>
