@@ -22,6 +22,7 @@ interface ProductFormProps {
   name?: string
   slug?: string
   category?: string
+  cat?: string
   images?: string[]
   price?: number
   brand?: string
@@ -39,7 +40,7 @@ interface ProductFormProps {
 export default function ProductEditForm({ productId }: { productId: string }) {
   const { data: productData } = useSWR(`/api/admin/products/${productId}`)
   const [categories, setCategories] = useState<Category[]>([])
-  const [category, setCategory] = useState<string>(productData?.category || '')
+  const [category, setCategory] = useState<string>(productData?.cat || '')
   const [productProperties, setProductProperties] = useState<any>(
     productData?.properties || {}
   )
@@ -70,6 +71,7 @@ export default function ProductEditForm({ productId }: { productId: string }) {
       //setValue('category', productData.category)
       setValue('price', productData.price)
       setValue('brand', productData.brand)
+      setValue('cat', productData.cat)  
       setValue('description', productData.description)
       setValue('isFeatured', productData.isFeatured)
       setValue('weight', productData.weight)
@@ -79,7 +81,6 @@ export default function ProductEditForm({ productId }: { productId: string }) {
       setProductImages(productData.images || [])
     }
   }, [productData, setValue])
-
 
   const uploadHandler = async (e: any) => {
     e.preventDefault()
@@ -161,15 +162,15 @@ export default function ProductEditForm({ productId }: { productId: string }) {
     setProductImages(productImages)
   }
 
-    function setProductProp(propName: string, value: string) {
+  function setProductProp(propName: string, value: string) {
     setProductProperties((prev: any) => {
       const newProductProps = { ...prev }
       newProductProps[propName] = value
       return newProductProps
     })
     setValue('properties', productProperties)
-    }
-  
+  }
+
   const propertiesToFill = []
   if (categories.length > 0 && category) {
     let catInfo = categories.find(({ _id }) => _id === category)
@@ -265,9 +266,13 @@ export default function ProductEditForm({ productId }: { productId: string }) {
                 onChange={handleCategoryChange}
               >
                 <option value="">Select a category</option>
-                {categories.map((category: any) => (
-                  <option key={category._id} value={category._id}>
-                    {category.name}
+                {categories.map((cate: any) => (
+                  <option key={cate._id} value={cate._id}>
+                    {
+                      cate.name === category && (
+                        cate.name[0].toUpperCase() + cate.name.substring(1)
+                      )
+                    }
                   </option>
                 ))}
               </select>

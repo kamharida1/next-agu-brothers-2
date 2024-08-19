@@ -7,7 +7,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import toast from 'react-hot-toast'
 import useSWRMutation from 'swr/mutation'
-import { formatPrice } from '@/lib/utils'
+import Price from '@/components/products/Price'
 
 const Form = () => {
   const router = useRouter()
@@ -83,7 +83,7 @@ const Form = () => {
               <p>{shippingAddress.email}</p>
               <p>
                 {shippingAddress.address}, {shippingAddress.city},{' '}
-                {shippingAddress.postalCode}, {shippingAddress.country}{' '} 
+                {shippingAddress.postalCode}, {shippingAddress.country}{' '}
               </p>
               <div>
                 <Link className="btn" href="/shipping">
@@ -128,15 +128,15 @@ const Form = () => {
                             width={50}
                             height={50}
                           ></Image>
-                          <span className="px-2">
-                            {item.name}
-                          </span>
+                          <span className="px-2">{item.name}</span>
                         </Link>
                       </td>
                       <td>
                         <span>{item.qty}</span>
                       </td>
-                      <td>{formatPrice(item.price)}</td>
+                      <td>
+                        <Price price={item.price} />
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -157,25 +157,33 @@ const Form = () => {
                 <li>
                   <div className=" flex justify-between">
                     <div>Items</div>
-                    <div>{formatPrice(itemsPrice)}</div>
+                    <div>
+                      <Price price={itemsPrice} />
+                    </div>
                   </div>
                 </li>
                 <li>
                   <div className=" flex justify-between">
                     <div>Tax</div>
-                    <div>{formatPrice(taxPrice)}</div>
+                    <div>
+                      <Price price={taxPrice} />
+                    </div>
                   </div>
                 </li>
                 <li>
                   <div className=" flex justify-between">
                     <div>Shipping</div>
-                    <div>{formatPrice(shippingPrice)}</div>
+                    <div>
+                      <Price price={shippingPrice} />
+                    </div>
                   </div>
                 </li>
                 <li>
                   <div className=" flex justify-between">
                     <div>Total</div>
-                    <div>{formatPrice(totalPrice)}</div>
+                    <div>
+                      <Price price={totalPrice} />
+                    </div>
                   </div>
                 </li>
 

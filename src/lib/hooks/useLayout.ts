@@ -8,7 +8,7 @@ type Layout = {
   drawerOpen: boolean
 }
 const initialState: Layout = {
-  theme: 'system',
+  theme: typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light',
   drawerOpen: false,
 }
 

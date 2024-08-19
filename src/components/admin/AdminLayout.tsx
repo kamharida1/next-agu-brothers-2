@@ -84,6 +84,14 @@ const AdminLayout = ({
                 Jobs
               </Link>
             </li>
+            <li>
+              <Link
+                className={'settings' === activeItem ? 'active' : ''}
+                href="/admin/settings"
+              >
+                Settings
+              </Link>
+            </li>
           </ul>
         </div>
         <div className="md:col-span-4 px-4">{children} </div>

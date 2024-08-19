@@ -1,12 +1,12 @@
 'use client'
 import { Order } from '@/lib/models/OrderModel'
-import { formatPrice } from '@/lib/utils'
 import { format } from 'date-fns'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import useSWR from 'swr'
 import OrderHistorySkeleton from '../ui/skeletons/OrderHistorySkeleton'
+import Price from '@/components/products/Price'
 
 const formatDate = (dateString: any) => {
   return format(new Date(dateString), 'MMMM do yyyy, h:mm:ss a')
@@ -54,7 +54,9 @@ export default function MyOrders() {
               <tr key={order._id}>
                 <td>{order._id.substring(20, 24)}</td>
                 <td>{formatDate(order.createdAt.substring(0, 10))}</td>
-                <td>{formatPrice(order.totalPrice)}</td>
+                <td>
+                  <Price price={order.totalPrice} />
+                </td>
                 <td
                   className={
                     order.isPaid && order.paidAt

@@ -34,9 +34,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html data-theme="dark" lang="en">
+    <html lang="en">
       <body className={`${poppins.className} antialiased`}>
         <Providers>
+          <Script src="https://cdn.jsdelivr.net/npm/theme-change@2.0.2/index.js" />
           <div className="drawer">
             <DrawerButton />
             <div className="drawer-content">

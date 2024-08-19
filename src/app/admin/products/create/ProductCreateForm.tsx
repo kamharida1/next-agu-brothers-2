@@ -37,7 +37,6 @@ interface ProductFormProps {
   notes?: string
 }
 
-
 export default function ProductCreateForm() {
   const [categories, setCategories] = useState<Category[]>([])
   const [category, setCategory] = useState<string>('')
@@ -53,18 +52,18 @@ export default function ProductCreateForm() {
     }
   }, [categoriesData])
 
-      const {
-      register,
-      handleSubmit,
-      watch,
-      formState: { errors },
-      setValue,
-    } = useForm<ProductFormProps>()
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+    setValue,
+  } = useForm<ProductFormProps>()
 
   const uploadHandler = async (e: any) => {
     e.preventDefault()
     const toastId = toast.loading('Uploading image...')
-    setIsUploading(true)  
+    setIsUploading(true)
     const uploadedUrls: string[] = []
     try {
       const resSign = await fetch('/api/cloudinary/cloudinary-sign', {
@@ -90,22 +89,22 @@ export default function ProductCreateForm() {
             body: formData,
           }
         )
-        const {secure_url} = await res.json()
+        const { secure_url } = await res.json()
         uploadedUrls.push(secure_url)
         toast.success('Files uploaded successfully', {
           id: toastId,
         })
       }
-      console.log('productImages', productImages) 
+      console.log('productImages', productImages)
       setValue('images', productImages)
       setIsUploading(false)
-      } catch (err: any) {
-        toast.error(err.message, {
-          id: toastId,
-        })
+    } catch (err: any) {
+      toast.error(err.message, {
+        id: toastId,
+      })
     }
 
-    setProductImages(prev => [...prev, ...uploadedUrls])
+    setProductImages((prev) => [...prev, ...uploadedUrls])
   }
 
   const handleDeleteProductImage = async (index: number) => {
@@ -118,12 +117,12 @@ export default function ProductCreateForm() {
   }
 
   const handleCategoryChange = (e: any) => {
-     const value = e.target.value
-     setCategory(value)
-     setValue('category', value) // Synchronize the value with React Hook Form
-   }
+    const value = e.target.value
+    setCategory(value)
+    setValue('category', value) // Synchronize the value with React Hook Form
+  }
 
-  const { trigger: createProduct , isMutating: isCreating } = useSWRMutation(
+  const { trigger: createProduct, isMutating: isCreating } = useSWRMutation(
     `/api/admin/products`,
     async (url, { arg }) => {
       const res = await fetch(`${url}`, {
@@ -153,29 +152,27 @@ export default function ProductCreateForm() {
     })
     setValue('properties', productProperties)
   }
-  
-  const propertiesToFill= []
+
+  const propertiesToFill = []
   if (categories.length > 0 && category) {
     let catInfo = categories.find(({ _id }) => _id === category)
-   if (catInfo) {
-     propertiesToFill.push(...catInfo.properties)
-     while (catInfo.parent?._id) {
-       const parentCat = categories.find(
-         (cat) => cat._id === catInfo?.parent?._id
-       )
-       if (parentCat) {
-         propertiesToFill.push(...parentCat.properties)
-         catInfo = parentCat
-       } else {
-         break
-       }
-     }
-   }
+    if (catInfo) {
+      propertiesToFill.push(...catInfo.properties)
+      while (catInfo.parent?._id) {
+        const parentCat = categories.find(
+          (cat) => cat._id === catInfo?.parent?._id
+        )
+        if (parentCat) {
+          propertiesToFill.push(...parentCat.properties)
+          catInfo = parentCat
+        } else {
+          break
+        }
+      }
+    }
   }
 
-  const formSubmit: SubmitHandler<ProductFormProps> = async (
-    formData: any
-  ) => {
+  const formSubmit: SubmitHandler<ProductFormProps> = async (formData: any) => {
     const productData: Product = {
       ...formData,
       slug: formData.name.toLowerCase().replace(/ /g, '-'),

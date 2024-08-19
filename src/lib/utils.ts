@@ -41,22 +41,6 @@ export function toPlainObject(obj: any): any {
   return plainObj;
 }
 
-export const formatPrice = (price: number, factor: number = 1) => {
-  if (typeof price !== "number") {
-    return "Invalid Price";
-  }
-
-  // Increase price by the given factor
-  const updatedPrice = price * factor;
-
-  return updatedPrice.toLocaleString("en-NG", {
-    style: "currency",
-    currency: "NGN",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  });
-};
-
 export const formatDate = (date: any) => { 
   const dateObj = new Date(date);
   return format(dateObj, 'PPpp')

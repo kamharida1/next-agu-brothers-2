@@ -3,7 +3,7 @@ const productSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
     slug: { type: String, required: true, unique: true },
-    cat: { type: String, required: true, unique: true},
+    cat: { type: String, required: true},
     category: { type: mongoose.Types.ObjectId, ref: 'Category'},
     images: [{ type: String, required: true }],
     image:{ type: String},
@@ -16,8 +16,9 @@ const productSchema = new mongoose.Schema(
     description: { type: String, required: true },
     isFeatured: { type: Boolean, default: false },
     properties: { type: Object },
+    sold: { type: Number, default: 0 },
     weight: { type: Number },
-    banner: String,
+    banner: { type: String },
   },
   {
     timestamps: true,
@@ -47,6 +48,7 @@ export type Product = {
   numReviews: number
   countInStock: number
   weight: number
+  sold: number
   properties: { name: string, value: string }
   createdAt: string
   updatedAt: string

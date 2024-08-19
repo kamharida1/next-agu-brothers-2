@@ -134,7 +134,7 @@ const productServices = {
   getLatest,
   getByQuery,
   getCategories,
-  getByBrand
+  getByBrand,
 }
 
 export default productServices

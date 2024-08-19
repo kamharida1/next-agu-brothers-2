@@ -32,6 +32,6 @@ const config: Config = {
       },
     ],
   },
-  darkMode: ['class', '["dark"]'],
+  darkMode: ['class', '[data-mode="dark"]'],
 }
 export default config;

@@ -1,15 +1,16 @@
 import AddToCart from '@/components/products/AddToCart'
-import { convertDocToObj, formatPrice } from '@/lib/utils'
+import { convertDocToObj } from '@/lib/utils'
 import productServices from '@/lib/services/productService'
 import { FaStar } from 'react-icons/fa'
 import Link from 'next/link'
 import React from 'react'
 import { Rating } from '@/components/products/Rating'
 import ProductImages from '@/components/products/ProductImages'
-import ReviewForm from '@/components/products/ReviewForm'
 import { format } from 'date-fns'
 import { Review } from '@/lib/models/ReviewModel'
 import { GoPackage } from 'react-icons/go'
+import ReviewForm from './ReviewForm'
+import Price from '@/components/products/Price'
 
 const formatDate = (dateString: any) => {
   return format(new Date(dateString), 'MMMM do yyyy, h:mm:ss a')
@@ -91,11 +92,11 @@ export default async function ProductDetails({
           <ProductImages images={product.images} />
         </div>
         <div className="md:col-span-2">
-          <div className="space-y-4">
+          <div className="space-y-4 ">
             <h1 className="text-2xl font-bold">{product.name}</h1>
             <Rating
               value={product.rating}
-              caption={`${product.numReviews} ratings`}
+              caption={`${product.numReviews} people rated`}
             />
             <p className="text-lg">{product.brand}</p>
             <div className="divider"></div>
@@ -127,14 +128,26 @@ export default async function ProductDetails({
             <div className="card-body">
               <div className="flex justify-between mb-2">
                 <div>Price</div>
-                <div>{formatPrice(product.price)}</div>
+                <div>
+                  <Price price={product.price} />
+                </div>
               </div>
               <div className="flex justify-between mb-2">
                 <div>Status</div>
                 <div>
-                  {product.countInStock > 0 ? 'In stock' : 'Unavailable'}
+                  {product.countInStock > 0 ? (
+                    <span className="text-green-500">In stock</span>
+                  ) : (
+                    <span className="text-red-500">Out of stock</span>
+                  )}
                 </div>
               </div>
+              {/* Render the "Only 1 item remaining" message */}
+              {product.countInStock === 1 && (
+                <div className="text-orange-600 text-sm">
+                  Only 1 item remaining!
+                </div>
+              )}
               {product.countInStock !== 0 && (
                 <div className="card-actions justify-center">
                   <AddToCart
@@ -142,6 +155,7 @@ export default async function ProductDetails({
                       ...convertDocToObj(product),
                       qty: 0,
                       weight: product.weight,
+                      countInStock: product.countInStock,
                     }}
                   />
                 </div>
@@ -156,7 +170,11 @@ export default async function ProductDetails({
         <div className="md:col-span-2">
           <div className="card bg-base-200 shadow-xl">
             <div className="card-body">
-              <h2 className="card-title text-xl font-semibold">All reviews</h2>
+              <h2 className="card-title text-xl font-semibold">
+                {product.reviews.length === 0
+                  ? `No reviews yet`
+                  : `All Reviews`}
+              </h2>
               <ul className="space-y-4">
                 {product.reviews &&
                   product.reviews.map((review: Review) => (

@@ -1,7 +1,7 @@
 'use client'
 import MonnifyButton from "@/components/MonnifyButton"
+import Price from "@/components/products/Price"
 import { OrderItem } from "@/lib/models/OrderModel"
-import { formatPrice } from "@/lib/utils"
 import { PayPalButtons, PayPalScriptProvider } from "@paypal/react-paypal-js"
 import { useSession } from "next-auth/react"
 import Image from "next/image"
@@ -30,6 +30,22 @@ export default function OrderDetails({
       const data = await res.json()
       res.ok
         ? toast.success('Order delivered successfully')
+        : toast.error(data.message)
+    }
+  )
+
+  const {trigger: payOrder, isMutating: isPaying } = useSWRMutation(
+    `/api/orders/${orderId}`,
+    async (url) => {
+      const res = await fetch(`/api/admin/orders/${orderId}/pay`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      const data = await res.json()
+      res.ok
+        ? toast.success('Order paid successfully')
         : toast.error(data.message)
     }
   )
@@ -142,7 +158,9 @@ export default function OrderDetails({
                         </Link>
                       </td>
                       <td>{item.qty}</td>
-                      <td>{formatPrice(item.price)}</td>
+                      <td>
+                        <Price price={item.price} />
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -156,19 +174,27 @@ export default function OrderDetails({
               <h2 className="card-title">Order Summary</h2>
               <div className="mb-2 flex justify-between">
                 <span>Items</span>
-                <span>{formatPrice(itemsPrice)}</span>
+                <span>
+                  <Price price={itemsPrice} />
+                </span>
               </div>
               <div className="flex justify-between">
                 <span>Shipping</span>
-                <span>{formatPrice(shippingPrice)}</span>
+                <span>
+                  <Price price={shippingPrice} />
+                </span>
               </div>
               <div className="flex justify-between">
                 <span>Tax</span>
-                <span>{formatPrice(taxPrice)}</span>
+                <span>
+                  <Price price={taxPrice} />
+                </span>
               </div>
               <div className="flex justify-between">
                 <span>Total</span>
-                <span>{formatPrice(totalPrice)}</span>
+                <span>
+                  <Price price={totalPrice} />
+                </span>
               </div>
               {!isPaid && paymentMethod === 'PayPal' && (
                 <div className="flex">
@@ -196,21 +222,37 @@ export default function OrderDetails({
                 </div>
               )}
               {session?.user.isAdmin && !isDelivered && (
-                  <button
-                    className="btn w-full my-2"
-                    onClick={() => deliverOrder()}
-                    disabled={isDelivering || isDelivered}
-                  >
-                    {isDelivering && (
-                      <span className="loading loading-spinner"></span>
-                    )}
-                    Mark as delivered
-                  </button>  
+                <button
+                  className="btn w-full my-2"
+                  onClick={() => deliverOrder()}
+                  disabled={isDelivering || isDelivered}
+                >
+                  {isDelivering && (
+                    <span className="loading loading-spinner"></span>
+                  )}
+                  Mark as delivered
+                </button>
+              )}
+              {session?.user.isAdmin && !isPaid && (
+                <button
+                  className="btn w-full my-2"
+                  onClick={() => payOrder()}
+                  disabled={isPaying || isPaid}
+                >
+                  {isPaying && (
+                    <span className="loading loading-spinner"></span>
+                  )}
+                  Mark as paid & delivered
+                </button>
               )}
               {isDelivered && (
-                  <Link className="btn w-full my-2 btn-primary" href={`/`} passHref>
-                    Shop for more items
-                  </Link>
+                <Link
+                  className="btn w-full my-2 btn-primary"
+                  href={`/`}
+                  passHref
+                >
+                  Shop for more items
+                </Link>
               )}
             </div>
           </div>

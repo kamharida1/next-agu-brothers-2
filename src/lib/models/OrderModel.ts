@@ -1,4 +1,5 @@
-   import mongoose, { Types } from 'mongoose'
+   import { count } from 'console'
+import mongoose, { Types } from 'mongoose'
    const orderSchema = new mongoose.Schema(
      {
        user: {
@@ -21,6 +22,7 @@
            image: { type: String, required: true },
            price: { type: Number, required: true },
            weight: { type: Number, required: true },
+           countInStock  : { type: Number, required: true },
          },
        ],
        shippingAddress: {
@@ -95,6 +97,7 @@ export type OrderItem = {
   images: string[]
   price: number
   weight: number
+  countInStock: number
 }
 
 export type ShippingAddress = {

@@ -5,8 +5,8 @@ import Link from 'next/link'
 import React from 'react'
 import { Rating } from './Rating'
 import CldImage from '../CldImage'
-import { formatPrice } from '@/lib/utils'
 import useWishListStore from '@/lib/hooks/useWishListStore'
+import Price from './Price'
 
 
 export default function ProductItem({ product }: { product: Product }) {
@@ -63,7 +63,7 @@ export default function ProductItem({ product }: { product: Product }) {
         <p className="text-sm mt-2">{product.brand}</p>
         <div className="flex items-center justify-between mt-4">
           <span className="text-2xl font-semibold text-primary">
-            {formatPrice(product.price)}
+            <Price price={product.price} />
           </span>
           <Link href={`/product/${product.slug}`}>
             <button className="btn btn-primary btn-sm">View Details</button>

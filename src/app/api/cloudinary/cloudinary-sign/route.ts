@@ -15,10 +15,9 @@ export const POST = auth(async (req: any) => {
   const signature = cloudinary.v2.utils.api_sign_request(
     {
       timestamp: timestamp,
-      eager: 'c_pad,h_300,w_400|c_crop,h_200,w_260',
       folder: 'signed_upload_product_form'
     },
-    process.env.NEXT_PUBLIC_CLOUDINARY_SECRET!
+    'raOnuH6_f9FpgQZs4NgFKTdzLzc'
   )
 
   return Response.json({ signature, timestamp })

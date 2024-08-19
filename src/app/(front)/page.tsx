@@ -34,7 +34,7 @@ export default async function Home() {
                 <div className="hero min-h-[400px] w-[3/4] flex items-center justify-center rounded-md px-4 bg-base-300 p-4">
                   <div className="max-w-md">
                     <h1 className="mb-5 text-3xl font-bold">{product.name}</h1>
-                    <p className="mb-5">{product.description}</p>
+                    <p className="mb-5 truncate">{product.description}</p>
                     <button className="btn btn-primary">View Product</button>
                   </div>
                 </div>
