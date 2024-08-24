@@ -1,20 +1,27 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import toast from 'react-hot-toast'
+
 import { Product } from '@/lib/models/ProductModel'
+import { useRouter } from 'next/navigation'
 
 type SettingsProps = {
   products: Product[]
 }
 
 export default function Settings({ products }: SettingsProps) {
+  const brands = [...new Set(products.map((product) => product.brand))]
+
   const [factor, setFactor] = useState<string>('')
   const [countInStock, setCountInStock] = useState<string>('')
+  const [selectedBrand, setSelectedBrand] = useState<string>(brands[0])
   const [selectedProduct, setSelectedProduct] = useState<string>(
     products[0]?._id || ''
   )
   const [mode, setMode] = useState<'factor' | 'countInStock'>('factor')
   const [loading, setLoading] = useState<boolean>(false)
   const [searchTerm, setSearchTerm] = useState<string>('')
+  const router = useRouter()
 
   // Filtered products based on search term
   const filteredProducts = products.filter((product) =>
@@ -26,15 +33,15 @@ export default function Settings({ products }: SettingsProps) {
     try {
       let response
       if (mode === 'factor') {
-        response = await fetch('/api/settings', {
+        response = await fetch('/api/admin/settings/updatePriceByFactor', {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ name: 'factor', value: factor }),
+          body: JSON.stringify({ brand: selectedBrand, factor }),
         })
       } else if (mode === 'countInStock' && selectedProduct) {
-        response = await fetch(`/api/products/updateStock`, {
+        response = await fetch(`/api/admin/settings/updateCountInStock`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -44,7 +51,8 @@ export default function Settings({ products }: SettingsProps) {
       }
 
       if (response?.ok) {
-        alert('Update successful')
+         toast.success('Updated successfully')
+         router.push('/admin/products')
         setFactor('')
         setCountInStock('')
       } else {
@@ -81,17 +89,37 @@ export default function Settings({ products }: SettingsProps) {
 
         {/* Render input fields based on mode */}
         {mode === 'factor' ? (
-          <div className="form-control mb-4">
-            <label className="label">
-              <span className="label-text">Factor</span>
-            </label>
-            <input
-              type="number"
-              className="input input-bordered w-full"
-              value={factor}
-              onChange={(e) => setFactor(e.target.value)}
-            />
-          </div>
+          <>
+          {/* Select Brand */}
+            <div className="form-control mb-4">
+              <label className="label">
+                <span className="label-text">Select Brand</span>
+              </label>
+              <select
+                className="select select-bordered w-full"
+                value={selectedBrand}
+                onChange={(e) => setSelectedBrand(e.target.value)}
+              >
+                {brands.map((brand) => (
+                  <option key={brand} value={brand}>
+                    {brand}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {/* Factor Input */}
+            <div className="form-control mb-4">
+              <label className="label">
+                <span className="label-text">Factor</span>
+              </label>
+              <input
+                type="number"
+                className="input input-bordered w-full"
+                value={factor}
+                onChange={(e) => setFactor(e.target.value)}
+              />
+            </div>
+          </>
         ) : (
           <>
             {/* Search Box */}

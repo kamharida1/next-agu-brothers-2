@@ -4,8 +4,7 @@ import Link from 'next/link'
 import { FaRegHeart } from 'react-icons/fa'
 import useWishListStore from '@/lib/hooks/useWishListStore'
 import CldImage from '@/components/CldImage'
-import { format } from 'path'
-import Price from '@/components/products/Price'
+import { formatPrice } from '@/lib/utils'
 
 export default function Wishlist() {
   const { items, removeItem } = useWishListStore()
@@ -69,7 +68,7 @@ export default function Wishlist() {
                   </Link>
                   <div className="flex justify-between items-center">
                     <span className="text-lg font-semibold">
-                      <Price price={item.price} />
+                      {formatPrice(item.price)}
                     </span>
                     <button
                       onClick={() => removeItem(item)}

@@ -1,7 +1,7 @@
 'use client'
 import MonnifyButton from "@/components/MonnifyButton"
-import Price from "@/components/products/Price"
 import { OrderItem } from "@/lib/models/OrderModel"
+import { formatPrice } from "@/lib/utils"
 import { PayPalButtons, PayPalScriptProvider } from "@paypal/react-paypal-js"
 import { useSession } from "next-auth/react"
 import Image from "next/image"
@@ -17,6 +17,23 @@ export default function OrderDetails({
   orderId: string
   paypalClientId: string
   }) {
+  
+  const { trigger: deleteOrder, isMutating: isDeleting } = useSWRMutation(
+    `/api/orders/${orderId}`,
+    async (url) => {
+      const res = await fetch(`/api/admin/orders/${orderId}/delete`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      const data = await res.json()
+      res.ok
+        ? toast.success('Order deleted successfully')
+        : toast.error(data.message
+        )
+    }
+  )
   
   const { trigger: deliverOrder, isMutating: isDelivering } = useSWRMutation(
     `/api/orders/${orderId}`,
@@ -159,7 +176,7 @@ export default function OrderDetails({
                       </td>
                       <td>{item.qty}</td>
                       <td>
-                        <Price price={item.price} />
+                        {formatPrice(item.price)}
                       </td>
                     </tr>
                   ))}
@@ -175,25 +192,25 @@ export default function OrderDetails({
               <div className="mb-2 flex justify-between">
                 <span>Items</span>
                 <span>
-                  <Price price={itemsPrice} />
+                  {formatPrice(itemsPrice)}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span>Shipping</span>
                 <span>
-                  <Price price={shippingPrice} />
+                  {formatPrice(shippingPrice)}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span>Tax</span>
                 <span>
-                  <Price price={taxPrice} />
+                  {formatPrice(taxPrice)}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span>Total</span>
                 <span>
-                  <Price price={totalPrice} />
+                  {formatPrice(totalPrice)}
                 </span>
               </div>
               {!isPaid && paymentMethod === 'PayPal' && (
@@ -255,6 +272,20 @@ export default function OrderDetails({
                 </Link>
               )}
             </div>
+            {session?.user.isAdmin && (
+              <div className="card-footer">
+                <button
+                  className="btn btn-error w-full"
+                  onClick={() => deleteOrder()}
+                  disabled={isDeleting}
+                >
+                  {isDeleting && (
+                    <span className="loading loading-spinner"></span>
+                  )}
+                  Delete Order
+                </button>
+              </div>  
+            )}
           </div>
         </div>
       </div>

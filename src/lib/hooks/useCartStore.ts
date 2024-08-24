@@ -53,7 +53,6 @@ export default function useCartService() {
       const exist = items.find((x) => x.slug === item.slug);
 
       if (exist) {
-        // Check stock availability before increasing the quantity
         if (exist.qty < item.countInStock) {
           const updatedCartItems = items.map((x) =>
             x.slug === item.slug ? { ...exist, qty: exist.qty + 1 } : x
@@ -70,7 +69,6 @@ export default function useCartService() {
           console.log("Cannot add more than the available stock.");
         }
       } else {
-        // Add new item only if countInStock is greater than 0
         if (item.countInStock > 0) {
           const updatedCartItems = [...items, { ...item, qty: 1 }];
           const { itemsPrice, shippingPrice, taxPrice, totalPrice } = calcPrice(updatedCartItems, shippingAddress);
@@ -93,8 +91,8 @@ export default function useCartService() {
 
       const updatedCartItems =
         exist.qty === 1
-          ? items.filter((x: OrderItem) => x.slug !== item.slug)
-          : items.map((x) => (item.slug ? { ...exist, qty: exist.qty - 1 } : x));
+          ? items.filter((x) => x.slug !== item.slug)
+          : items.map((x) => (x.slug === item.slug ? { ...exist, qty: exist.qty - 1 } : x));
 
       const { itemsPrice, shippingPrice, taxPrice, totalPrice } = calcPrice(updatedCartItems, shippingAddress);
       cartStore.setState({
@@ -133,7 +131,7 @@ const calcPrice = (items: OrderItem[], shippingAddress: ShippingAddress) => {
   const cityRates = shippingRates[shippingAddress.city as keyof typeof shippingRates];
   const shippingPrice = cityRates ? round2(cityRates.baseRate + cityRates.perKg * totalWeight) : 0;
 
-  const taxPrice = round2(Number(0.05 * itemsPrice));
+  const taxPrice = round2(Number(0.006 * itemsPrice));
   const totalPrice = round2(itemsPrice + shippingPrice + taxPrice);
 
   return { itemsPrice, shippingPrice, taxPrice, totalPrice };

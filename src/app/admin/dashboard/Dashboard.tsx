@@ -17,7 +17,7 @@ import {
   BarElement,
   ArcElement,
 } from 'chart.js'
-import Price from '@/components/products/Price'
+import { formatPrice } from '@/lib/utils'
 
 ChartJS.register(
   CategoryScale,
@@ -122,7 +122,7 @@ const Dashboard = () => {
         <div className="stat">
           <div className="stat-title">Sales</div>
           <div className="stat-value text-primary">
-            <Price price={summary.ordersPrice} />
+            {formatPrice(summary.ordersPrice)}
           </div>
           <div className="stat-desc">
             <Link href="/admin/orders">View sales</Link>

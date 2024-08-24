@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { Order } from '@/lib/models/OrderModel'
 import Link from 'next/link'
 import useSWR from 'swr'
-import Price from '@/components/products/Price'
+import { formatPrice } from '@/lib/utils'
 
 export default function Orders() {
   const { data: orders, error } = useSWR(`/api/admin/orders`)
@@ -78,7 +78,7 @@ export default function Orders() {
                   {new Date(order.createdAt).toISOString().substring(0, 10)}
                 </td>
                 <td>
-                  <Price price={order.totalPrice} />
+                  {formatPrice(order.totalPrice)}
                 </td>
                 <td
                   className={

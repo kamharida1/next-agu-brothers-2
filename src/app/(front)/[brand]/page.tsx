@@ -1,11 +1,11 @@
 import CldImage from "@/components/CldImage"
 import AddToCart from "@/components/products/AddToCart"
-import Price from "@/components/products/Price"
 import { Product } from "@/lib/models/ProductModel"
 import productServices from "@/lib/services/productService"
 import { convertDocToObj } from "@/lib/utils"
 import Link from "next/link"
 import { FaRegHeart } from "react-icons/fa"
+import { formatPrice } from "@/lib/utils"
 
 export default async function ProductsByBrand({
   params,
@@ -76,7 +76,7 @@ export default async function ProductsByBrand({
                   </Link>
                   <div className="flex justify-between items-center overflow-hidden">
                     <span className="text-lg font-semibold">
-                      <Price price={item?.price} />
+                      {formatPrice(item?.price)}
                     </span>
                     <AddToCart
                       brand={item?.brand}

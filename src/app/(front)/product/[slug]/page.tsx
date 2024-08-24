@@ -1,5 +1,5 @@
 import AddToCart from '@/components/products/AddToCart'
-import { convertDocToObj } from '@/lib/utils'
+import { convertDocToObj, formatPrice } from '@/lib/utils'
 import productServices from '@/lib/services/productService'
 import { FaStar } from 'react-icons/fa'
 import Link from 'next/link'
@@ -10,7 +10,6 @@ import { format } from 'date-fns'
 import { Review } from '@/lib/models/ReviewModel'
 import { GoPackage } from 'react-icons/go'
 import ReviewForm from './ReviewForm'
-import Price from '@/components/products/Price'
 
 const formatDate = (dateString: any) => {
   return format(new Date(dateString), 'MMMM do yyyy, h:mm:ss a')
@@ -129,7 +128,7 @@ export default async function ProductDetails({
               <div className="flex justify-between mb-2">
                 <div>Price</div>
                 <div>
-                  <Price price={product.price} />
+                  {formatPrice(product.price)}
                 </div>
               </div>
               <div className="flex justify-between mb-2">

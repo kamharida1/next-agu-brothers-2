@@ -1,12 +1,11 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { formatId} from '@/lib/utils'
+import { formatId, formatPrice} from '@/lib/utils'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import useSWR from 'swr'
 import useSWRMutation from 'swr/mutation'
-import Price from '@/components/products/Price'
 
 export default function Products() {
   const { data: products, error } = useSWR(`/api/admin/products`)
@@ -80,6 +79,7 @@ export default function Products() {
             <tr>
               <th>id</th>
               <th>name</th>
+              <th>cost price</th>
               <th>price</th>
               <th>category</th>
               <th>count in stock</th>
@@ -92,8 +92,9 @@ export default function Products() {
               <tr key={product._id}>
                 <td>{formatId(product._id ?? '')}</td>
                 <td>{product.name}</td>
+                <td>{formatPrice(product.costPrice)}</td>
                 <td>
-                  <Price price={product.price} />
+                  {formatPrice(product.price)}
                 </td>
                 <td>{product?.category?.name}</td>
                 <td>{product.countInStock}</td>

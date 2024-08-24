@@ -2,7 +2,6 @@ import { auth } from "@/lib/auth"
 import dbConnect from "@/lib/dbConnect"
 import ProductModel from "@/lib/models/ProductModel"
 
-// Update the countInStock of a product
 export const PUT = auth(async (req: any) => {
   if (!req.auth || !req.auth.user?.isAdmin) {
     return Response.json(

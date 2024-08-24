@@ -6,7 +6,8 @@ const productSchema = new mongoose.Schema(
     cat: { type: String, required: true},
     category: { type: mongoose.Types.ObjectId, ref: 'Category'},
     images: [{ type: String, required: true }],
-    image:{ type: String},
+    image: { type: String },
+    costPrice: { type: Number, required: true },
     price: { type: Number, required: true },
     brand: { type: String, required: true },
     rating: { type: Number, required: true, default: 0 },
@@ -42,6 +43,7 @@ export type Product = {
   brand: string
   description: string
   reviews: any
+  costPrice: number
   category: string
   rating: number
   isFeatured: boolean

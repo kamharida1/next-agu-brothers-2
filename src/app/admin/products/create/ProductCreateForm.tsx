@@ -25,6 +25,7 @@ interface ProductFormProps {
   cat?: string
   images?: string[]
   price?: number
+  costPrice?: number
   brand?: string
   rating?: number
   numReviews?: number
@@ -244,7 +245,6 @@ export default function ProductCreateForm() {
               <select
                 value={watch('category')}
                 id="category"
-                // onChange={handleCategoryChange}
                 className="select select-bordered w-full max-w-md"
                 {...register('category', { required: 'Category is required' })}
                 onChange={handleCategoryChange}
@@ -360,6 +360,7 @@ export default function ProductCreateForm() {
             </div>
           </div>
           <FormInput name="Price" id="price" required />
+          <FormInput name="Cost Price" id="costPrice" required />
 
           <FormInput name="Brand" id="brand" required />
           <FormInput name="Notes" id="notes" />

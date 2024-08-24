@@ -6,7 +6,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { IoIosCart } from "react-icons/io"
-import Price from "@/components/products/Price"
+import { formatPrice } from "@/lib/utils"
 
 export default function CartDetails() { 
   const router = useRouter()
@@ -106,7 +106,7 @@ export default function CartDetails() {
                         +
                       </button>
                     </td>
-                    <td><Price price={item.price} /></td>
+                    <td>{formatPrice(item.price)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -119,7 +119,7 @@ export default function CartDetails() {
                   <li>
                     <div className="pb-3 text-xl">
                       Subtotal ({items.reduce((acc, item) => acc + item.qty, 0)}{' '}
-                      items): <Price price={itemsPrice} />
+                      items): {formatPrice(itemsPrice)}
                     </div>
                   </li>
                   <li>

@@ -8,6 +8,20 @@ export function convertDocToObj(doc: any) {
   return doc
 }
 
+export const formatPrice = (price: number | undefined) => {
+  // Ensure price is a valid number
+  if (typeof price !== 'number' || isNaN(price)) {
+    return '₦0'; // Fallback value for undefined or invalid price
+  }
+
+  // Format the price using toLocaleString
+  return price.toLocaleString('en-NG', {
+    style: 'currency',
+    currency: 'NGN',
+    minimumFractionDigits: 0,
+  });
+};
+
 export const formatNumber = (x: number) => {
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
 }

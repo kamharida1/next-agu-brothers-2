@@ -25,6 +25,7 @@ interface ProductFormProps {
   cat?: string
   images?: string[]
   price?: number
+  costPrice?: number
   brand?: string
   rating?: number
   numReviews?: number
@@ -68,8 +69,9 @@ export default function ProductEditForm({ productId }: { productId: string }) {
     if (productData) {
       setValue('name', productData.name)
       setValue('slug', productData.slug)
-      //setValue('category', productData.category)
+      setValue('category', productData.category)
       setValue('price', productData.price)
+      setValue('costPrice', productData.costPrice)
       setValue('brand', productData.brand)
       setValue('cat', productData.cat)  
       setValue('description', productData.description)
@@ -259,20 +261,25 @@ export default function ProductEditForm({ productId }: { productId: string }) {
             </label>
             <div className="md:w-4/5">
               <select
-                value={category}
+                value={watch('category')}
                 id="category"
                 className="select select-bordered w-full max-w-md"
-                // {...register('category', { required: 'Category is required' })}
+                {...register('category', { required: 'Category is required' })}
                 onChange={handleCategoryChange}
               >
                 <option value="">Select a category</option>
-                {categories.map((cate: any) => (
+                {/* {categories.map((cate: any) => (
                   <option key={cate._id} value={cate._id}>
                     {
                       cate.name === category && (
                         cate.name[0].toUpperCase() + cate.name.substring(1)
                       )
                     }
+                  </option>
+                ))} */}
+                {categories.map((category: any) => (
+                  <option key={category._id} value={category._id}>
+                    {category.name}
                   </option>
                 ))}
               </select>
@@ -380,6 +387,7 @@ export default function ProductEditForm({ productId }: { productId: string }) {
             </div>
           </div>
           <FormInput name="Price" id="price" required />
+          <FormInput name="Cost Price" id="costPrice" required />
           <FormInput name="Weight" id="weight" />
           <FormInput name="Brand" id="brand" required />
           <FormInput name="Description" id="description" required />
