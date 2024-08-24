@@ -23,6 +23,18 @@ const UserSchema = new mongoose.Schema(
       required: true,
     },
     isAdmin: { type: Boolean, required: true, default: false },
+    cart: {
+      type: Array,
+      default: [],
+    },
+    addresses: {
+      type: Array,
+      default: [],
+    },
+    wishlist: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Product',
+    }]
   },
   { timestamps: true }
 )
