@@ -15,7 +15,6 @@ export default function OrderDetailsPage({
   return (
     <OrderDetails
       orderId={params.id}
-      paypalClientId={process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || 'sb'}
     />
   )
 }

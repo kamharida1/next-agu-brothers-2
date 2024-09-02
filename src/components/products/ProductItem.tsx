@@ -24,12 +24,14 @@ export default function ProductItem({ product }: { product: Product }) {
           <CldImage
             src={product.images[0]}
             alt={product.name}
-            width={300}
-            height={300}
-            className="object-cover object-center w-full h-64 rounded-t-xl transition-transform transform hover:scale-60"
+            width="300"
+            height="300"
+            crop={"fit"}
+            sizes="100vw"
+            className="object-cover  w-full h-64 rounded-t-xl transition-transform transform hover:scale-60"
           />
           <button
-            type='button'
+            type="button"
             onClick={() => handleWishList(product)}
             className="absolute top-2 right-2 p-2 opacity-80 bg-white btn-sm rounded-full shadow-lg z-10 items-center justify-center"
           >

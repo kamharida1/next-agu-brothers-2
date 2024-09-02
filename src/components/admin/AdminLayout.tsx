@@ -92,6 +92,14 @@ const AdminLayout = ({
                 Settings
               </Link>
             </li>
+            <li>
+              <Link
+                className={'profits' === activeItem ? 'active' : ''}
+                href="/admin/profits"
+              >
+                Profits
+              </Link>
+            </li>
           </ul>
         </div>
         <div className="md:col-span-4 px-4">{children} </div>

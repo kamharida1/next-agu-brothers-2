@@ -3,6 +3,7 @@
 import { Review } from "@/lib/models/ReviewModel";
 import { formatDate } from "@/lib/utils";
 import { FaStar } from "react-icons/fa";
+import useSWR from "swr";
 
 export default function ReviewList({ reviews }: { reviews: Review[] }) {
   return (

@@ -3,20 +3,54 @@ import MonnifyButton from "@/components/MonnifyButton"
 import { OrderItem } from "@/lib/models/OrderModel"
 import { formatPrice } from "@/lib/utils"
 import { PayPalButtons, PayPalScriptProvider } from "@paypal/react-paypal-js"
+import { channel } from "diagnostics_channel"
 import { useSession } from "next-auth/react"
 import Image from "next/image"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { useEffect } from "react"
 import toast from "react-hot-toast"
 import useSWR from "swr"
 import useSWRMutation from "swr/mutation"
 
 export default function OrderDetails({
   orderId,
-  paypalClientId,
 }: {
   orderId: string
-  paypalClientId: string
   }) {
+  const router = useRouter()
+  useEffect(() => {
+    // Dynamically add Monnify SDK script to the document
+    const script = document.createElement('script')
+    script.src = 'https://sdk.monnify.com/plugin/monnify.js'
+    script.async = true
+    document.body.appendChild(script)
+
+    // Cleanup the script when the component unmounts
+    return () => {
+      document.body.removeChild(script)
+    }
+  }, [])
+
+  useEffect(() => {
+   const script = document.createElement('script')
+   script.src = 'https://remitademo.net/payment/v1/remita-pay-inline.bundle.js'
+   script.async = true
+   script.onload = () => {
+     console.log('Remita script loaded successfully')
+     if (typeof (window as any).RmPaymentEngine === 'undefined') {
+       console.error('Remita Payment Engine not loaded')
+     } else {
+       console.log('Remita Payment Engine loaded')
+     }
+   }
+   script.onerror = () => console.error('Failed to load Remita script')
+   document.body.appendChild(script)
+
+   return () => {
+     document.body.removeChild(script)
+   }
+ }, [])
   
   const { trigger: deleteOrder, isMutating: isDeleting } = useSWRMutation(
     `/api/orders/${orderId}`,
@@ -32,7 +66,9 @@ export default function OrderDetails({
         ? toast.success('Order deleted successfully')
         : toast.error(data.message
         )
+      router.push('/admin/orders')
     }
+    
   )
   
   const { trigger: deliverOrder, isMutating: isDelivering } = useSWRMutation(
@@ -69,30 +105,71 @@ export default function OrderDetails({
 
   const { data: session } = useSession()
 
-  function createPayPalOrder() {
-    return fetch(`/api/orders/${orderId}/create-paypal-order`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-      .then((response) => response.json())
-      .then((order) => order.id)
+  async function onApproveMonnifyOrder(data: any) { 
+    try {
+      const response = await fetch(
+        `/api/orders/${orderId}/capture-monnify-order`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        }
+      )
+
+      if (!response.ok) {
+        // If the response is not OK, throw an error with the status code
+        const errorMessage = await response.text() // Fetch the error message from the response
+        throw new Error(
+          `HTTP error! Status: ${response.status} - ${errorMessage}`
+        )
+      }
+
+      const orderData = await response.json()
+
+      // Handle successful response
+      toast.success('Order paid successfully')
+      return orderData
+    } catch (error) {
+      // Handle fetch or JSON parsing error
+      console.error('Error processing order payment:', error)
+      toast.error('Failed to process payment. Please try again.')
+    }
   }
 
-  function onApprovePayPalOrder(data: any) {
-    return fetch(`/api/orders/${orderId}/capture-paypal-order`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    })
-      .then((response) => response.json())
-      .then((orderData) => {
-        toast.success('Order paid successfully')
-      })
-  }
+ async function onApproveRemitaOrder(data: any) {
+   try {
+     const response = await fetch(
+       `/api/orders/${orderId}/capture-remita-order`,
+       {
+         method: 'POST',
+         headers: {
+           'Content-Type': 'application/json',
+         },
+         body: JSON.stringify(data),
+       }
+     )
+
+     if (!response.ok) {
+       // If the response is not OK, throw an error with the status code
+       const errorMessage = await response.text() // Fetch the error message from the response
+       throw new Error(
+         `HTTP error! Status: ${response.status} - ${errorMessage}`
+       )
+     }
+
+     const orderData = await response.json()
+
+     // Handle successful response
+     toast.success('Order paid successfully')
+     return orderData
+   } catch (error) {
+     // Handle fetch or JSON parsing error
+     console.error('Error processing order payment:', error)
+     toast.error('Failed to process payment. Please try again.')
+   }
+ }
 
   const { data, error } = useSWR(`/api/orders/${orderId}`)
 
@@ -112,6 +189,80 @@ export default function OrderDetails({
     isDelivered,
     deliveredAt,
   } = data
+
+  const monnifyPay = () => {
+    if (typeof (window as any).MonnifySDK === 'undefined') {
+      console.error('Monnify SDK not loaded')
+      return
+    }
+
+    (window as any).MonnifySDK.initialize({
+      amount: totalPrice,
+      currency: 'NGN',
+      reference: new String(new Date().getTime()),
+      customerFullName: shippingAddress.fullName,
+      customerEmail: shippingAddress.email,
+      apiKey: 'MK_TEST_3TQCCKWD03', 
+      contractCode: '2893747607', 
+      paymentDescription: 'Monnify Payment',
+      onLoadStart: () => {
+        console.log('loading has started')
+      },
+      onLoadComplete: () => {
+        console.log('SDK is UP')
+      },
+      onComplete: (response: any) => {
+        console.log('Payment Successful', response)
+        onApproveMonnifyOrder(response) 
+      },
+      onClose: (data: any) => {
+        console.log(data)
+      },
+    })
+    
+  }
+
+ const remitaPay = () => {
+   // Ensure the Remita Payment Engine is loaded before using it
+   if (typeof (window as any).RmPaymentEngine !== 'undefined') {
+    const remita = (window as any).RmPaymentEngine
+
+    // Check if shippingAddress and shippingAddress.name are defined
+    if (shippingAddress && shippingAddress.fullName) {
+      const [firstName, lastName] = shippingAddress?.fullName.split(' ')
+
+      const paymentEngine = remita.init({
+        key: 'QzAwMDAyNzEyNTl8MTEwNjE4NjF8OWZjOWYwNmMyZDk3MDRhYWM3YThiOThlNTNjZTE3ZjYxOTY5NDdmZWE1YzU3NDc0ZjE2ZDZjNTg1YWYxNWY3NWM4ZjMzNzZhNjNhZWZlOWQwNmJhNTFkMjIxYTRiMjYzZDkzNGQ3NTUxNDIxYWNlOGY4ZWEyODY3ZjlhNGUwYTY', // Ensure this is using the correct environment variable prefix
+        customerId: shippingAddress.email,
+        firstName,
+        lastName,
+        email: shippingAddress.email,
+        amount: totalPrice,
+        narration: 'Payment Initiated',
+        transactionId: Array.from({length: 10}, () => Math.floor(Math.random() * 10)).join(''),
+        channel: 'CARD,USSD,QR,IBANK',
+        onSuccess: (response: any) => {
+          console.log('Payment Successful', response)
+          onApproveRemitaOrder(response)
+        },
+        onError: (response: any) => {
+          console.log('Payment Error', response)
+        },
+        onClose: () => {
+          console.error('Payment widget closed')
+        },
+      })
+
+      paymentEngine.showPaymentWidget()
+    } else {
+      toast.error('Shipping address or name is missing')
+    }
+     
+   } else {
+     return toast.error('Remita Payment Engine not loaded')
+   }
+ }
+
 
   return (
     <div>
@@ -175,9 +326,7 @@ export default function OrderDetails({
                         </Link>
                       </td>
                       <td>{item.qty}</td>
-                      <td>
-                        {formatPrice(item.price)}
-                      </td>
+                      <td>{formatPrice(item.price)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -191,40 +340,30 @@ export default function OrderDetails({
               <h2 className="card-title">Order Summary</h2>
               <div className="mb-2 flex justify-between">
                 <span>Items</span>
-                <span>
-                  {formatPrice(itemsPrice)}
-                </span>
+                <span>{formatPrice(itemsPrice)}</span>
               </div>
               <div className="flex justify-between">
                 <span>Shipping</span>
-                <span>
-                  {formatPrice(shippingPrice)}
-                </span>
+                <span>{formatPrice(shippingPrice)}</span>
               </div>
               <div className="flex justify-between">
                 <span>Tax</span>
-                <span>
-                  {formatPrice(taxPrice)}
-                </span>
+                <span>{formatPrice(taxPrice)}</span>
               </div>
               <div className="flex justify-between">
                 <span>Total</span>
-                <span>
-                  {formatPrice(totalPrice)}
-                </span>
+                <span>{formatPrice(totalPrice)}</span>
               </div>
-              {!isPaid && paymentMethod === 'PayPal' && (
-                <div className="flex">
-                  <ul className="flex">
+              {!isPaid && paymentMethod === 'Remita' && (
+                <div>
+                  <ul>
                     <li>
-                      <PayPalScriptProvider
-                        options={{ clientId: paypalClientId }}
+                      <button
+                        className="btn btn-primary w-full my-2"
+                        onClick={() => remitaPay()}
                       >
-                        <PayPalButtons
-                          createOrder={createPayPalOrder}
-                          onApprove={onApprovePayPalOrder}
-                        />
-                      </PayPalScriptProvider>
+                        Pay with Remita
+                      </button>
                     </li>
                   </ul>
                 </div>
@@ -233,7 +372,13 @@ export default function OrderDetails({
                 <div>
                   <ul>
                     <li>
-                      <MonnifyButton orderId={orderId} />
+                      {/* <MonnifyButton orderId={orderId} /> */}
+                      <button
+                        className="btn btn-primary w-full my-2"
+                        onClick={() => monnifyPay()}
+                      >
+                        Pay with Monnify
+                      </button>
                     </li>
                   </ul>
                 </div>
@@ -272,21 +417,21 @@ export default function OrderDetails({
                 </Link>
               )}
             </div>
-            {session?.user.isAdmin && (
-              <div className="card-footer">
-                <button
-                  className="btn btn-error w-full"
-                  onClick={() => deleteOrder()}
-                  disabled={isDeleting}
-                >
-                  {isDeleting && (
-                    <span className="loading loading-spinner"></span>
-                  )}
-                  Delete Order
-                </button>
-              </div>  
-            )}
           </div>
+          {session?.user.isAdmin && (
+            <div className="card-footer">
+              <button
+                className="btn btn-error my-2 w-full"
+                onClick={() => deleteOrder()}
+                disabled={isDeleting}
+              >
+                {isDeleting && (
+                  <span className="loading loading-spinner"></span>
+                )}
+                Delete Order
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
