@@ -20,7 +20,7 @@ export default async function Blog() {
   const posts = await blogServices.getBlogs()
   return (
     <>
-      <div className="text-sm breadcrumbs  border-b-2 border-b-orange-600">
+      <div className="text-sm breadcrumbs border-b-2 border-b-orange-600">
         <ul className="dark:text-black">
           <li>
             <Link href={'/'}>

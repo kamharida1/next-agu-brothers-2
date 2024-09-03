@@ -9,7 +9,7 @@ const getLatest = cache(async () => {
   await dbConnect()
   const products = await ProductModel.find({})
     .sort({ _id: -1 })
-    .limit(4)
+    .limit(5)
     .lean()
   return products as Product[]
 })
@@ -23,7 +23,10 @@ const getByBrand = cache(async (brand: string ) => {
 
 const getFeatured = cache(async () => {
   await dbConnect()
-  const products = await ProductModel.find({ isFeatured: true }).lean()
+  const products = await ProductModel.find({ isFeatured: true })
+    .sort({ _id: -1 })
+    .limit(5)
+    .lean()
   return products as Product[]
 })
 

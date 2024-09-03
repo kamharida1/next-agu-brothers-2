@@ -15,6 +15,11 @@ const Sidebar = () => {
 
   return (
     <ul className="menu p-4 w-80 min-h-full bg-base-200 text-base-content">
+      <li className='text-xl'>
+        <Link href="/all-products" onClick={toggleDrawer}>
+          All Products
+        </Link>
+      </li>
       <li>
         <h2 className="text-xl">Shop By Department</h2>
       </li>

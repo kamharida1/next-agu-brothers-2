@@ -1,7 +1,6 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
-
 import { Product } from '@/lib/models/ProductModel'
 import { useRouter } from 'next/navigation'
 
@@ -13,15 +12,25 @@ export default function Settings({ products }: SettingsProps) {
   const brands = [...new Set(products.map((product) => product.brand))]
 
   const [factor, setFactor] = useState<string>('')
-  const [countInStock, setCountInStock] = useState<string>('')
+  const [featured, setFeatured] = useState<boolean>()
   const [selectedBrand, setSelectedBrand] = useState<string>(brands[0])
   const [selectedProduct, setSelectedProduct] = useState<string>(
     products[0]?._id || ''
   )
-  const [mode, setMode] = useState<'factor' | 'countInStock'>('factor')
+  const [mode, setMode] = useState<'factor' | 'featured'>('factor')
   const [loading, setLoading] = useState<boolean>(false)
   const [searchTerm, setSearchTerm] = useState<string>('')
   const router = useRouter()
+
+  // Update `featured` state based on the selected product's current status
+  useEffect(() => {
+    const selectedProductData = products.find(
+      (product) => product._id === selectedProduct
+    )
+    if (selectedProductData) {
+      setFeatured(selectedProductData.isFeatured)
+    }
+  }, [selectedProduct, products])
 
   // Filtered products based on search term
   const filteredProducts = products.filter((product) =>
@@ -40,21 +49,20 @@ export default function Settings({ products }: SettingsProps) {
           },
           body: JSON.stringify({ brand: selectedBrand, factor }),
         })
-      } else if (mode === 'countInStock' && selectedProduct) {
-        response = await fetch(`/api/admin/settings/updateCountInStock`, {
+      } else if (mode === 'featured' && selectedProduct) {
+        response = await fetch(`/api/admin/settings/updateFeatured`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ productId: selectedProduct, countInStock }),
+          body: JSON.stringify({ productId: selectedProduct, featured }),
         })
       }
 
       if (response?.ok) {
-         toast.success('Updated successfully')
-         router.push('/admin/products')
+        toast.success('Updated successfully')
+        router.push('/admin/products')
         setFactor('')
-        setCountInStock('')
       } else {
         alert('Failed to save settings')
       }
@@ -78,19 +86,17 @@ export default function Settings({ products }: SettingsProps) {
           <select
             className="select select-bordered w-full"
             value={mode}
-            onChange={(e) =>
-              setMode(e.target.value as 'factor' | 'countInStock')
-            }
+            onChange={(e) => setMode(e.target.value as 'factor' | 'featured')}
           >
             <option value="factor">Update Price Factor</option>
-            <option value="countInStock">Update Count In Stock</option>
+            <option value="featured">Set featured</option>
           </select>
         </div>
 
         {/* Render input fields based on mode */}
         {mode === 'factor' ? (
           <>
-          {/* Select Brand */}
+            {/* Select Brand */}
             <div className="form-control mb-4">
               <label className="label">
                 <span className="label-text">Select Brand</span>
@@ -157,16 +163,16 @@ export default function Settings({ products }: SettingsProps) {
               </select>
             </div>
 
-            {/* Count In Stock Input */}
+            {/* Featured Input */}
             <div className="form-control mb-4">
               <label className="label">
-                <span className="label-text">Count In Stock</span>
+                <span className="label-text">Featured</span>
               </label>
               <input
-                type="number"
-                className="input input-bordered w-full"
-                value={countInStock}
-                onChange={(e) => setCountInStock(e.target.value)}
+                type="checkbox"
+                className="checkbox checkbox-primary"
+                checked={featured}
+                onChange={(e) => setFeatured(e.target.checked)}
               />
             </div>
           </>

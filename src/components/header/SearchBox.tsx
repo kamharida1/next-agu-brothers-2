@@ -13,7 +13,7 @@ export const SearchBox = () => {
   if (!categories) return 'Loading...'
 
   return (
-    <form action="/search" method="GET">
+    <form className='justify-between' action="/search" method="GET">
       <div className="join">
         <select
           name="category"
@@ -26,13 +26,13 @@ export const SearchBox = () => {
           ))}
         </select>
         <input
-          className="join-item input input-bordered  w-48"
+          className="join-item input input-bordered w-full"
           placeholder="Search"
           defaultValue={q}
           name="q"
         />
-        <button className="join-item btn">Search</button>
       </div>
+      <button className="btn">Search</button>
     </form>
   )
 }

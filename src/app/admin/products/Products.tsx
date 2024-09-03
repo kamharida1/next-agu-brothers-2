@@ -79,6 +79,7 @@ export default function Products() {
             <tr>
               <th>id</th>
               <th>name</th>
+              <th>featured</th>
               <th>cost price</th>
               <th>price</th>
               <th>category</th>
@@ -92,6 +93,7 @@ export default function Products() {
               <tr key={product._id}>
                 <td>{formatId(product._id ?? '')}</td>
                 <td>{product.name}</td>
+                <td>{product.isFeatured ? 'Yes' : 'No'}</td>
                 <td>{formatPrice(product.costPrice)}</td>
                 <td>
                   {formatPrice(product.price)}
