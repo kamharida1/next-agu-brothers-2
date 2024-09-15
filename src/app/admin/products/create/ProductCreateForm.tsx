@@ -36,9 +36,12 @@ interface ProductFormProps {
   banner?: string
   weight?: number
   notes?: string
+  discountPercentage?: number
+  discountedPrice?: number
 }
 
 export default function ProductCreateForm() {
+  const [isFeatured, setIsFeatured] = useState<boolean>()
   const [categories, setCategories] = useState<Category[]>([])
   const [category, setCategory] = useState<string>('')
   const [productProperties, setProductProperties] = useState<any>({})
@@ -181,6 +184,7 @@ export default function ProductCreateForm() {
       images: productImages,
       image: productImages[0],
       properties: productProperties,
+      isFeatured,
     }
     await createProduct(productData as any)
   }
@@ -361,12 +365,24 @@ export default function ProductCreateForm() {
           </div>
           <FormInput name="Price" id="price" required />
           <FormInput name="Cost Price" id="costPrice" required />
-
+          <FormInput name="Discount Percentage" id="discountPercentage" />
           <FormInput name="Brand" id="brand" required />
           <FormInput name="Notes" id="notes" />
           <FormInput name="Description" id="description" required />
           <FormInput name="Count In Stock" id="countInStock" required />
           <FormInput name="Weight(kg)" id="weight" />
+          {/* Featured Input */}
+          <div className="form-control mb-4">
+            <label className="label">
+              <span className="label-text">Featured</span>
+            </label>
+            <input
+              type="checkbox"
+              className="checkbox checkbox-primary"
+              checked={isFeatured}
+              onChange={(e) => setIsFeatured(e.target.checked)}
+            />
+          </div>
 
           <button
             type="submit"

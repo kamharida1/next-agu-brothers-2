@@ -39,7 +39,7 @@ export const POST = auth(async (req: any) => {
     brand,
     rating,
     weight,
-    numReviews,
+    discountPercentage,
     countInStock,
     description,
     isFeatured,
@@ -75,7 +75,8 @@ export const POST = auth(async (req: any) => {
       numReviews: 0,
       countInStock,
       description,
-      isFeatured: true,
+      discountPercentage,
+      isFeatured,
       properties,
       banner,
     })

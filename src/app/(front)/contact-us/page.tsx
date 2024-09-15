@@ -1,9 +1,9 @@
 // File: pages/contact.js
 
-import ContactForm from '@/components/ContactForm'
 import Head from 'next/head'
 import Link from 'next/link'
 import { IoIosInformation } from 'react-icons/io'
+import ContactForm from './ContactForm'
 
 const Contact = () => {
   return (

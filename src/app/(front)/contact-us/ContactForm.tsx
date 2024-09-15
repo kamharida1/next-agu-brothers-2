@@ -1,9 +1,9 @@
 'use client'
-import { Contact } from '@/lib/models/ContactModel'
 import { useState } from 'react'
 import useSWRMutation from 'swr/mutation'
 import toast from 'react-hot-toast'
 import { useSession } from 'next-auth/react'
+import { Contact } from '@/lib/models/ContactModel'
 
 
 const ContactForm = () => {

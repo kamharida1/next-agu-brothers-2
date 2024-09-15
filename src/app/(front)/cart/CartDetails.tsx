@@ -119,7 +119,11 @@ export default function CartDetails() {
                   <li>
                     <div className="pb-3 text-xl">
                       Subtotal ({items.reduce((acc, item) => acc + item.qty, 0)}{' '}
-                      items): {formatPrice(itemsPrice)}
+                      {items.reduce((acc, item) => acc + item.qty, 0) === 1
+                        ? 'item'
+                        : 'items'}
+                      )  :
+                      {formatPrice(itemsPrice)}
                     </div>
                   </li>
                   <li>

@@ -14,7 +14,7 @@ export default function ProductImages({ images }: ProductImagesProps) {
   return (
     <>
       <div className="text-center justify-center">
-        <Link href={`/product/${activeImage}`} passHref>
+        <Link href={`/images/${activeImage}`} passHref>
           <CldImage
             src={activeImage}
             width={300}

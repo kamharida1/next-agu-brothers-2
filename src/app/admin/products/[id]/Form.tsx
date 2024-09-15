@@ -36,6 +36,8 @@ interface ProductFormProps {
   banner?: string
   weight?: number
   notes?: string
+  discountPercentage?: number
+  discountedPrice?: number
 }
 
 export default function ProductEditForm({ productId }: { productId: string }) {
@@ -45,11 +47,19 @@ export default function ProductEditForm({ productId }: { productId: string }) {
   const [productProperties, setProductProperties] = useState<any>(
     productData?.properties || {}
   )
+  const [isFeatured, setIsFeatured] = useState<boolean>()
   const [productImages, setProductImages] = useState<string[]>([])
   const [isUploading, setIsUploading] = useState(false)
   const router = useRouter()
 
   const { data: categoriesData } = useSWR('/api/admin/categories')
+  useEffect(() => {
+   
+    if (productData) {
+      setIsFeatured(productData.isFeatured)
+    }
+  }, [productData])
+
 
   useEffect(() => {
     if (categoriesData) {
@@ -70,6 +80,7 @@ export default function ProductEditForm({ productId }: { productId: string }) {
       setValue('name', productData.name)
       setValue('slug', productData.slug)
       setValue('category', productData.category)
+      setValue('discountPercentage', productData.discountPercentage)
       setValue('price', productData.price)
       setValue('costPrice', productData.costPrice)
       setValue('brand', productData.brand)
@@ -199,6 +210,7 @@ export default function ProductEditForm({ productId }: { productId: string }) {
       images: productImages,
       image: productImages[0],
       properties: productProperties,
+      isFeatured,
     }
     await updateProduct(productData as any)
   }
@@ -389,10 +401,23 @@ export default function ProductEditForm({ productId }: { productId: string }) {
           <FormInput name="Price" id="price" required />
           <FormInput name="Cost Price" id="costPrice" required />
           <FormInput name="Weight" id="weight" />
+          <FormInput name="Discount Percentage" id="discountPercentage" />
           <FormInput name="Brand" id="brand" required />
           <FormInput name="Description" id="description" required />
           <FormInput name="Count In Stock" id="countInStock" required />
           <FormInput name="Notes" id="notes" />
+          <div className="form-control mb-4">
+            <label className="label">
+              <span className="label-text">Featured</span>
+            </label>
+            <input
+              type="checkbox"
+              className="checkbox checkbox-primary"
+              checked={isFeatured}
+              onChange={(e) => setIsFeatured(e.target.checked)}
+            />
+          </div>
+
           <button
             type="submit"
             disabled={isUpdating}

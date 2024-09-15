@@ -50,6 +50,8 @@ export const PUT = auth(async (...p: any) => {
     countInStock,
     description,
     properties,
+    isFeatured,
+    discountPercentage,
   } = await req.json()
 
   try {
@@ -81,7 +83,8 @@ export const PUT = auth(async (...p: any) => {
       product.countInStock = countInStock
       product.description = description
       product.properties = properties
-
+      product.isFeatured = isFeatured
+      product.discountPercentage = discountPercentage
       const updatedProduct = await product.save()
       return Response.json(updatedProduct)
     } else {

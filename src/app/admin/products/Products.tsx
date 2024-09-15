@@ -9,7 +9,6 @@ import useSWRMutation from 'swr/mutation'
 
 export default function Products() {
   const { data: products, error } = useSWR(`/api/admin/products`)
-  const router = useRouter()
 
   const [searchTerm, setSearchTerm] = useState('')
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
@@ -80,6 +79,8 @@ export default function Products() {
               <th>id</th>
               <th>name</th>
               <th>featured</th>
+              <th>discounted %</th>
+              <th>discountedPrice</th>
               <th>cost price</th>
               <th>price</th>
               <th>category</th>
@@ -94,6 +95,8 @@ export default function Products() {
                 <td>{formatId(product._id ?? '')}</td>
                 <td>{product.name}</td>
                 <td>{product.isFeatured ? 'Yes' : 'No'}</td>
+                <td>{product.discountPercentage}</td>
+                <td>{formatPrice(product.discountedPrice)}</td>
                 <td>{formatPrice(product.costPrice)}</td>
                 <td>
                   {formatPrice(product.price)}

@@ -3,8 +3,8 @@ const productSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
     slug: { type: String, required: true, unique: true },
-    cat: { type: String, required: true},
-    category: { type: mongoose.Types.ObjectId, ref: 'Category'},
+    cat: { type: String, required: true },
+    category: { type: mongoose.Types.ObjectId, ref: 'Category' },
     images: [{ type: String, required: true }],
     image: { type: String },
     costPrice: { type: Number, required: true },
@@ -20,11 +20,23 @@ const productSchema = new mongoose.Schema(
     sold: { type: Number, default: 0 },
     weight: { type: Number },
     banner: { type: String },
+    discountPercentage: { type: Number, default: 0 }, // e.g., 20% discount
+    discountedPrice: { type: Number },
   },
   {
     timestamps: true,
   }
-)
+);
+
+ // Pre-save middleware to calculate the discounted price
+  productSchema.pre('save', function (next) {
+    if (this.discountPercentage && this.price) {
+      this.discountedPrice = this.price - (this.price * this.discountPercentage) / 100;
+    } else {
+      this.discountedPrice = this.price;
+    }
+    next();
+  });
 
 const ProductModel =
   mongoose.models.Product || mongoose.model('Product', productSchema)
@@ -51,6 +63,8 @@ export type Product = {
   countInStock: number
   weight: number
   sold: number
+  discountPercentage: number
+  discountedPrice: number
   properties: { name: string, value: string }
   createdAt: string
   updatedAt: string

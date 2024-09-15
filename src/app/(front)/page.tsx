@@ -26,45 +26,67 @@ export default async function Home() {
     <>
       <div className="block items-center">
         {/* Latest Products */}
-        <h1 className="text-2xl text-center font-semibold m-4 ">Latest Products</h1>
-        <div className="grid grid-cols-5 gap-4 m-4">
+        <h1 className="text-xl md:text-2xl text-center font-semibold m-4">
+          Latest Products
+        </h1>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 m-4">
           {latestProducts.map((product: Product) => (
-            <div key={product.slug} className="border border-gray-200 p-4">
+            <div
+              key={product.slug}
+              className="card shadow-lg border border-gray-200"
+            >
               <Link href={`/product/${product.slug}`}>
-                <CldImage
-                  src={product.image}
-                  alt={product.name}
-                  width={200}
-                  height={200}
-                  className="object-cover w-full h-48"
-                />
-                <h2 className="text-lg font-semibold">{product.name}</h2>
-                {/* <p className="text-sm text-gray-600">{product.description}</p> */}
-                <p className="text-lg font-semibold text-orange-600">
-                  {formatPrice(product.price)}
-                </p>
+                <figure className="p-4">
+                  <CldImage
+                    src={product.image}
+                    alt={product.name}
+                    width={200}
+                    height={200}
+                    className="object-cover max-w-full sm:w-60 h-40 sm:h-60 md:h-48"
+                  />
+                </figure>
+                <div className="card-body p-4">
+                  <h2 className="card-title text-md md:text-lg font-semibold">
+                    {product.name}
+                  </h2>
+                  <p className="text-md md:text-lg font-semibold text-orange-600">
+                    {formatPrice(product.price)}
+                  </p>
+                </div>
               </Link>
             </div>
           ))}
         </div>
       </div>
+
       <div className="block">
-        <div className="grid grid-cols-5 gap-4 m-4">
+        <h1 className="text-xl md:text-2xl text-center font-semibold m-4">
+          Featured Products
+        </h1>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 m-4">
           {featuredProducts.map((product: Product) => (
-            <div key={product.slug} className="border border-gray-200 p-4">
+            <div
+              key={product.slug}
+              className="card shadow-lg border border-gray-200"
+            >
               <Link href={`/product/${product.slug}`}>
-                <CldImage
-                  src={product.image}
-                  alt={product.name}
-                  width={200}
-                  height={200}
-                  className="object-cover w-full h-48"
-                />
-                <h2 className="text-lg font-semibold">{product.name}</h2>
-                {/* <p className="text-sm text-gray-600">{product.description}</p> */}
-                <p className="text-lg font-semibold text-orange-600">
-                  {formatPrice(product.price)}
-                </p>
+                <figure className="p-4">
+                  <CldImage
+                    src={product.image}
+                    alt={product.name}
+                    width={200}
+                    height={200}
+                    className="object-cover max-w-full sm:w-60 h-40 sm:h-60 md:h-48"
+                  />
+                </figure>
+                <div className="card-body p-4">
+                  <h2 className="card-title text-md md:text-lg font-semibold">
+                    {product.name}
+                  </h2>
+                  <p className="text-md md:text-lg font-semibold text-orange-600">
+                    {formatPrice(product.price)}
+                  </p>
+                </div>
               </Link>
             </div>
           ))}
