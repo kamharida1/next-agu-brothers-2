@@ -3,6 +3,7 @@ import { create } from "zustand";
 import { round2 } from "../utils";
 import { persist } from "zustand/middleware";
 import { shippingRates } from "../shipping";
+import { useEffect } from "react";
 
 type Cart = {
   items: OrderItem[];
@@ -39,6 +40,17 @@ export const cartStore = create<Cart>()(
 
 export default function useCartService() {
   const { items, itemsPrice, shippingPrice, taxPrice, totalPrice, paymentMethod, shippingAddress } = cartStore();
+
+  useEffect(() => {
+    // Calculate the prices when the component mounts or when items or shippingAddress changes
+    const { itemsPrice, shippingPrice, taxPrice, totalPrice } = calcPrice(items, shippingAddress);
+    cartStore.setState({
+      itemsPrice,
+      shippingPrice,
+      taxPrice,
+      totalPrice,
+    });
+  }, [items, shippingAddress]);
 
   return {
     items,
