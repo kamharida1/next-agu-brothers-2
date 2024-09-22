@@ -12,10 +12,10 @@ type Inputs = {
   title: string
   comment: string
   rating: number
-  product: string
+  //product: string
 }
 
-export default function ReviewForm({ productId }: { productId: string }) {
+export default function ReviewForm({ slug }: { slug: string }) {
   const { data: session } = useSession()
   const [rating, setRating] = useState(0)
 
@@ -32,18 +32,18 @@ export default function ReviewForm({ productId }: { productId: string }) {
       title: '',
       comment: '',
       rating: 0,
-      product: '',
+      //product: productId,
     },
   })
   useEffect(() => {
     if (session && session.user) {
       setValue('username', session.user.name!)
-      setValue('product', productId)
+      //setValue('product', productId)
     }
-  }, [session, setValue, productId])
+  }, [session, setValue])
 
   const { trigger: createReview, isMutating } = useSWRMutation(
-    '/api/products/reviews',
+    `/api/products/${slug}/reviews`,
     async (url, { arg }: { arg: Inputs }) => {
       const res = await fetch(`${url}`, {
         method: 'POST',
@@ -65,7 +65,7 @@ export default function ReviewForm({ productId }: { productId: string }) {
       title: formData.title,
       comment: formData.comment,
       rating: rating,
-      product: productId,
+      // product: productId,
     }
     await createReview(review)
     reset({
@@ -73,7 +73,7 @@ export default function ReviewForm({ productId }: { productId: string }) {
       title: '',
       comment: '',
       rating: 0,
-      product: productId,
+     // product: productId,
     })
     setRating(0)
   }

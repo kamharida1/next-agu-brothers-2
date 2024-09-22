@@ -23,6 +23,7 @@ const Form = () => {
       city: '',
       postalCode: '',
       country: '',
+      phone: '',
     },
   })
 
@@ -33,6 +34,7 @@ const Form = () => {
     setValue('postalCode', shippingAddress.postalCode || '')
     setValue('country', shippingAddress.country || '')
     setValue('email', shippingAddress.email || '')
+    setValue('phone', shippingAddress.phone || '')
   }, [setValue, shippingAddress])
 
   const formSubmit: SubmitHandler<ShippingAddress> = async (form) => {
@@ -115,6 +117,7 @@ const Form = () => {
             <FormInput name="Address" id="address" required />
             {/* <FormInput name="City" id="city" required /> */}
             <CitySelect name="City" id="city" required />
+            <FormInput name="Phone" id="phone" required />
             <FormInput name="Postal Code" id="postalCode" required />
             <FormInput name="Country" id="country" required />
             <FormInput

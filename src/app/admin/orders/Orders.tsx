@@ -31,7 +31,7 @@ export default function Orders() {
         const deliveredAt = order.deliveredAt
           ? new Date(order.deliveredAt).toISOString().substring(0, 10)
           : ''
-        const phone = order.shippingAddress.city || ''
+        const phone = order.shippingAddress.phone || ''
 
         return (
           paidAt.includes(debouncedSearchTerm) ||

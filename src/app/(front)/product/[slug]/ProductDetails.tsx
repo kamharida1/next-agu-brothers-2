@@ -12,7 +12,7 @@ import { Review } from '@/lib/models/ReviewModel'
 import { GoPackage } from 'react-icons/go'
 import ReviewForm from './ReviewForm'
 import useSWRMutation from 'swr/mutation'
-import useSWR from 'swr'
+import useSWR, { mutate } from 'swr'
 import { useSession } from 'next-auth/react'
 import Head from 'next/head'
 
@@ -93,11 +93,13 @@ export default function ProductDetails({
   // Delete a review
   const handleDelete = async (reviewId: string) => {
     await deleteReview({ productId: product._id, reviewId })
+    mutate(`/api/products/${params.slug}/reviews`) // Re-fetch updated reviews
   }
 
   // User can delete their own review
   const handleUserDelete = async () => {
     await userDeleteReview({ username: session?.user?.name ?? '' })
+    mutate(`/api/products/${params.slug}/reviews`) // Re-fetch updated reviews
   }
 
   return (
@@ -212,7 +214,7 @@ export default function ProductDetails({
       </div>
       <h1 className="card-title mt-6 text-2xl font-bold">Reviews</h1>
       <div className="grid md:grid-cols-4 gap-6 my-6">
-        {product._id && <ReviewForm productId={product._id} />}
+        {product._id && <ReviewForm slug={product.slug} />}
         <div className="md:col-span-2">
           <div className="card bg-base-200 shadow-xl">
             {/* Render reviews if available */}

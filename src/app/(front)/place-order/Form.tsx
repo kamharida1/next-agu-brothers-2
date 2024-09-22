@@ -81,6 +81,7 @@ const Form = () => {
               <h2 className="card-title">Shipping Address</h2>
               <p>{shippingAddress.fullName}</p>
               <p>{shippingAddress.email}</p>
+              <p>{shippingAddress.phone}</p>
               <p>
                 {shippingAddress.address}, {shippingAddress.city},{' '}
                 {shippingAddress.postalCode}, {shippingAddress.country}{' '}

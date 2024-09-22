@@ -1,26 +1,61 @@
 'use client'
 
-import CldImage from "@/components/CldImage"
-import useCartService from "@/lib/hooks/useCartStore"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
-import { IoIosCart } from "react-icons/io"
-import { formatPrice } from "@/lib/utils"
+import CldImage from '@/components/CldImage'
+import useCartService from '@/lib/hooks/useCartStore'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { IoIosCart } from 'react-icons/io'
+import { formatPrice } from '@/lib/utils'
+import { OrderItem } from '@/lib/models/OrderModel'
 
-export default function CartDetails() { 
+export default function CartDetails() {
   const router = useRouter()
   const { items, itemsPrice, decrease, increase } = useCartService()
-  
+
   const [mounted, setMounted] = useState(false)
+  const [cartUpdate, setCartUpdate] = useState(0) // Track cart updates
+  const [animationActive, setAnimationActive] = useState(false) // Control animation
+  const [actionType, setActionType] = useState('') // Track whether it's add or remove action
+
   useEffect(() => {
     setMounted(true)
   }, [])
 
+  // Trigger the animation when cartUpdate changes
+  useEffect(() => {
+    if (cartUpdate > 0) {
+      setAnimationActive(true)
+      const timer = setTimeout(() => setAnimationActive(false), 1000) // Animation duration
+      return () => clearTimeout(timer)
+    }
+  }, [cartUpdate])
+
   if (!mounted) return <></>
 
+  const handleIncrease = (item: OrderItem) => {
+    increase(item)
+    setCartUpdate(cartUpdate + 1) // Increment the update state
+    setActionType('add') // Set action type to 'add'
+  }
+
+  const handleDecrease = (item: OrderItem) => {
+    decrease(item)
+    setCartUpdate(cartUpdate + 1) // Increment the update state
+    setActionType('remove') // Set action type to 'remove'
+  }
+
   return (
-    <div className="w-full h-screen px-3 py-2">
+    <div className="w-full h-screen px-3 py-2 relative">
+      {/* Animation Element */}
+      {animationActive && (
+        <div className="absolute top-0 right-0 p-4 bg-yellow-500 text-white rounded-lg shadow-lg animate-bounce">
+          {actionType === 'add'
+            ? 'Item added to cart!'
+            : 'Item removed from cart!'}
+        </div>
+      )}
+
       <div className="text-sm breadcrumbs  border-b-2 border-b-orange-600">
         <ul>
           <li>
@@ -47,6 +82,7 @@ export default function CartDetails() {
           </li>
         </ul>
       </div>
+
       <h1 className="py-4 text-2xl">Shopping Cart</h1>
       {items.length === 0 ? (
         <div className="mt-4">
@@ -93,7 +129,7 @@ export default function CartDetails() {
                       <button
                         type="button"
                         className="btn btn-sm sm:btn-md"
-                        onClick={() => decrease(item)}
+                        onClick={() => handleDecrease(item)}
                       >
                         -
                       </button>
@@ -101,7 +137,7 @@ export default function CartDetails() {
                       <button
                         type="button"
                         className="btn btn-sm sm:btn-md"
-                        onClick={() => increase(item)}
+                        onClick={() => handleIncrease(item)}
                       >
                         +
                       </button>
@@ -122,8 +158,7 @@ export default function CartDetails() {
                       {items.reduce((acc, item) => acc + item.qty, 0) === 1
                         ? 'item'
                         : 'items'}
-                      )  :
-                      {formatPrice(itemsPrice)}
+                      ) :{formatPrice(itemsPrice)}
                     </div>
                   </li>
                   <li>

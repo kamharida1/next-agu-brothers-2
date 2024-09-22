@@ -32,6 +32,7 @@ import mongoose, { Types } from 'mongoose'
          postalCode: { type: String, required: true },
          country: { type: String, required: true },
          email: { type: String, required: true },
+         phone: { type: String, required: true },
        },
        paymentMethod: { type: String, required: true },
        paymentResult: {
@@ -69,6 +70,7 @@ export type Order = {
     postalCode: string
     country: string
     email: string 
+    phone: string
   }
   paymentMethod: string
   paymentResult?: {
@@ -76,6 +78,7 @@ export type Order = {
     status: string;
     email_address: string;
     update_time: string;  
+    rrr: string;
   }
   itemsPrice: number
   shippingPrice: number
@@ -107,4 +110,5 @@ export type ShippingAddress = {
   postalCode: string
   country: string
   email: string
+  phone: string
 }
