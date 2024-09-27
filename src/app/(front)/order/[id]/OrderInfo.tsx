@@ -18,6 +18,8 @@ export default function OrderInfo({ orderId }: { orderId: string }) {
   const [status, setStatus] = useState<string | null>(null)
   const [statusLoading, setStatusLoading] = useState<boolean>(false)
   const [rrr, setRRR] = useState<string | null>(null)
+  const [response, setResponse] = useState<any | null>(null)
+  const [rrrError, setRrrError] = useState<any | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   const router = useRouter()
@@ -135,6 +137,31 @@ export default function OrderInfo({ orderId }: { orderId: string }) {
       console.error('Error generating RRR', err)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const checkRRRStatus = async () => {
+    try {
+      setRrrError(null)
+      setResponse(null)
+      setStatusLoading(true)
+      const response = await fetch(`/api/orders/${orderId}/remita/check-status`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ rrr })
+      })
+      const data = await response.json()
+      if (data.success) {
+        setResponse(data.data)
+      } else {
+        setRrrError('Failed to check RRR status')
+      }
+    } catch (err: any) {
+      setRrrError('An error occured: ' + err.message)
+    } finally {
+      setStatusLoading(false)
     }
   }
 
@@ -290,6 +317,7 @@ export default function OrderInfo({ orderId }: { orderId: string }) {
       },
     })
   }
+
   return (
     <div>
       <h1 className="text-2xl py-4"> Order {orderId}</h1>
@@ -398,12 +426,18 @@ export default function OrderInfo({ orderId }: { orderId: string }) {
               {rrr && (
                 <div className="mt-4">
                   <h3 className="text-lg font-semibold">
-                    Remita Retrieval Reference (RRR)
+                    Check Remita Status
                   </h3>
-                  <p>{rrr}</p>
+                  <input
+                    type="text"
+                    className="input input-bordered w-full my-2"
+                    placeholder="Enter RRR"
+                    value={rrr}
+                    onChange={(e) => setRRR(e.target.value)}
+                  />
                   <button
                     className="btn btn-secondary w-full my-2"
-                    onClick={() => {}}
+                    onClick={checkRRRStatus}
                     disabled={statusLoading}
                   >
                     {statusLoading ? (
@@ -412,7 +446,8 @@ export default function OrderInfo({ orderId }: { orderId: string }) {
                       'Check RRR Status'
                     )}
                   </button>
-                  {status && <p>Status: {status}</p>}
+                  {response && <pre>{JSON.stringify(response, null, 2)}</pre>}
+                  {rrrError && <p className="text-error">{rrrError}</p>}
                 </div>
               )}
               {!isPaid && paymentMethod === 'Moniepoint' && (
