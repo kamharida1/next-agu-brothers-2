@@ -1,4 +1,5 @@
 import OrderDetails from "./OrderDetails"
+import OrderInfo from "./OrderInfo"
 
 export function generateMetadata({ params }: { params: { id: string } }) {
   return {
@@ -13,7 +14,7 @@ export default function OrderDetailsPage({
   params: { id: string }
 }) {
   return (
-    <OrderDetails
+    <OrderInfo
       orderId={params.id}
     />
   )

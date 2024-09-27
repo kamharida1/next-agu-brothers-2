@@ -3,13 +3,14 @@ import useSWRMutation from 'swr/mutation'
 import useSWR from 'swr'
 import toast from 'react-hot-toast'
 import Link from 'next/link'
-import { ValidationRule, useForm } from 'react-hook-form'
+import { Controller, ValidationRule, useForm } from 'react-hook-form'
 import { useEffect, useState } from 'react'
 import { formatId } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
 import { Blog } from '@/lib/models/BlogModel'
 import slugify from 'slugify'
 import { CldImage, CldUploadWidget, CloudinaryUploadWidgetInfo } from 'next-cloudinary'
+import Tiptap from '@/components/blog/Tiptap'
 
 interface UploadedAssetData {
   public_id: string
@@ -51,6 +52,7 @@ export default function BlogEditForm({ slug }: { slug: string }) {
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
     setValue,
   } = useForm<Blog>()
@@ -144,15 +146,39 @@ export default function BlogEditForm({ slug }: { slug: string }) {
 
               {result ? (
                 <CldImage
-                  src={blog.image}
+                  src={result.secure_url} // Use result.secure_url instead of blog.image
                   width={100}
                   height={100}
                   alt="Uploaded Image"
                 />
-              ) : null}
+              ) : (
+                blog.image && ( // If there's no new upload, use the existing blog image
+                  <CldImage
+                    src={blog.image}
+                    width={100}
+                    height={100}
+                      alt="Current Image"
+                      className='rounded w-40 h-40'
+                  />
+                )
+              )}
             </div>
           </div>
-          <FormInput name="Content" id="content" required />
+          <div className="md:flex mb-6">
+            <label className="label md:w-1/5" htmlFor="slug">
+              Content
+            </label>
+            <div className="md:w-4/5">
+              <Controller
+                name="content"
+                control={control}
+                defaultValue={blog.content}
+                render={({ field }) => (
+                  <Tiptap content={field.value} setContent={field.onChange} />
+                )}
+              />
+            </div>
+          </div>
 
           <button
             type="submit"
