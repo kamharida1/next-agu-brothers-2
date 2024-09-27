@@ -188,7 +188,7 @@ export default function OrderInfo({ orderId }: { orderId: string }) {
       },
       onSuccess: function (response: any) {
         console.log('Payment Successful', response)
-        //onApproveRemitaOrder(response)
+        onApproveRemitaOrder(response)
       },
       onError: function (response: any) {
         console.log('Payment Error', response)
@@ -425,9 +425,7 @@ export default function OrderInfo({ orderId }: { orderId: string }) {
               )}
               {rrr && (
                 <div className="mt-4">
-                  <h3 className="text-lg font-semibold">
-                    Check Remita Status
-                  </h3>
+                  <h3 className="text-lg font-semibold">Check Remita Status</h3>
                   <input
                     type="text"
                     className="input input-bordered w-full my-2"
@@ -446,7 +444,13 @@ export default function OrderInfo({ orderId }: { orderId: string }) {
                       'Check RRR Status'
                     )}
                   </button>
-                  {response && <pre>{JSON.stringify(response, null, 2)}</pre>}
+                  {response && (
+                    <div className="bg-base-100 p-4 rounded-lg shadow-md">
+                      <pre className="text-sm overflow-auto whitespace-pre-wrap break-words">
+                        {JSON.stringify(response, null, 2)}
+                      </pre>
+                    </div>
+                  )}
                   {rrrError && <p className="text-error">{rrrError}</p>}
                 </div>
               )}
