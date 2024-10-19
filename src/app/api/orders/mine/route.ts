@@ -16,3 +16,4 @@ export const GET = auth(async (req: any) => {
   const orders = await OrderModel.find({ user: user._id })
   return Response.json(orders)
 }) as any
+

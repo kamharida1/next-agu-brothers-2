@@ -36,7 +36,6 @@ export default function ProductDetails({
   )
 
   // Delete a review
-  // Delete a review
   const { trigger: deleteReview, isMutating: isDeleting } = useSWRMutation(
     `/api/admin/products/reviews`,
     async (
@@ -94,12 +93,14 @@ export default function ProductDetails({
   const handleDelete = async (reviewId: string) => {
     await deleteReview({ productId: product._id, reviewId })
     mutate(`/api/products/${params.slug}/reviews`) // Re-fetch updated reviews
+    mutate(`/api/products/${params.slug}`) // Re-fetch updated product
   }
 
   // User can delete their own review
   const handleUserDelete = async () => {
     await userDeleteReview({ username: session?.user?.name ?? '' })
     mutate(`/api/products/${params.slug}/reviews`) // Re-fetch updated reviews
+    mutate(`/api/products/${params.slug}`) // Re-fetch updated product
   }
 
   return (

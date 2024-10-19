@@ -41,12 +41,14 @@ export const truncateText = (text: string, wordLimit: number) => {
 export function toPlainObject(obj: any): any {
   if (obj === null || obj === undefined) return obj;
   if (Array.isArray(obj)) return obj.map(toPlainObject);
-  if (typeof obj !== 'object' || obj instanceof Date || obj instanceof Buffer) return obj.toString();
+  if (typeof obj !== 'object' || obj instanceof Date || obj instanceof Buffer || obj instanceof Uint8Array) {
+    return obj.toString();
+  }
 
   const plainObj: any = {};
   for (const key of Object.keys(obj)) {
     const value = obj[key];
-    if (typeof value === 'object' && !(value instanceof Date) && !(value instanceof Buffer)) {
+    if (typeof value === 'object' && !(value instanceof Date) && !(value instanceof Buffer) && !(value instanceof Uint8Array)) {
       plainObj[key] = toPlainObject(value);
     } else {
       plainObj[key] = value;

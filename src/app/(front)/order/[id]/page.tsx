@@ -1,3 +1,4 @@
+import OrderDet from "./OrderDet"
 import OrderDetails from "./OrderDetails"
 import OrderInfo from "./OrderInfo"
 
@@ -14,7 +15,7 @@ export default function OrderDetailsPage({
   params: { id: string }
 }) {
   return (
-    <OrderInfo
+    <OrderDet
       orderId={params.id}
     />
   )

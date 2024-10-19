@@ -6,6 +6,8 @@ import { SubmitHandler, useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { FaStar } from 'react-icons/fa'
 import useSWRMutation from 'swr/mutation'
+import { mutate } from 'swr'
+
 
 type Inputs = {
   username: string
@@ -52,6 +54,8 @@ export default function ReviewForm({ slug }: { slug: string }) {
         },
         body: JSON.stringify(arg),
       })
+      // Revalidate product data to update the rating
+      mutate(`/api/products/${slug}`)
       const data = await res.json()
       if (!res.ok) return toast.error(data.message)
 

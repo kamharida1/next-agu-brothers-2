@@ -177,7 +177,7 @@ export default function OrderInfo({ orderId }: { orderId: string }) {
       key: "QzAwMDAyNzEyNTl8MTEwNjE4NjF8OWZjOWYwNmMyZDk3MDRhYWM3YThiOThlNTNjZTE3ZjYxOTY5NDdmZWE1YzU3NDc0ZjE2ZDZjNTg1YWYxNWY3NWM4ZjMzNzZhNjNhZWZlOWQwNmJhNTFkMjIxYTRiMjYzZDkzNGQ3NTUxNDIxYWNlOGY4ZWEyODY3ZjlhNGUwYTY=",
       processRrr: true,
       transactionId,
-      channel: 'CARD,USSD',
+      channel: 'CARD,USSD,TRANSFER,BANK' ,
       extendedData: {
         customFields: [
           {
