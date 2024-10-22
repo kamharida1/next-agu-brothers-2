@@ -1,7 +1,7 @@
 'use client'
 
 import { useSession } from 'next-auth/react'
-import { useEffect, useState } from 'react'
+import { forwardRef, useEffect, useState } from 'react'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { FaStar } from 'react-icons/fa'
@@ -17,7 +17,8 @@ type Inputs = {
   //product: string
 }
 
-export default function ReviewForm({ slug }: { slug: string }) {
+const ReviewForm = forwardRef<HTMLFormElement, { slug: string }>((props, ref) => {
+  const { slug } = props;
   const { data: session } = useSession()
   const [rating, setRating] = useState(0)
 
@@ -86,11 +87,10 @@ export default function ReviewForm({ slug }: { slug: string }) {
       <div className="card bg-base-300">
         <div className="card-body">
           <h2 className="card-title">Add a review</h2>
-          <form onSubmit={handleSubmit(formSubmit)}>
+          <form onSubmit={handleSubmit(formSubmit)} ref={ref}>
             <div className="flex my-4">
               {[...Array(5)].map((_, i) => (
                 <FaStar
-                  id="rating"
                   key={i}
                   className="cursor-pointer w-8 h-8 mr-2"
                   color={i < rating ? 'gold' : 'gray'}
@@ -154,4 +154,8 @@ export default function ReviewForm({ slug }: { slug: string }) {
       </div>
     </div>
   )
-}
+})
+
+ReviewForm.displayName = 'ReviewForm';
+
+export default ReviewForm;

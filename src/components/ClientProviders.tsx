@@ -32,14 +32,19 @@ export default function ClientProviders({
     <SWRConfig
       value={{
         onError: (error, key) => {
-          toast.error(error.message)
+          toast.error(`Error fetching data from ${key}: ${error.message}`)
         },
         fetcher: async (resource, init) => {
-          const res = await fetch(resource, init)
-          if (!res.ok) {
-            throw new Error('An error occurred while fetching the data.')
+          try {
+            const res = await fetch(resource, init)
+            if (!res.ok) {
+              throw new Error(`An error occurred while fetching the data from ${resource}.`)
+            }
+            return res.json()
+          } catch (error) {
+            console.error(`Failed to fetch from ${resource}:`, error)
+            throw error
           }
-          return res.json()
         },
       }}
     >
