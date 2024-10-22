@@ -3,9 +3,9 @@
 import { Review } from "@/lib/models/ReviewModel";
 import { formatDate } from "@/lib/utils";
 import { FaStar } from "react-icons/fa";
-import useSWR from "swr";
 
 export default function ReviewList({ reviews }: { reviews: Review[] }) {
+  if (!reviews) return <div>Loading...</div>;
   return (
     <div className="p-4 md:p-0">
       <h2 className="text-2xl font-bold">Reviews</h2>

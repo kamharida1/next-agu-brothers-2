@@ -27,6 +27,7 @@ export const GET = auth(async (...request: any) => {
     )
   }
   const reviews = await ReviewModel.find({ product: product._id })
+  
   return Response.json(reviews)
 }) as any
 

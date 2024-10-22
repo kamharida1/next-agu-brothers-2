@@ -84,7 +84,7 @@ export default function ProductDetails({
         return response.json()
       }
     )
-
+  if(!reviews) return <div>Loading reviews...</div>
   if (!product) return <div>Loading...</div>
   if (!product) return <div>Product Not Found</div>
 
