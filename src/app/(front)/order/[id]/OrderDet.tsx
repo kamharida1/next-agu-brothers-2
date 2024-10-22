@@ -9,8 +9,7 @@ import { useRouter } from "next/navigation";
 import { AiOutlineCloseCircle } from "react-icons/ai";
 import Script from "next/script";
 import { useEffect, useState } from "react";
-import { usePaystackPayment } from 'react-paystack';
-
+import { usePaystackPayment } from "react-paystack";
 
 // Extend the Window interface to include handlePgData
 declare global {
@@ -29,7 +28,7 @@ type Config = {
   email: string;
   amount: number;
   publicKey: string;
-}
+};
 export default function OrderDetails({ orderId }: { orderId: string }) {
   const [isModalVisible, setIsModalVisible] = useState(false); // Control modal visibility
   const router = useRouter();
@@ -39,7 +38,7 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
   const [amount, setAmount] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [paymentResult, setPaymentResult] = useState<any | null>(null);
-  const[isPaid, setIsPaid] = useState(false);
+  const [isPaid, setIsPaid] = useState(false);
   const [paidAt, setPaidAt] = useState("");
   const [narration, setNarration] = useState("");
   const [transactionId, setTransactionId] = useState("");
@@ -47,22 +46,37 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
   const [responseData, setResponseData] = useState<any | null>(null);
   const [transError, setTransError] = useState<any | null>("");
 
-  
   // Paystack payment
   const config: Config = {
-    reference: (new Date()).getTime().toString(),
+    reference: new Date().getTime().toString(),
     email: email,
     amount: Number(amount),
-    publicKey: 'pk_test_e10dba7e643757aaf5a1280e8d4c4538fb6318a8',
+    publicKey: "pk_test_e10dba7e643757aaf5a1280e8d4c4538fb6318a8",
   };
 
   const onSuccess = (reference: any) => {
     console.log(reference);
+    onApprovePaystackOrder(reference);
   };
   const onClose = () => {
-    console.log('closed')
-  }
-  const initializePayment = usePaystackPayment(config);
+    console.log("closed");
+  };
+
+  const PaystackHookButton = () => {
+    const initializePayment = usePaystackPayment(config);
+    return (
+      <div>
+        <button
+          className="btn btn-primary w-full hover:bg-blue-600 transition duration-300 ease-in-out px-8 py-2 text-white rounded-md shadow-lg"
+          onClick={() => {
+            initializePayment({ onSuccess, onClose });
+          }}
+        >
+          Pay with Paystack
+        </button>
+      </div>
+    );
+  };
 
   const publicKey =
     "QUzAwMDA3NTE2OTZ8MTQ0NzY3MjE4ODV8NGE4MThhNjI0Mzc5NGYxYWQzMTdiYmQ3MjdhMTFjOTU3NWRmZjFkYzZjNjYzZGRjMzE2NDkyMGFmZDBhNTJkODVhNzA0Njk4NjI0YTljYTE0MzFhZDUyMDlkOTAzZjdlMmNjN2NkODFkMjA0MTRmYjBmYTZiNmJlOTM5ZTQ0NDQ=";
@@ -166,8 +180,8 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
     deliveredAt,
   } = data;
 
-  async function sendMail(order:any) {
-    try{
+  async function sendMail(order: any) {
+    try {
       const response = await fetch(`/api/orders/${orderId}/send-mail`, {
         method: "POST",
         headers: {
@@ -184,7 +198,7 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
       const data = await response.json();
       toast.success("Mail sent successfully");
       return data;
-    }catch(err){
+    } catch (err) {
       console.error("Error sending mail:", err);
     }
   }
@@ -193,6 +207,44 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
     try {
       const response = await fetch(
         `/api/orders/${orderId}/capture-remita-order`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        }
+      );
+
+      if (!response.ok) {
+        // If the response is not OK, throw an error with the status code
+        const errorMessage = await response.text(); // Fetch the error message from the response
+        throw new Error(
+          `HTTP error! Status: ${response.status} - ${errorMessage}`
+        );
+      }
+
+      const orderData = await response.json();
+
+      // Handle successful response
+      toast.success("Order paid successfully");
+      setIsPaid(true);
+      setPaidAt(orderData.paidAt);
+      setPaymentResult(orderData.paymentResult);
+      setResponseData(orderData.paymentResult);
+      sendMail(orderData);
+      return orderData;
+    } catch (error) {
+      // Handle fetch or JSON parsing error
+      console.error("Error processing order payment:", error);
+      toast.error("Failed to process payment. Please try again.");
+    }
+  }
+
+  async function onApprovePaystackOrder(data: any) {
+    try {
+      const response = await fetch(
+        `/api/orders/${orderId}/capture-paystack-order`,
         {
           method: "POST",
           headers: {
@@ -313,20 +365,16 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
       const data = await response.json();
       if (data) {
         //setResponseData(data);
-        onApproveRemitaOrder(data)
+        onApproveRemitaOrder(data);
       } else {
         setTransError("Failed to check Transaction status");
       }
-      
     } catch (err: any) {
       setTransError("An error occured: " + err.message);
     } finally {
       setStatusLoading(false);
     }
   };
-
-
-
 
   return (
     <>
@@ -373,7 +421,7 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
                   required
                 />
               </div>
-             {/*phoneNumber */}
+              {/*phoneNumber */}
               {/* <div className="form-control mb-4">
                 <label htmlFor="phoneNumber" className="label text-center">
                   <span className="label-text">Phone Number</span>
@@ -500,36 +548,38 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
                 <p>{paymentMethod}</p>
                 {isPaid ? (
                   <>
-                  <div className="text-success">Paid at {paidAt}
-                  </div>
+                    <div className="text-success">Paid at {paidAt}</div>
                     <div className="card bg-base-100 mt-4">
-                    <div className="card-body">
-                      <h2 className="card-title">Payment Result</h2>
-                      <div className="mb-2">
-                      <strong>ID:</strong> {paymentResult?.id}
+                      <div className="card-body">
+                        <h2 className="card-title">Payment Result</h2>
+                        <div className="mb-2">
+                          <strong>ID:</strong> {paymentResult?.id}
+                        </div>
+                        <div className="mb-2">
+                          <strong>Status:</strong> {paymentResult?.status}
+                        </div>
+                        <div className="mb-2">
+                          <strong>Update Time:</strong>{" "}
+                          {paymentResult?.update_time}
+                        </div>
+                        <div className="mb-2">
+                          <strong>Email Address:</strong>{" "}
+                          {paymentResult?.email_address}
+                        </div>
+                        <div className="mb-2">
+                          <strong>Card Type:</strong> {paymentResult?.cardType}
+                        </div>
+                        <div className="mb-2">
+                          <strong>Debited Amount:</strong>{" "}
+                          {formatPrice(paymentResult?.debitedAmount)}
+                        </div>
+                        <div className="mb-2">
+                          <strong>Payment Channel:</strong>{" "}
+                          {paymentResult?.paymentChannel}
+                        </div>
                       </div>
-                      <div className="mb-2">
-                      <strong>Status:</strong> {paymentResult?.status}
-                      </div>
-                      <div className="mb-2">
-                      <strong>Update Time:</strong> {paymentResult?.update_time}
-                      </div>
-                      <div className="mb-2">
-                      <strong>Email Address:</strong> {paymentResult?.email_address}
-                      </div>
-                      <div className="mb-2">
-                      <strong>Card Type:</strong> {paymentResult?.cardType}
-                      </div>
-                      <div className="mb-2">
-                      <strong>Debited Amount:</strong> {formatPrice(paymentResult?.debitedAmount)}
-                      </div>
-                      <div className="mb-2">
-                      <strong>Payment Channel:</strong> {paymentResult?.paymentChannel}
-                      </div>
-                    </div>
                     </div>
                   </>
-                
                 ) : (
                   <div className="text-error">Not Paid</div>
                 )}
@@ -592,12 +642,12 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
                   <span>Total</span>
                   <span>{formatPrice(totalPrice)}</span>
                 </div>
-               {paymentResult && (
-                 <div className="flex justify-between">
-                 <span>Debited Amount</span>
-                 <span>{formatPrice(paymentResult?.debitedAmount)}</span>
-               </div>
-               )}
+                {paymentResult && (
+                  <div className="flex justify-between">
+                    <span>Debited Amount</span>
+                    <span>{formatPrice(paymentResult?.debitedAmount)}</span>
+                  </div>
+                )}
                 {!isPaid && paymentMethod === "Remita" && (
                   <div>
                     <ul>
@@ -613,7 +663,19 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
                   </div>
                 )}
 
-                { paymentResult?.id && (
+                {/* Paystack payment */}
+                {!isPaid && paymentMethod === "PayStack" && (
+                  <div>
+                    <ul>
+                      <li>
+                      <PaystackHookButton />
+                      </li>
+                    </ul>
+                  </div>
+                )}
+
+                {paymentMethod === "Remita" 
+                && paymentResult?.id && (
                   <div className="mt-4">
                     <h3 className="text-lg font-semibold">
                       Check Remita Status
@@ -628,10 +690,10 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
                     <button
                       className="btn btn-secondary w-full my-2"
                       onClick={() => {
-                        if(paymentResult.id) {
-                          checkTransStatus(paymentResult.id)}
+                        if (paymentResult.id) {
+                          checkTransStatus(paymentResult.id);
                         }
-                      }
+                      }}
                       disabled={statusLoading}
                     >
                       {statusLoading ? (
