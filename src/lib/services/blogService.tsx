@@ -4,7 +4,7 @@ import BlogModel, { Blog } from '../models/BlogModel'
 import { notFound } from 'next/navigation' // Importing the notFound function from Next.js for handling 404 errors.
 
 
-export const revalidate = 3600 // revalidate the data at most every hour
+export const revalidate = 60000 
 
 const getBlogs = cache(async (): Promise<Blog[]> => {
   await dbConnect()

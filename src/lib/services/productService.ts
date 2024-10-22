@@ -4,7 +4,7 @@ import { cache } from 'react'
 import ReviewModel from '../models/ReviewModel'
 import { toPlainObject } from '../utils'
 
-export const revalidate = 3600 // revalidate the data at most every hour
+export const revalidate = 60000 // revalidate the data at most every hour
 
 const getLatest = cache(async () => {
   await dbConnect()

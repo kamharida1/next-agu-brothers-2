@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation' // Importing the notFound function fr
 import JobModel, { Job } from '../models/JobModel'
 
 
-export const revalidate = 3600 // revalidate the data at most every hour
+export const revalidate = 60000 // revalidate the data at most every hour
 
 const getJobs = cache(async (): Promise<Job[]> => {
   await dbConnect()

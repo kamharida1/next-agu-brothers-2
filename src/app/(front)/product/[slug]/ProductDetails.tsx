@@ -28,7 +28,7 @@ export default function ProductDetails({
   }
 }) {
   const { data: session } = useSession()
-  const { data: product} = useSWR(
+  const { data: product } = useSWR(
     `/api/products/${params.slug}`
   )
   const { data: reviews, error: reviewsError } = useSWR(
@@ -84,9 +84,10 @@ export default function ProductDetails({
         return response.json()
       }
     )
-  if(!reviews) return <div>Loading reviews...</div>
+
+
   if (!product) return <div>Loading...</div>
-  if (!product) return <div>Product Not Found</div>
+
 
   // Delete a review
   const handleDelete = async (reviewId: string) => {
