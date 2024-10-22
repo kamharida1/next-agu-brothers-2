@@ -9,6 +9,8 @@ import { useRouter } from "next/navigation";
 import { AiOutlineCloseCircle } from "react-icons/ai";
 import Script from "next/script";
 import { useEffect, useState } from "react";
+import { usePaystackPayment } from 'react-paystack';
+
 
 // Extend the Window interface to include handlePgData
 declare global {
@@ -17,27 +19,53 @@ declare global {
     RmPaymentEngine: any;
   }
 }
+
 import toast from "react-hot-toast";
 import useSWR from "swr";
 import useSWRMutation from "swr/mutation";
 
+type Config = {
+  reference: string;
+  email: string;
+  amount: number;
+  publicKey: string;
+}
 export default function OrderDetails({ orderId }: { orderId: string }) {
-  const [transactionRef, setTransactionRef] = useState("");
   const [isModalVisible, setIsModalVisible] = useState(false); // Control modal visibility
   const router = useRouter();
-  // const [rrr, setRrr] = useState("");
   const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [amount, setAmount] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [paymentResult, setPaymentResult] = useState<any | null>(null);
+  const[isPaid, setIsPaid] = useState(false);
+  const [paidAt, setPaidAt] = useState("");
   const [narration, setNarration] = useState("");
   const [transactionId, setTransactionId] = useState("");
   const [statusLoading, setStatusLoading] = useState<boolean>(false);
-  const [response, setResponse] = useState<any | null>(null);
+  const [responseData, setResponseData] = useState<any | null>(null);
   const [transError, setTransError] = useState<any | null>("");
 
+  
+  // Paystack payment
+  const config: Config = {
+    reference: (new Date()).getTime().toString(),
+    email: email,
+    amount: Number(amount),
+    publicKey: 'pk_test_e10dba7e643757aaf5a1280e8d4c4538fb6318a8',
+  };
+
+  const onSuccess = (reference: any) => {
+    console.log(reference);
+  };
+  const onClose = () => {
+    console.log('closed')
+  }
+  const initializePayment = usePaystackPayment(config);
+
   const publicKey =
-    "QzAwMDAyNzEyNTl8MTEwNjE4NjF8OWZjOWYwNmMyZDk3MDRhYWM3YThiOThlNTNjZTE3ZjYxOTY5NDdmZWE1YzU3NDc0ZjE2ZDZjNTg1YWYxNWY3NWM4ZjMzNzZhNjNhZWZlOWQwNmJhNTFkMjIxYTRiMjYzZDkzNGQ3NTUxNDIxYWNlOGY4ZWEyODY3ZjlhNGUwYTY=";
+    "QUzAwMDA3NTE2OTZ8MTQ0NzY3MjE4ODV8NGE4MThhNjI0Mzc5NGYxYWQzMTdiYmQ3MjdhMTFjOTU3NWRmZjFkYzZjNjYzZGRjMzE2NDkyMGFmZDBhNTJkODVhNzA0Njk4NjI0YTljYTE0MzFhZDUyMDlkOTAzZjdlMmNjN2NkODFkMjA0MTRmYjBmYTZiNmJlOTM5ZTQ0NDQ=";
 
   // User can delete their order using useSWRMutation
   const { trigger: userDeleteOrder, isMutating: isUserDeleting } =
@@ -113,7 +141,11 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
       setFirstName(data.shippingAddress.fullName.split(" ")[0]);
       setLastName(data.shippingAddress.fullName.split(" ")[1]);
       setAmount(data.totalPrice);
+      setPhoneNumber(data.shippingAddress.phoneNumber);
       setNarration(`Payment for order ${orderId}`);
+      setIsPaid(data.isPaid);
+      setPaidAt(data.paidAt);
+      setPaymentResult(data.paymentResult);
     }
   }, [data, orderId]);
 
@@ -128,11 +160,34 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
     shippingPrice,
     taxPrice,
     totalPrice,
-    isPaid,
-    paidAt,
+    //isPaid,
+    //paidAt,
     isDelivered,
     deliveredAt,
   } = data;
+
+  async function sendMail(order:any) {
+    try{
+      const response = await fetch(`/api/orders/${orderId}/send-mail`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(order),
+      });
+      if (!response.ok) {
+        const errorMessage = await response.text();
+        throw new Error(
+          `HTTP error! Status: ${response.status} - ${errorMessage}`
+        );
+      }
+      const data = await response.json();
+      toast.success("Mail sent successfully");
+      return data;
+    }catch(err){
+      console.error("Error sending mail:", err);
+    }
+  }
 
   async function onApproveRemitaOrder(data: any) {
     try {
@@ -159,6 +214,11 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
 
       // Handle successful response
       toast.success("Order paid successfully");
+      setIsPaid(true);
+      setPaidAt(orderData.paidAt);
+      setPaymentResult(orderData.paymentResult);
+      setResponseData(orderData.paymentResult);
+      sendMail(orderData);
       return orderData;
     } catch (error) {
       // Handle fetch or JSON parsing error
@@ -212,6 +272,7 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
       firstName: firstName,
       lastName: lastName,
       email: email,
+      phoneNumber: phoneNumber,
       amount: amount,
       narration: narration,
       transactionId: Math.floor(Math.random() * 100000000),
@@ -219,7 +280,7 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
         console.log("callback Successful Response", response);
         setTransactionId(response.transactionId);
         setIsModalVisible(false);
-        onApproveRemitaOrder(response);
+        checkTransStatus(response.transactionId);
       },
       onError: function (response: any) {
         console.log("callback Error Response", response);
@@ -234,10 +295,10 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
     paymentEngine.showPaymentWidget();
   };
 
-  const checkTransStatus = async () => {
+  const checkTransStatus = async (transactionId: string) => {
     try {
       setTransError(null);
-      setResponse(null);
+      setResponseData(null);
       setStatusLoading(true);
       const response = await fetch(
         `/api/orders/${orderId}/remita/check-trans-status`,
@@ -251,16 +312,21 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
       );
       const data = await response.json();
       if (data) {
-        setResponse(data);
+        //setResponseData(data);
+        onApproveRemitaOrder(data)
       } else {
         setTransError("Failed to check Transaction status");
       }
+      
     } catch (err: any) {
       setTransError("An error occured: " + err.message);
     } finally {
       setStatusLoading(false);
     }
   };
+
+
+
 
   return (
     <>
@@ -307,6 +373,21 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
                   required
                 />
               </div>
+             {/*phoneNumber */}
+              {/* <div className="form-control mb-4">
+                <label htmlFor="phoneNumber" className="label text-center">
+                  <span className="label-text">Phone Number</span>
+                </label>
+                <input
+                  type="text"
+                  className="input input-bordered w-full bg-gray-100 focus:ring focus:ring-blue-500 rounded-lg"
+                  id="phoneNumber"
+                  placeholder="Enter Phone Number"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  name="phoneNumber"
+                />
+              </div> */}
 
               <div className="form-control mb-4">
                 <label htmlFor="firstName" className="label text-center">
@@ -387,7 +468,7 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
         strategy="beforeInteractive"
       />
       <Script
-        src="https://demo.remita.net/payment/v1/remita-pay-inline.bundle.js"
+        src="https://login.remita.net/payment/v1/remita-pay-inline.bundle.js"
         strategy="lazyOnload"
       />
 
@@ -399,6 +480,8 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
               <div className="card-body">
                 <h2 className="card-title">Shipping Address</h2>
                 <p>{shippingAddress.fullName}</p>
+                <p>{shippingAddress.email}</p>
+                <p>{shippingAddress.phone}</p>
                 <p>
                   {shippingAddress.address}, {shippingAddress.city},{" "}
                   {shippingAddress.postalCode}, {shippingAddress.country}
@@ -416,7 +499,37 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
                 <h2 className="card-title">Payment Method</h2>
                 <p>{paymentMethod}</p>
                 {isPaid ? (
-                  <div className="text-success">Paid at {paidAt}</div>
+                  <>
+                  <div className="text-success">Paid at {paidAt}
+                  </div>
+                    <div className="card bg-base-100 mt-4">
+                    <div className="card-body">
+                      <h2 className="card-title">Payment Result</h2>
+                      <div className="mb-2">
+                      <strong>ID:</strong> {paymentResult?.id}
+                      </div>
+                      <div className="mb-2">
+                      <strong>Status:</strong> {paymentResult?.status}
+                      </div>
+                      <div className="mb-2">
+                      <strong>Update Time:</strong> {paymentResult?.update_time}
+                      </div>
+                      <div className="mb-2">
+                      <strong>Email Address:</strong> {paymentResult?.email_address}
+                      </div>
+                      <div className="mb-2">
+                      <strong>Card Type:</strong> {paymentResult?.cardType}
+                      </div>
+                      <div className="mb-2">
+                      <strong>Debited Amount:</strong> {formatPrice(paymentResult?.debitedAmount)}
+                      </div>
+                      <div className="mb-2">
+                      <strong>Payment Channel:</strong> {paymentResult?.paymentChannel}
+                      </div>
+                    </div>
+                    </div>
+                  </>
+                
                 ) : (
                   <div className="text-error">Not Paid</div>
                 )}
@@ -479,6 +592,12 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
                   <span>Total</span>
                   <span>{formatPrice(totalPrice)}</span>
                 </div>
+               {paymentResult && (
+                 <div className="flex justify-between">
+                 <span>Debited Amount</span>
+                 <span>{formatPrice(paymentResult?.debitedAmount)}</span>
+               </div>
+               )}
                 {!isPaid && paymentMethod === "Remita" && (
                   <div>
                     <ul>
@@ -494,7 +613,7 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
                   </div>
                 )}
 
-                {transactionId && (
+                { paymentResult?.id && (
                   <div className="mt-4">
                     <h3 className="text-lg font-semibold">
                       Check Remita Status
@@ -503,12 +622,16 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
                       type="text"
                       className="input input-bordered w-full my-2"
                       placeholder="Enter Transaction ID"
-                      value={transactionId}
+                      value={paymentResult.id || transactionId}
                       onChange={(e) => setTransactionId(e.target.value)}
                     />
                     <button
                       className="btn btn-secondary w-full my-2"
-                      onClick={checkTransStatus}
+                      onClick={() => {
+                        if(paymentResult.id) {
+                          checkTransStatus(paymentResult.id)}
+                        }
+                      }
                       disabled={statusLoading}
                     >
                       {statusLoading ? (
@@ -517,10 +640,10 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
                         "Check Transaction Status"
                       )}
                     </button>
-                    {response && (
+                    {responseData && (
                       <div className="bg-base-100 p-4 rounded-lg shadow-md">
                         <pre className="text-sm overflow-auto whitespace-pre-wrap break-words">
-                          {JSON.stringify(response, null, 2)}
+                          {JSON.stringify(responseData, null, 2)}
                         </pre>
                       </div>
                     )}

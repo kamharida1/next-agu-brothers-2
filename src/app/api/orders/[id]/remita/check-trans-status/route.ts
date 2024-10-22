@@ -1,8 +1,6 @@
 import { auth } from "@/lib/auth";
 import dbConnect from "@/lib/dbConnect";
-import OrderModel from "@/lib/models/OrderModel";
 import cryptoJS from "crypto-js";
-import https from "https";
 
 export const POST = auth(async (...request: any) => {
   const [req, { params }] = request;
@@ -29,16 +27,15 @@ export const POST = auth(async (...request: any) => {
     console.log("Transaction ID:", transactionId);
     const secretKey =
       process.env.REMITA_SECRET ||
-      "4ac2427b53b5bac53df667e5605d2a4234a994f68bc63479522567c6247627f0b8e0217b0d3378d49f216bcd4f3a46bf0056627358df61f929450e3c7d48bef1";
+      "35985afbbb3821ab58b408b87e73f4ce76449ae51a47d761912f7b7dc9c5481a265a39f49c92c2deaa0fc36fc248ff773847dc6f72616b8a52db711f65a0adb3";
     const publicKey =
       process.env.REMITA_PUBLIC_KEY ||
-      "U09MRHw0MDgxOTUzOHw2ZDU4NGRhMmJhNzVlOTRiYmYyZjBlMmM1YzUyNzYwZTM0YzRjNGI4ZTgyNzJjY2NjYTBkMDM0ZDUyYjZhZWI2ODJlZTZjMjU0MDNiODBlMzI4YWNmZGY2OWQ2YjhiYzM2N2RhMmI1YWEwYTlmMTFiYWI2OWQxNTc5N2YyZDk4NA==";
-
+      "QUzAwMDA3NTE2OTZ8MTQ0NzY3MjE4ODV8NGE4MThhNjI0Mzc5NGYxYWQzMTdiYmQ3MjdhMTFjOTU3NWRmZjFkYzZjNjYzZGRjMzE2NDkyMGFmZDBhNTJkODVhNzA0Njk4NjI0YTljYTE0MzFhZDUyMDlkOTAzZjdlMmNjN2NkODFkMjA0MTRmYjBmYTZiNmJlOTM5ZTQ0NDQ=";
     // Encryption using SHA512
     const dataToHash = `${transactionId}${secretKey}`;
 
     const apiHash = cryptoJS.SHA512(dataToHash).toString();
-    const url = `https://demo.remita.net/payment/v1/payment/query/${transactionId}`;
+    const url = `https://login.remita.net/payment/v1/payment/query/${transactionId}`;
     //make a get request to remita
     const options = {
       method: "GET",
@@ -50,14 +47,11 @@ export const POST = auth(async (...request: any) => {
     };
     const response = await fetch(url, options);
     const data = await response.json();
-    if (data.responseCode === "34") {
-      console.error("Api Hashing Error:", data.responseMsg);
-    } else {
-      console.log("Response Data:", data);
-    }
-
-    console.log("REMITA_SECRET:", process.env.REMITA_SECRET);
-    console.log("REMITA_PUBLIC_KEY:", process.env.REMITA_PUBLIC_KEY);
+    // if (data.responseCode === "34") {
+    //   console.error("Api Hashing Error:", data.responseMsg);
+    // } else {
+    //   console.log("Response Data:", data);
+    // }
     return Response.json(data, { status: response.status });
   } catch (error) {
     return Response.json(

@@ -38,8 +38,11 @@ import mongoose, { Types } from 'mongoose'
        paymentResult: {
          id: String,
          status: String,
-         update_time: String,
-         email_address: String
+         update_time: Date,
+         email_address: String,
+         cardType: String,
+         debitedAmount: Number,
+         paymentChannel: String,
        },
        itemsPrice: { type: Number, required: true },
        shippingPrice: { type: Number, required: true },
