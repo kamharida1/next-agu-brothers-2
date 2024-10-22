@@ -28,7 +28,7 @@ export default function ProductDetails({
   }
 }) {
   const { data: session } = useSession()
-  const { data: product } = useSWR(
+  const { data: product, error: productError } = useSWR(
     `/api/products/${params.slug}`
   )
   const { data: reviews, error: reviewsError } = useSWR(
@@ -85,6 +85,7 @@ export default function ProductDetails({
       }
     )
 
+  if (productError) return <div>Error loading product: {productError.message}</div>
 
   if (!product) return <div>Loading...</div>
 
