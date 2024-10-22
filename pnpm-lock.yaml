@@ -47,6 +47,9 @@ importers:
       dompurify:
         specifier: ^3.1.6
         version: 3.1.7
+      form-data:
+        specifier: ^4.0.1
+        version: 4.0.1
       framer-motion:
         specifier: ^11.3.2
         version: 11.11.9(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -135,6 +138,9 @@ importers:
       '@types/dompurify':
         specifier: ^3.0.5
         version: 3.0.5
+      '@types/form-data':
+        specifier: ^2.5.0
+        version: 2.5.0
       '@types/node':
         specifier: ^20
         version: 20.12.12
@@ -659,6 +665,10 @@ packages:
 
   '@types/dompurify@3.0.5':
     resolution: {integrity: sha512-1Wg0g3BtQF7sSb27fJQAKck1HECM6zV1EB66j8JH9i3LCjYabJa0FSdiSgsD5K/RbrsR0SiraKacLB+T8ZVYAg==}
+
+  '@types/form-data@2.5.0':
+    resolution: {integrity: sha512-23/wYiuckYYtFpL+4RPWiWmRQH2BjFuqCUi2+N3amB1a1Drv+i/byTrGvlLwRVLFNAZbwpbQ7JvTK+VCAPMbcg==}
+    deprecated: This is a stub types definition. form-data provides its own type definitions, so you do not need this installed.
 
   '@types/json5@0.0.29':
     resolution: {integrity: sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==}
@@ -3084,6 +3094,10 @@ snapshots:
   '@types/dompurify@3.0.5':
     dependencies:
       '@types/trusted-types': 2.0.7
+
+  '@types/form-data@2.5.0':
+    dependencies:
+      form-data: 4.0.1
 
   '@types/json5@0.0.29': {}
 
