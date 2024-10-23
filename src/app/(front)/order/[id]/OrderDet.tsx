@@ -45,6 +45,7 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
   const [statusLoading, setStatusLoading] = useState<boolean>(false);
   const [responseData, setResponseData] = useState<any | null>(null);
   const [transError, setTransError] = useState<any | null>("");
+  const [loading, setLoading] = useState(false);
 
   // Paystack payment
   const config: Config = {
@@ -201,6 +202,31 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
     } catch (err) {
       console.error("Error sending mail:", err);
     }
+  }
+
+  
+  let obj = {
+    amount: totalPrice,
+    email: shippingAddress.email,
+    currency: "NGN",
+    description: `Payment for order ${orderId}`,
+    meta: shippingAddress.fullName,
+    callback: window.location.href,
+    isAPI: true,
+  };
+
+  const token = "PK_TEST_98a4f6909c45b5dc0bdbb0d87230c5de";
+
+  // Trigger payment modal via HydrogenPay script
+  async function openDialogModal() {
+    if (typeof (window as any).handlePgData === "undefined") {
+      console.error("Hydrogen Payment Engine not loaded");
+      return;
+    }
+    let res = (window as any).handlePgData(obj, token, () => {
+      console.log("Payment dialog closed");
+    });
+    console.log("return transaction ref", await res);
   }
 
   async function onApproveRemitaOrder(data: any) {
@@ -519,6 +545,10 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
         src="https://login.remita.net/payment/v1/remita-pay-inline.bundle.js"
         strategy="lazyOnload"
       />
+      <Script
+        src="https://js.hydrogenpay.com/inline.js"
+        strategy="lazyOnload"
+      />
 
       <div>
         <h1 className="text-2xl py-4"> Order {orderId}</h1>
@@ -646,6 +676,22 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
                   <div className="flex justify-between">
                     <span>Debited Amount</span>
                     <span>{formatPrice(paymentResult?.debitedAmount)}</span>
+                  </div>
+                )}
+                {!isPaid && paymentMethod === "HydrogenPay" && (
+                  <div>
+                    <ul>
+                      <li>
+                        <button
+                          className="btn btn-primary w-full my-2"
+                          disabled={loading}
+                          onClick={() => openDialogModal()}
+                          id="hydrogen-pay-button"
+                        >
+                          {loading ? "Processing..." : "Pay with HydrogenPay"}
+                        </button>
+                      </li>
+                    </ul>
                   </div>
                 )}
                 {!isPaid && paymentMethod === "Remita" && (
