@@ -3,7 +3,6 @@ import CldImage from "@/components/CldImage"
 import { Product } from "@/lib/models/ProductModel"
 import { formatPrice } from "@/lib/utils"
 import Link from "next/link"
-import { format } from "path"
 import { RiBloggerLine } from "react-icons/ri"
 import useSWR from "swr"
 
@@ -41,19 +40,19 @@ export default function ProductList() {
         </ul>
       </div>
       <div className="block">
-        <div className="grid grid-cols-5 gap-4 m-4">
+        {/* Responsive grid for different screen sizes */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 m-4">
           {products.map((product: Product) => (
-            <div key={product.slug} className="border border-gray-200 p-4">
+            <div key={product.slug} className="border border-gray-200 p-4 rounded-lg hover:shadow-lg transition-shadow">
               <Link href={`/product/${product.slug}`}>
                 <CldImage
                   src={product.image}
                   alt={product.name}
                   width={200}
                   height={200}
-                  className="object-cover w-full h-48"
+                  className="object-cover w-full h-48 rounded-md"
                 />
-                <h2 className="text-lg font-semibold">{product.name}</h2>
-                {/* <p className="text-sm text-gray-600">{product.description}</p> */}
+                <h2 className="text-lg font-semibold mt-2">{product.name}</h2>
                 <p className="text-lg font-semibold text-orange-600">
                   {formatPrice(product.price)}
                 </p>
@@ -66,8 +65,3 @@ export default function ProductList() {
   )
 }
 
-const ProductTile = () => { 
-  return (
-    <></>
-  )
-}
