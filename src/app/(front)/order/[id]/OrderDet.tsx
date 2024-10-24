@@ -94,8 +94,8 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
       const data = await res.json();
       res.ok
         ? toast.success("Order deleted successfully")
-        : toast.error(data.message);
-      router.push("/orders");
+        : toast.error(data.message); 
+      router.push("/");
     });
 
   const { trigger: deleteOrder, isMutating: isDeleting } = useSWRMutation(
