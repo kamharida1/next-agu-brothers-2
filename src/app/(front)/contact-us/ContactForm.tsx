@@ -7,13 +7,13 @@ import { Contact } from '@/lib/models/ContactModel'
 
 
 const ContactForm = () => {
-  const { data: session } = useSession()
-  // user's email
-  const email = session?.user?.email as string
+  // const { data: session } = useSession()
+  // // user's email
+  // const email = session?.user?.email as string
 
   const [formData, setFormData] = useState({
     name: '',
-    email,
+    email: '',
     message: '',
     phone: '',
     read: false,

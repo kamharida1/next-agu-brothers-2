@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 
 export default function About() {
   return (
-    <div className="min-h-screen ">
+    <div className="min-h-screen">
       {/* Breadcrumb Navigation */}
       <div className="text-sm breadcrumbs border-b border-gray-300 dark:border-gray-700">
         <ul className="container mx-auto px-4 flex space-x-2">
