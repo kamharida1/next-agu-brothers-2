@@ -74,7 +74,7 @@ const Form = () => {
     <div>
       <CheckoutSteps current={4} />
 
-      <div className="grid md:grid-cols-4 md:gap-5 my-4">
+      <div className="grid md:grid-cols-4 md:gap-5 my-4 mx-2">
         <div className="overflow-x-auto md:col-span-3">
           <div className="card bg-base-300">
             <div className="card-body">
@@ -93,7 +93,7 @@ const Form = () => {
               </div>
             </div>
           </div>
-          <div className="card bg-base-300 mt-4">
+          <div className="card bg-base-300 mt-4 ">
             <div className="card-body">
               <h2 className="card-title">Payment Method</h2>
               <p>{paymentMethod}</p>
@@ -104,7 +104,7 @@ const Form = () => {
               </div>
             </div>
           </div>
-          <div className="card bg-base-300 mt-4">
+          <div className="card bg-base-300 mt-4 ">
             <div className="card-body">
               <h2 className="card-title">Items</h2>
               <table className="table ">
@@ -151,7 +151,7 @@ const Form = () => {
           </div>
         </div>
         <div>
-          <div className="card bg-base-300">
+          <div className="card bg-base-300 mt-4">
             <div className="card-body">
               <h2 className="card-title">Order Summary</h2>
               <ul className="space-y-3">
