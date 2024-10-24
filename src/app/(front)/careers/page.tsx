@@ -59,7 +59,7 @@ export default async function Careers() {
             <JobItem key={job._id} job={job} />
           ))}
         </ul>
-        <p className="mt-4 text-slate-700">
+        <p className="mt-4">
           Thank you for your interest in joining Agu Brothers. We look forward
           to reviewing your application!
         </p>
