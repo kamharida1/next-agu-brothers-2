@@ -9,8 +9,8 @@ import { formatPrice } from '@/lib/utils'
 export default function Wishlist() {
   const { items, removeItem } = useWishListStore()
   return (
-    <div className="w-full h-screen px-3 py-2">
-      <div className="text-sm breadcrumbs  border-b-2 border-b-orange-600">
+    <div className="container mx-auto px-3 py-2">
+      <div className="text-sm breadcrumbs border-b-2 border-b-orange-600">
         <ul className="dark:text-black">
           <li>
             <Link href={'/'}>
@@ -36,7 +36,7 @@ export default function Wishlist() {
           </li>
         </ul>
       </div>
-      <div className="w-full h-5/6 py-5">
+      <div className="w-full py-5">
         <h1 className="text-2xl font-bold text-center">Favourite Products</h1>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-5">
           {items.length === 0 ? (
