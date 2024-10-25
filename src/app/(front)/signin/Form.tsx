@@ -13,7 +13,7 @@ type Inputs = {
 const Form = () => {
   const { data: session } = useSession()
   const params = useSearchParams()
-  let callbackUrl = params.get('callbackUrl') || 'https://agubrothers.com'
+  let callbackUrl = params.get('callbackUrl') || 'https://www.agubrothers.com'
   const router = useRouter()
 
   const {

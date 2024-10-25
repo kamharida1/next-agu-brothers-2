@@ -25,7 +25,7 @@ export const hydrogenPay = {
         amount,
         email,
         customerName,
-        callbackUrl: callbackUrl || "https://agubrothers.com",
+        callbackUrl: callbackUrl || "https://www.agubrothers.com",
       }),
     });
     return handleResponse(response);

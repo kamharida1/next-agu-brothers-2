@@ -18,7 +18,7 @@ const Form = () => {
   const params = useSearchParams()
   const router = useRouter()
 
-  let callbackUrl = params.get('callbackUrl') || 'https://agubrothers.com'
+  let callbackUrl = params.get('callbackUrl') || 'https://www.agubrothers.com'
   const {
     register,
     handleSubmit,
