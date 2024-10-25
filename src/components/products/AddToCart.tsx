@@ -4,7 +4,10 @@ import useCartService from "@/lib/hooks/useCartStore";
 import { OrderItem } from "@/lib/models/OrderModel";
 import clsx from "clsx";
 import { useRouter } from "next/navigation";
+import toast from 'react-hot-toast';
+
 import { useEffect, useState } from "react";
+import { FaShoppingCart } from "react-icons/fa";
 
 export default function AddToCart({ item, brand }: { item: OrderItem;  brand?: string }) { 
   const router = useRouter()
@@ -17,6 +20,19 @@ export default function AddToCart({ item, brand }: { item: OrderItem;  brand?: s
   
   const addToCartHandler = () => { 
     increase(item)
+     // Show toast notification
+     toast.success(
+      `${item.name} has been added to your cart!`,
+      {
+        icon: <FaShoppingCart />,
+        duration: 3000,
+        style: {
+          borderRadius: '8px',
+          background: '#333',
+          color: '#fff',
+        },
+      }
+    );
   }
 
   return (existItem && !brand ) ? (
