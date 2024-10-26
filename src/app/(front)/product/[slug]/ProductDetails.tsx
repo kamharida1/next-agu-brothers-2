@@ -14,7 +14,6 @@ import ReviewForm from './ReviewForm'
 import useSWRMutation from 'swr/mutation'
 import useSWR, { mutate } from 'swr'
 import { useSession } from 'next-auth/react'
-import Head from 'next/head'
 
 const formatDate = (dateString: any) => {
   return format(new Date(dateString), 'MMMM do yyyy, h:mm:ss a')

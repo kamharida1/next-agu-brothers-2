@@ -18,7 +18,7 @@ const Form = () => {
     if (!shippingAddress.address) {
       return router.push('/shipping')
     }
-    setSelectedPaymentMethod(paymentMethod || 'Remita')
+    setSelectedPaymentMethod(paymentMethod || 'Transfer')
   }, [paymentMethod, router, shippingAddress.address])
 
   return (
@@ -29,7 +29,7 @@ const Form = () => {
         <div className="card-body">
           <h1 className="card-title">Payment Method</h1>
           <form onSubmit={handleSubmit}>
-            {['Remita', 'PayStack', 'HydrogenPay'].map((payment) => (
+            {['Transfer', 'Cash on Delivery'].map((payment) => (
               <div key={payment}>
                 <label className="label cursor-pointer">
                   <span className="label-text">{payment}</span>
