@@ -33,20 +33,12 @@ type Config = {
 export default function OrderDetails({ orderId }: { orderId: string }) {
   const [isModalVisible, setIsModalVisible] = useState(false); // Control modal visibility
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [amount, setAmount] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
+
   const [paymentResult, setPaymentResult] = useState<any | null>(null);
   const [isPaid, setIsPaid] = useState(false);
   const [paidAt, setPaidAt] = useState("");
-  const [narration, setNarration] = useState("");
-  const [transactionId, setTransactionId] = useState("");
-  const [statusLoading, setStatusLoading] = useState<boolean>(false);
-  const [responseData, setResponseData] = useState<any | null>(null);
-  const [transError, setTransError] = useState<any | null>("");
-  const [loading, setLoading] = useState(false);
+  const [isCashModalVisible, setIsCashModalVisible] = useState(false); // Cash on Delivery modal
+
 
   // User can delete their order using useSWRMutation
   const { trigger: userDeleteOrder, isMutating: isUserDeleting } =
@@ -118,12 +110,6 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
 
   useEffect(() => {
     if (data) {
-      setEmail(data.shippingAddress.email);
-      setFirstName(data.shippingAddress.fullName.split(" ")[0]);
-      setLastName(data.shippingAddress.fullName.split(" ")[1]);
-      setAmount(data.totalPrice);
-      setPhoneNumber(data.shippingAddress.phoneNumber);
-      setNarration(`Payment for order ${orderId}`);
       setIsPaid(data.isPaid);
       setPaidAt(data.paidAt);
       setPaymentResult(data.paymentResult);
@@ -251,7 +237,50 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
           </div>
         </div>
       )}
-
+    {/* Cash on Delivery Modal */}
+    {isCashModalVisible && (
+        <div className="modal modal-open w-full flex items-center justify-center transition-all ease-in-out duration-500">
+          <div className="modal-box w-full relative">
+            <button
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-2xl transition-colors"
+              onClick={() => setIsCashModalVisible(false)}
+            >
+              <AiOutlineCloseCircle />
+            </button>
+            <h3 className="font-bold text-lg text-center text-gray-800 mb-6">
+              Cash on Delivery Instructions
+            </h3>
+            <div className="mb-4">
+              <p className="text-sm">
+                Cash on Delivery is available only to customers in the local area of our office. Please ensure you meet the eligibility criteria, visit us at:
+              </p>
+              <p className="text-md font-bold">
+                Address: Agu Brothers Electronics, 33 Ogui Road, Enugu State, Nigeria
+              </p>
+              <p className="text-md font-bold">Contact: +2349099234242</p>
+            </div>
+            <div className="mb-4">
+              <p className="text-sm">
+                If you live outside this area, kindly choose another payment method or contact us on WhatsApp for further assistance.
+              </p>
+            </div>
+            <div className="flex justify-center">
+              <button
+                className="btn btn-primary w-full hover:bg-blue-600 transition duration-300 ease-in-out px-8 py-2 text-white rounded-md shadow-lg"
+                onClick={() => {
+                  setIsCashModalVisible(false);
+                  toast.success(
+                    'Cash on Delivery instructions acknowledged.',
+                    { duration: 5000 }
+                  );
+                }}
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div>
         <h1 className="text-2xl py-4"> Order {orderId}</h1>
         <div className="grid md:grid-cols-4 md:gap-5 my-4">
@@ -394,6 +423,14 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
                       </li>
                     </ul>
                   </div>
+                )}
+                {!isPaid && paymentMethod === 'Cash on Delivery' && (
+                  <button
+                    className="btn btn-primary w-full hover:bg-blue-600 transition duration-300 ease-in-out px-8 py-2 text-white rounded-md shadow-lg"
+                    onClick={() => setIsCashModalVisible(true)}
+                  >
+                    Cash on Delivery Instructions
+                  </button>
                 )}
                 {/* User can delete unpaid order */}
                 {!isPaid && !session?.user.isAdmin && (
