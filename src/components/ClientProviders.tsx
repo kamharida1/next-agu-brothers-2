@@ -28,25 +28,46 @@ export default function ClientProviders({
       window.removeEventListener('focus', updateStore)
     }
   }, [])
+  const fetcher = async (resource: string, init?: RequestInit) => {
+    // Setup an AbortController for the fetch
+    const controller = new AbortController();
+    const signal = controller.signal;
+    init = { ...init, signal };
+  
+    try {
+      const res = await fetch(resource, init);
+  
+      // Handle non-200 status responses
+      if (!res.ok) {
+        const error = new Error(`Fetch failed with status: ${res.status}`);
+        error.name = 'FetchError';
+        throw error;
+      }
+  
+      // Parse and return the JSON response
+      return await res.json();
+    } catch (error) {
+      if ((error as Error).name !== 'AbortError') {
+        console.error(`Failed to fetch from ${resource}:`, error);
+        throw error;
+      }
+    }
+  };
   return (
     <SWRConfig
       value={{
-        onError: (error, key) => {
-          toast.error(`Error fetching data from ${key}: ${error.message}`)
-        },
-        fetcher: async (resource, init) => {
-          try {
-            const res = await fetch(resource, init)
-            if (!res.ok) {
-              throw new Error(`An error occurred while fetching the data from ${resource}.`)
-            }
-            return res.json()
-          } catch (error) {
-            console.error(`Failed to fetch from ${resource}:`, error)
-            throw error
-          }
-        },
-      }}
+      fetcher,
+      onError: (error, key) => {
+        // Only show an error message for user-critical operations
+        if (key.includes('/api/products')) {
+          toast.error('Failed to load data. Please try again.');
+        } else {
+          toast.error(`Error fetching data from ${key}: ${error.message}`);
+        }
+      },
+      revalidateOnFocus: false, // Disable re-fetch on window focus
+      revalidateOnReconnect: false, // Disable re-fetch on reconnect
+    }}
     >
       <div data-theme={selectedTheme}>
         <Toaster toastOptions={{ className: 'toaster-con' }} />
