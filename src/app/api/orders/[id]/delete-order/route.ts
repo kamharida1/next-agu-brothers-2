@@ -31,7 +31,7 @@ export const DELETE = auth(async (...request: any) => {
     }
 
     // Check if the user is an admin or the owner of the order
-    if (user.isAdmin || order.user.toString() === user._id.toString()) {
+    if (order.user.toString() === user._id.toString()) {
       // Check if the order is paid
       if (order.isPaid) {
         return new Response(

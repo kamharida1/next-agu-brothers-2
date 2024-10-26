@@ -28,7 +28,7 @@ export default function AddToCart({ item, brand }: { item: OrderItem;  brand?: s
         duration: 3000,
         style: {
           borderRadius: '8px',
-          background: '#333',
+         backgroundColor: 'green',
           color: '#fff',
         },
       }

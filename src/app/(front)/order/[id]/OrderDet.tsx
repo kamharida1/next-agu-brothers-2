@@ -22,6 +22,7 @@ declare global {
 import toast from "react-hot-toast";
 import useSWR from "swr";
 import useSWRMutation from "swr/mutation";
+import { FaWhatsapp } from "react-icons/fa";
 
 type Config = {
   reference: string;
@@ -47,41 +48,6 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
   const [transError, setTransError] = useState<any | null>("");
   const [loading, setLoading] = useState(false);
 
-  // Paystack payment
-  const config: Config = {
-    reference: new Date().getTime().toString(),
-    email: email,
-    amount: Number(amount),
-    publicKey: "pk_test_e10dba7e643757aaf5a1280e8d4c4538fb6318a8",
-  };
-
-  const onSuccess = (reference: any) => {
-    console.log(reference);
-    onApprovePaystackOrder(reference);
-  };
-  const onClose = () => {
-    console.log("closed");
-  };
-
-  const PaystackHookButton = () => {
-    const initializePayment = usePaystackPayment(config);
-    return (
-      <div>
-        <button
-          className="btn btn-primary w-full hover:bg-blue-600 transition duration-300 ease-in-out px-8 py-2 text-white rounded-md shadow-lg"
-          onClick={() => {
-            initializePayment({ onSuccess, onClose });
-          }}
-        >
-          Pay with Paystack
-        </button>
-      </div>
-    );
-  };
-
-  const publicKey =
-    "UzAwMDA3NTE2OTZ8MTQ0NzY3MjE4ODV8NGE4MThhNjI0Mzc5NGYxYWQzMTdiYmQ3MjdhMTFjOTU3NWRmZjFkYzZjNjYzZGRjMzE2NDkyMGFmZDBhNTJkODVhNzA0Njk4NjI0YTljYTE0MzFhZDUyMDlkOTAzZjdlMmNjN2NkODFkMjA0MTRmYjBmYTZiNmJlOTM5ZTQ0NDQ=";
-
   // User can delete their order using useSWRMutation
   const { trigger: userDeleteOrder, isMutating: isUserDeleting } =
     useSWRMutation(`/api/orders/${orderId}`, async (url) => {
@@ -94,7 +60,7 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
       const data = await res.json();
       res.ok
         ? toast.success("Order deleted successfully")
-        : toast.error(data.message); 
+        : toast.error(data.message);
       router.push("/");
     });
 
@@ -204,203 +170,7 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
     }
   }
 
-  
-  let obj = {
-    amount: totalPrice,
-    email: shippingAddress.email,
-    currency: "NGN",
-    description: `Payment for order ${orderId}`,
-    meta: shippingAddress.fullName,
-    callback: window.location.href,
-    isAPI: true,
-  };
-
-  const token = "PK_TEST_98a4f6909c45b5dc0bdbb0d87230c5de";
-
-  // Trigger payment modal via HydrogenPay script
-  async function openDialogModal() {
-    if (typeof (window as any).handlePgData === "undefined") {
-      console.error("Hydrogen Payment Engine not loaded");
-      return;
-    }
-    let res = (window as any).handlePgData(obj, token, () => {
-      console.log("Payment dialog closed");
-    });
-    console.log("return transaction ref", await res);
-  }
-
-  async function onApproveRemitaOrder(data: any) {
-    try {
-      const response = await fetch(
-        `/api/orders/${orderId}/capture-remita-order`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        }
-      );
-
-      if (!response.ok) {
-        // If the response is not OK, throw an error with the status code
-        const errorMessage = await response.text(); // Fetch the error message from the response
-        throw new Error(
-          `HTTP error! Status: ${response.status} - ${errorMessage}`
-        );
-      }
-
-      const orderData = await response.json();
-
-      // Handle successful response
-      toast.success("Order paid successfully");
-      setIsPaid(true);
-      setPaidAt(orderData.paidAt);
-      setPaymentResult(orderData.paymentResult);
-      setResponseData(orderData.paymentResult);
-      sendMail(orderData);
-      return orderData;
-    } catch (error) {
-      // Handle fetch or JSON parsing error
-      console.error("Error processing order payment:", error);
-      toast.error("Failed to process payment. Please try again.");
-    }
-  }
-
-  async function onApprovePaystackOrder(data: any) {
-    try {
-      const response = await fetch(
-        `/api/orders/${orderId}/capture-paystack-order`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        }
-      );
-
-      if (!response.ok) {
-        // If the response is not OK, throw an error with the status code
-        const errorMessage = await response.text(); // Fetch the error message from the response
-        throw new Error(
-          `HTTP error! Status: ${response.status} - ${errorMessage}`
-        );
-      }
-
-      const orderData = await response.json();
-
-      // Handle successful response
-      toast.success("Order paid successfully");
-      setIsPaid(true);
-      setPaidAt(orderData.paidAt);
-      setPaymentResult(orderData.paymentResult);
-      setResponseData(orderData.paymentResult);
-      sendMail(orderData);
-      return orderData;
-    } catch (error) {
-      // Handle fetch or JSON parsing error
-      console.error("Error processing order payment:", error);
-      toast.error("Failed to process payment. Please try again.");
-    }
-  }
-  //const [firstName, lastName] = shippingAddress.fullName.trim().split(" ");
-
-  // const makePayment = () => {
-  //   if (typeof window.RmPaymentEngine === "undefined") {
-  //     console.error("Payment engine script not loaded.");
-  //     return;
-  //   }
-
-  //   const handler = window.RmPaymentEngine.init({
-  //     key: "QzAwMDAyNzEyNTl8MTEwNjE4NjF8OWZjOWYwNmMyZDk3MDRhYWM3YThiOThlNTNjZTE3ZjYxOTY5NDdmZWE1YzU3NDc0ZjE2ZDZjNTg1YWYxNWY3NWM4ZjMzNzZhNjNhZWZlOWQwNmJhNTFkMjIxYTRiMjYzZDkzNGQ3NTUxNDIxYWNlOGY4ZWEyODY3ZjlhNGUwYTY=", // Replace with actual public key
-  //     customerId: shippingAddress.email, // Replace with customer id
-  //     transactionId: Math.random(), // Replace with unique transaction id
-  //     lastName,
-  //     firstName,
-  //     email: email,
-  //     amount: totalPrice,
-  //     narration: `Payment for order ${orderId}`,
-  //     onSuccess: (response: any) => {
-  //       console.log("callback Successful Response", response);
-  //       onApproveRemitaOrder(response);
-  //     },
-  //     onError: (response: any) => {
-  //       console.log("callback Error Response", response);
-  //     },
-  //     onClose: () => {
-  //       console.log("Transaction closed by user");
-  //     },
-  //   });
-
-  //   handler.openIframe();
-  // };
-
-  const makePayment = (e: any) => {
-    e.preventDefault();
-
-    if (typeof window.RmPaymentEngine === "undefined") {
-      console.error("RmPaymentEngine is not loaded yet");
-      return;
-    }
-
-    var paymentEngine = window.RmPaymentEngine.init({
-      key: publicKey,
-      customerId: email,
-      firstName: firstName,
-      lastName: lastName,
-      email: email,
-      phoneNumber: phoneNumber,
-      amount: amount,
-      narration: narration,
-      transactionId: Math.floor(Math.random() * 100000000),
-      onSuccess: function (response: any) {
-        console.log("callback Successful Response", response);
-        setTransactionId(response.transactionId);
-        setIsModalVisible(false);
-        checkTransStatus(response.transactionId);
-      },
-      onError: function (response: any) {
-        console.log("callback Error Response", response);
-        setIsModalVisible(false);
-      },
-      onClose: function () {
-        console.log("Payment widget closed");
-        setIsModalVisible(false);
-      },
-    });
-
-    paymentEngine.showPaymentWidget();
-  };
-
-  const checkTransStatus = async (transactionId: string) => {
-    try {
-      setTransError(null);
-      setResponseData(null);
-      setStatusLoading(true);
-      const response = await fetch(
-        `/api/orders/${orderId}/remita/check-trans-status`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ transactionId }),
-        }
-      );
-      const data = await response.json();
-      if (data) {
-        //setResponseData(data);
-        onApproveRemitaOrder(data);
-      } else {
-        setTransError("Failed to check Transaction status");
-      }
-    } catch (err: any) {
-      setTransError("An error occured: " + err.message);
-    } finally {
-      setStatusLoading(false);
-    }
-  };
+  async function makePayment(e: React.FormEvent) {}
 
   return (
     <>
@@ -418,137 +188,69 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
             {/* Close Button */}
             <button
               className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-2xl transition-colors"
-              onClick={() => setIsModalVisible(false)}
+              onClick={() => {
+                setIsModalVisible(false);
+              }}
             >
               <AiOutlineCloseCircle />
             </button>
 
-            <h3 className="font-bold text-xl text-center text-gray-800 mb-6">
-              Pay with Remita
+            <h3 className="font-bold text-lg text-center text-gray-800 mb-6">
+              Pay with Transfer
             </h3>
 
-            <form
-              onSubmit={makePayment}
-              id="payment-form"
-              className="space-y-4 w-full mx-auto" // Center form and set max width
-            >
-              <div className="form-control mb-4 w-full">
-                <label htmlFor="email" className="label text-center">
-                  <span className="label-text">Email</span>
-                </label>
-                <input
-                  type="email"
-                  className="input input-bordered w-full bg-gray-100 focus:ring focus:ring-blue-500 rounded-lg"
-                  id="email"
-                  placeholder="Enter Email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  name="email"
-                  required
-                />
-              </div>
-              {/*phoneNumber */}
-              {/* <div className="form-control mb-4">
-                <label htmlFor="phoneNumber" className="label text-center">
-                  <span className="label-text">Phone Number</span>
-                </label>
-                <input
-                  type="text"
-                  className="input input-bordered w-full bg-gray-100 focus:ring focus:ring-blue-500 rounded-lg"
-                  id="phoneNumber"
-                  placeholder="Enter Phone Number"
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  name="phoneNumber"
-                />
-              </div> */}
-
-              <div className="form-control mb-4">
-                <label htmlFor="firstName" className="label text-center">
-                  <span className="label-text">First Name</span>
-                </label>
-                <input
-                  type="text"
-                  className="input input-bordered w-full bg-gray-100 focus:ring focus:ring-blue-500 rounded-lg"
-                  id="firstName"
-                  placeholder="Enter First Name"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  name="firstName"
-                  required
-                />
-              </div>
-
-              <div className="form-control mb-4">
-                <label htmlFor="lastName" className="label text-center">
-                  <span className="label-text">Last Name</span>
-                </label>
-                <input
-                  type="text"
-                  className="input input-bordered w-full bg-gray-100 focus:ring focus:ring-blue-500 rounded-lg"
-                  id="lastName"
-                  placeholder="Enter Last Name"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  name="lastName"
-                  required
-                />
-              </div>
-
-              <div className="form-control mb-4">
-                <label htmlFor="amount" className="label text-center">
-                  <span className="label-text">Amount</span>
-                </label>
-                <input
-                  type="number"
-                  className="input input-bordered w-full bg-gray-100 focus:ring focus:ring-blue-500 rounded-lg"
-                  id="amount"
-                  placeholder="Enter Amount"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  name="amount"
-                  required
-                />
-              </div>
-
-              <div className="form-control mb-6">
-                <label htmlFor="narration" className="label text-center">
-                  <span className="label-text">Narration</span>
-                </label>
-                <input
-                  type="text"
-                  className="input input-bordered w-full bg-gray-100 focus:ring focus:ring-blue-500 rounded-lg"
-                  id="narration"
-                  placeholder="Enter Narration"
-                  value={narration}
-                  onChange={(e) => setNarration(e.target.value)}
-                  name="narration"
-                  required
-                />
-              </div>
-
-              <div className="modal-action flex justify-center">
-                <button type="submit" className="btn btn-primary">
-                  Pay Now
-                </button>
-              </div>
-            </form>
+            <div className="mb-4">
+              <p className="text-sm">
+                Please transfer the total amount of{" "}
+                <span className="font-bold">{formatPrice(totalPrice)}</span> to
+                the following bank account:
+              </p>
+              <p className="text-md font-bold">
+                Account Name: Agu Brothers Electronics
+              </p>
+              <p className="text-md font-bold">Account Number: 1895049684</p>
+              <p className="text-md font-bold">Bank: Access Bank PLC</p>
+              <p className="text-md font-bold flex items-center">
+                Phone Number: +2349099234242
+                <Link
+                  href="https://wa.me/2349099234242" // Replace with your WhatsApp number
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Contact us on WhatsApp"
+                >
+                  <FaWhatsapp size={30} color="green" />
+                </Link>
+              </p>
+            </div>
+            <div className="mb-4">
+              <p className="text-sm">
+                After completing the transfer, please send a screenshot of your
+                successful transaction to the Whatsapp phone number above.
+              </p>
+            </div>
+            <div className="flex justify-center">
+              <button
+                className="btn btn-primary w-full hover:bg-blue-600 transition duration-300 ease-in-out px-8 py-2 text-white rounded-md shadow-lg"
+                onClick={() => {
+                  setIsModalVisible(false);
+                  toast.success(
+                    "Please wait a few minutes. You will receive an email confirming your order.",
+                    { duration: 5000 }
+                  );
+                }}
+              >
+                I have completed the transfer
+              </button>
+            </div>
+            <div className="mt-4 text-center"></div>
+            <p className="text-xs ">
+              After payment, please come back to this page and note that
+              &quot;Not Paid&quot; has changed to &quot;Paid&quot; and the
+              &quot;Paid At&quot; field will be updated.
+            </p>
           </div>
         </div>
       )}
-
-      <Script
-        src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/js/bootstrap.bundle.min.js"
-        strategy="beforeInteractive"
-      />
-      <Script
-        src="https://login.remita.net/payment/v1/remita-pay-inline.bundle.js"
-        strategy="lazyOnload"
-      />
-      <Script
-        src="https://js.hydrogenpay.com/inline.js"
-        strategy="lazyOnload"
-      />
 
       <div>
         <h1 className="text-2xl py-4"> Order {orderId}</h1>
@@ -678,23 +380,8 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
                     <span>{formatPrice(paymentResult?.debitedAmount)}</span>
                   </div>
                 )}
-                {!isPaid && paymentMethod === "HydrogenPay" && (
-                  <div>
-                    <ul>
-                      <li>
-                        <button
-                          className="btn btn-primary w-full my-2"
-                          disabled={loading}
-                          onClick={() => openDialogModal()}
-                          id="hydrogen-pay-button"
-                        >
-                          {loading ? "Processing..." : "Pay with HydrogenPay"}
-                        </button>
-                      </li>
-                    </ul>
-                  </div>
-                )}
-                {!isPaid && paymentMethod === "Remita" && (
+
+                {!isPaid && paymentMethod === "Transfer" && (
                   <div>
                     <ul>
                       <li>
@@ -702,63 +389,12 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
                           className="btn btn-primary w-full hover:bg-blue-600 transition duration-300 ease-in-out px-8 py-2 text-white rounded-md shadow-lg"
                           onClick={() => setIsModalVisible(true)}
                         >
-                          Pay with Remita
+                          Pay with Transfer
                         </button>
                       </li>
                     </ul>
                   </div>
                 )}
-
-                {/* Paystack payment */}
-                {!isPaid && paymentMethod === "PayStack" && (
-                  <div>
-                    <ul>
-                      <li>
-                      <PaystackHookButton />
-                      </li>
-                    </ul>
-                  </div>
-                )}
-
-                {paymentMethod === "Remita" 
-                && paymentResult?.id && (
-                  <div className="mt-4">
-                    <h3 className="text-lg font-semibold">
-                      Check Remita Status
-                    </h3>
-                    <input
-                      type="text"
-                      className="input input-bordered w-full my-2"
-                      placeholder="Enter Transaction ID"
-                      value={paymentResult.id || transactionId}
-                      onChange={(e) => setTransactionId(e.target.value)}
-                    />
-                    <button
-                      className="btn btn-secondary w-full my-2"
-                      onClick={() => {
-                        if (paymentResult.id) {
-                          checkTransStatus(paymentResult.id);
-                        }
-                      }}
-                      disabled={statusLoading}
-                    >
-                      {statusLoading ? (
-                        <span className="loading loading-spinner"></span>
-                      ) : (
-                        "Check Transaction Status"
-                      )}
-                    </button>
-                    {responseData && (
-                      <div className="bg-base-100 p-4 rounded-lg shadow-md">
-                        <pre className="text-sm overflow-auto whitespace-pre-wrap break-words">
-                          {JSON.stringify(responseData, null, 2)}
-                        </pre>
-                      </div>
-                    )}
-                    {transError && <p className="text-error">{transError}</p>}
-                  </div>
-                )}
-
                 {/* User can delete unpaid order */}
                 {!isPaid && !session?.user.isAdmin && (
                   <div>
