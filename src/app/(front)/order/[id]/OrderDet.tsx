@@ -213,7 +213,7 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
               <p className="text-md font-bold flex items-center">
                 Phone Number: +2349099234242
                 <Link
-                  href="https://wa.me/1234567890" // Replace with your WhatsApp number
+                  href="https://wa.me/2349099234242" // Replace with your WhatsApp number
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Contact us on WhatsApp"
@@ -232,17 +232,22 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
               <button
                 className="btn btn-primary w-full hover:bg-blue-600 transition duration-300 ease-in-out px-8 py-2 text-white rounded-md shadow-lg"
                 onClick={() => {
-                  setIsModalVisible(false)
-                  toast.success("Please wait a few minutes. You will receive an email confirming your order.", { duration: 5000 });
+                  setIsModalVisible(false);
+                  toast.success(
+                    "Please wait a few minutes. You will receive an email confirming your order.",
+                    { duration: 5000 }
+                  );
                 }}
               >
                 I have completed the transfer
               </button>
             </div>
             <div className="mt-4 text-center"></div>
-              <p className="text-xs ">
-                After payment, please come back to this page and note that "Not Paid" has changed to "Paid" and the "Paid At" field will be updated.
-              </p>
+            <p className="text-xs ">
+              After payment, please come back to this page and note that
+              &quot;Not Paid&quot; has changed to &quot;Paid&quot; and the
+              &quot;Paid At&quot; field will be updated.
+            </p>
           </div>
         </div>
       )}
