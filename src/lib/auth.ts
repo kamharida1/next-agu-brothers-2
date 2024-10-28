@@ -69,10 +69,14 @@ export const config = {
       return session;
     },
     async signIn({ user, account, profile }: any) {
+      console.log("Google Profile Data:", profile);
+      console.log("Google Account Data:", account);
       try {
         await dbConnect();
         if (account.provider === "google") {
-          const existingUser = await UserModel.findOne({ email: profile.email });
+          const existingUser = await UserModel.findOne({
+            email: profile.email,
+          });
           if (!existingUser) {
             // Create new user
             const newUser = new UserModel({
@@ -95,7 +99,7 @@ export const config = {
         console.error("Error during sign-in:", error);
         return false; // Deny access if any error occurs
       }
-    },    
+    },
   },
 };
 
