@@ -68,7 +68,7 @@ export default function ProductDetails({
       `api/products/${params.slug}/reviews`,
       async (
         url: string,
-        { arg }: { arg: { productId: string; reviewId: string } }
+        { arg }: { arg: { reviewId: string } }
       ) => {
         const response = await fetch(url, {
           method: 'DELETE',
@@ -106,7 +106,7 @@ export default function ProductDetails({
 
   // User can delete their own review
   const handleUserDelete = async (reviewId: string) => {
-    await userDeleteReview({ productId: product._id, reviewId })
+    await userDeleteReview({ reviewId })
     mutate(`/api/products/${params.slug}/reviews`) // Re-fetch updated reviews
     mutate(`/api/products/${params.slug}`) // Re-fetch updated product
   }

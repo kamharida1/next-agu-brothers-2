@@ -98,7 +98,8 @@ export const POST = auth(async (...request: any) => {
   return Response.json({ message: 'Review added' })
 }) as any
 
-export const DELETE = auth(async (req: any) => {
+export const DELETE = auth(async (...request: any) => {
+  const [req, { params }] = request
   if (!req.auth) {
     return Response.json(
       { message: 'unauthorized' },
@@ -108,17 +109,19 @@ export const DELETE = auth(async (req: any) => {
     )
   }
 
-  const { productId, reviewId } = await req.json(); // Parse the JSON request
+  const { reviewId } = await req.json(); // Parse the JSON request
 
   await dbConnect();
 
   // Find the product by ID
-  const product = await ProductModel.findById(productId);
-  if (!product) {
+  const productToUpdate = await ProductModel.findOne({ slug: params.slug })
+  if (!productToUpdate) {
     return Response.json(
       { message: 'Product not found' },
-      { status: 404 }
-    );
+      {
+        status: 404,
+      }
+    )
   }
 
   // Find the review by ID to check if it exists
@@ -140,7 +143,7 @@ export const DELETE = auth(async (req: any) => {
   }
   // Remove the review from the product
   await ProductModel.findByIdAndUpdate(
-    productId,
+    productToUpdate._id,
     {
       $pull: { reviews: reviewId },
       $inc: { numReviews: -1 }
@@ -152,18 +155,18 @@ export const DELETE = auth(async (req: any) => {
   await ReviewModel.findByIdAndDelete(reviewId);
 
   // Recalculate the average rating after removing the review
-  const totalRating = product.reviews.reduce((acc: number, review: any) => {
+  const totalRating = productToUpdate.reviews.reduce((acc: number, review: any) => {
     if (review._id.toString() !== reviewId) {
       return acc + review.rating;
     }
     return acc;
   }, 0);
 
-  const newAverageRating = product.numReviews > 0 ? totalRating / product.numReviews : 0;
+  const newAverageRating = productToUpdate.numReviews > 0 ? totalRating / productToUpdate.numReviews : 0;
 
   // Update the product's rating
-  product.rating = newAverageRating;
-  await product.save();
+  productToUpdate.rating = newAverageRating;
+  await productToUpdate.save();
 
   return Response.json({ message: 'Review deleted successfully' });
 }) as any;
