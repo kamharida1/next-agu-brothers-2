@@ -69,29 +69,33 @@ export const config = {
       return session;
     },
     async signIn({ user, account, profile }: any) {
-      // Handle user creation/update logic here
-      await dbConnect();
-      if (account.provider === "google") {
-        const existingUser = await UserModel.findOne({ email: profile.email });
-        if (!existingUser) {
-          // If the user doesn't exist, create a new one
-          const newUser = new UserModel({
-            name: profile.name,
-            email: profile.email,
-            password: null, // Google users don't have a password
-            isAdmin: false, // You can set admin roles based on your requirements
-          });
-          await newUser.save();
-          user._id = newUser._id;
-          user.isAdmin = newUser.isAdmin;
-        } else {
-          // Assign existing user's _id and isAdmin to the current user object
-          user._id = existingUser._id;
-          user.isAdmin = existingUser.isAdmin;
+      try {
+        await dbConnect();
+        if (account.provider === "google") {
+          const existingUser = await UserModel.findOne({ email: profile.email });
+          if (!existingUser) {
+            // Create new user
+            const newUser = new UserModel({
+              name: profile.name,
+              email: profile.email,
+              password: null, // Google users don't have a password
+              isAdmin: false,
+            });
+            await newUser.save();
+            user._id = newUser._id;
+            user.isAdmin = newUser.isAdmin;
+          } else {
+            // Use existing user
+            user._id = existingUser._id;
+            user.isAdmin = existingUser.isAdmin;
+          }
         }
+        return true;
+      } catch (error) {
+        console.error("Error during sign-in:", error);
+        return false; // Deny access if any error occurs
       }
-      return true;
-    },
+    },    
   },
 };
 
