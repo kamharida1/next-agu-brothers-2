@@ -3,9 +3,15 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import dbConnect from "./dbConnect";
 import UserModel from "./models/UserModel";
 import bcrypt from "bcryptjs";
+import GoogleProvider from "next-auth/providers/google";
+
 
 export const config = {
   providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    }),
     CredentialsProvider({
       credentials: {
         email: {
