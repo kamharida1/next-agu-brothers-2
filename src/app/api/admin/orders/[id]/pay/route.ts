@@ -16,14 +16,6 @@ import ProductModel from '@/lib/models/ProductModel'
      try {
        await dbConnect()
 
-       const { 
-        email, 
-        firstName, 
-        lastName, 
-        amount,
-        phoneNumber,
-        narration, } = await req.json()
-
        const order = await OrderModel.findById(params.id)
        if (order) {
          order.isPaid = true
