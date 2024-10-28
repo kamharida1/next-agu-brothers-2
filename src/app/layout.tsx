@@ -19,12 +19,12 @@ export const metadata: Metadata = {
   metadataBase: new URL(`${process.env.NEXT_PUBLIC_BASE_URL}`),
   title: {
     default: 'Agu Brothers',
-    template: '%s | Agu Brothers',
+    template: '%s | Agu Brothers Electronics',
   },
   description:
-    'Discover the best in premium electronics and stylish furniture. Explore our diverse selection of high-quality products, ranging from the latest consumer electronics and gadgets to modern living room, bedroom, and office furniture. Benefit from affordable prices, exclusive deals, and exceptional customer service. Whether seeking cutting-edge technology or elegant home furnishings, our online store provides everything you need. Elevate your lifestyle with our top-rated electronics and bespoke furniture collections. Enjoy a seamless shopping experience for all your home electronics and furniture requirements.',
+    'Delivering top-quality home electronics and appliances to our valued customers. From cutting-edge high-definition televisions to energy-efficient refrigerators, versatile gas cookers, powerful freezers, generators, air conditioners, and a wide range of home essentials—our mission is clear: to offer reliable, innovative, and cost-effective solutions that elevate your everyday living experience.',
   verification: {
-    // google: "1234567890",
+    google: "google-site-verification=S3WVPpJ9iNLKBaAbgZ2gfw8KwkU4fcHRMWX-ukR2a1U",
   },
 }
 

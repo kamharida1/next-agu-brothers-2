@@ -7,7 +7,10 @@ import { IoIosInformation } from "react-icons/io";
 
 export const metadata: Metadata = {
   title: "About Us",
-  description: "Learn more about our company",
+  description: `We are dedicated to bringing the best in home electronics and appliances 
+    to our valued customers. From high-definition televisions to energy-efficient refrigerators, 
+    and from versatile gas cookers to powerful freezers, our mission is simple: to provide reliable, 
+    innovative, and affordable products that enhance your everyday life.`,
   openGraph: {
     title: "About Us",
     description: "Learn more about our company",
@@ -113,7 +116,7 @@ export default function About() {
 const sections = [
   {
     title: 'Who We Are',
-    content: `At Agu Brothers, we are dedicated to bringing the best in home electronics and appliances 
+    content: `We are dedicated to bringing the best in home electronics and appliances 
     to our valued customers. From high-definition televisions to energy-efficient refrigerators, 
     and from versatile gas cookers to powerful freezers, our mission is simple: to provide reliable, 
     innovative, and affordable products that enhance your everyday life.`,
