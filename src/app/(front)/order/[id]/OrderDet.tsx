@@ -441,7 +441,7 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
                     Mark as paid & delivered
                   </button>
                 )}
-                {isDelivered && (
+                {isDelivered || isPaid && (
                   <Link
                     className="btn w-full my-2 btn-primary"
                     href={`/`}
