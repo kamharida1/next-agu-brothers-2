@@ -310,36 +310,6 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
                 {isPaid ? (
                   <>
                     <div className="text-success">Paid at {paidAt}</div>
-                    <div className="card bg-base-100 mt-4">
-                      <div className="card-body">
-                        <h2 className="card-title">Payment Result</h2>
-                        <div className="mb-2">
-                          <strong>ID:</strong> {paymentResult?.id}
-                        </div>
-                        <div className="mb-2">
-                          <strong>Status:</strong> {paymentResult?.status}
-                        </div>
-                        <div className="mb-2">
-                          <strong>Update Time:</strong>{" "}
-                          {paymentResult?.update_time}
-                        </div>
-                        <div className="mb-2">
-                          <strong>Email Address:</strong>{" "}
-                          {paymentResult?.email_address}
-                        </div>
-                        <div className="mb-2">
-                          <strong>Card Type:</strong> {paymentResult?.cardType}
-                        </div>
-                        <div className="mb-2">
-                          <strong>Debited Amount:</strong>{" "}
-                          {formatPrice(paymentResult?.debitedAmount)}
-                        </div>
-                        <div className="mb-2">
-                          <strong>Payment Channel:</strong>{" "}
-                          {paymentResult?.paymentChannel}
-                        </div>
-                      </div>
-                    </div>
                   </>
                 ) : (
                   <div className="text-error">Not Paid</div>
