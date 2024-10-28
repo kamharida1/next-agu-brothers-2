@@ -62,51 +62,52 @@ export default function ProductDetails({
       return text ? JSON.parse(text) : {}
     }
   )
-  // User can delete their own review
-  const { trigger: userDeleteReview, isMutating: isDeletingUserReview } =
-    useSWRMutation(
-      `api/products/${params.slug}/reviews`,
-      async (
-        url: string,
-        { arg }: { arg: { reviewId: string } }
-      ) => {
-        const response = await fetch(url, {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(arg),
-        })
   
-        if (!response.ok) {
-          const data = await response.json()
-          toast.error(data.message)
-          throw new Error(data.message)
-        }
-  
-        toast.success('Review deleted successfully')
-  
-        // Check if the response body is empty
-        const text = await response.text()
-        return text ? JSON.parse(text) : {}
+   // Delete a user review
+   const { trigger: deleteUserReview, isMutating: isDeletingUserReview } = useSWRMutation(
+    `/api/products/${params.slug}/reviews`,
+    async (
+      url: string,
+      { arg }: { arg: { username: string, productId: string; reviewId: string } }
+    ) => {
+      const response = await fetch(url, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(arg),
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        toast.error(data.message)
+        throw new Error(data.message)
       }
-    )
+
+      toast.success('Review deleted successfully')
+
+      // Check if the response body is empty
+      const text = await response.text()
+      return text ? JSON.parse(text) : {}
+    }
+  )
 
   if (productError) return <div>Error loading product: {productError.message}</div>
 
   if (!product) return <div>Loading...</div>
+  
+ 
 
-
-  // Delete a review
-  const handleDelete = async (reviewId: string) => {
-    await deleteReview({ productId: product._id, reviewId })
+  // Delete a user review
+  const handleUserDelete = async (reviewId: string) => {
+    await deleteUserReview({ username: session?.user.name as string, productId: product._id, reviewId })
     mutate(`/api/products/${params.slug}/reviews`) // Re-fetch updated reviews
     mutate(`/api/products/${params.slug}`) // Re-fetch updated product
   }
 
-  // User can delete their own review
-  const handleUserDelete = async (reviewId: string) => {
-    await userDeleteReview({ reviewId })
+  // Delete a review
+  const handleDelete = async (reviewId: string) => {
+    await deleteReview({ productId: product._id, reviewId })
     mutate(`/api/products/${params.slug}/reviews`) // Re-fetch updated reviews
     mutate(`/api/products/${params.slug}`) // Re-fetch updated product
   }

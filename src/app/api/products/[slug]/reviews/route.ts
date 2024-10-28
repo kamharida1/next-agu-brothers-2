@@ -109,66 +109,47 @@ export const DELETE = auth(async (...request: any) => {
     )
   }
 
-  const { reviewId } = await req.json(); // Parse the JSON request
+  const { reviewId, username, productId } = await req.json(); // Parse the JSON request
 
   await dbConnect();
-
-  // Find the product by ID
-  const productToUpdate = await ProductModel.findOne({ slug: params.slug })
-  if (!productToUpdate) {
-    return Response.json(
-      { message: 'Product not found' },
-      {
-        status: 404,
-      }
-    )
-  }
-
-  // Find the review by ID to check if it exists
   const review = await ReviewModel.findById(reviewId);
+
   if (!review) {
     return Response.json(
       { message: 'Review not found' },
-      { status: 404 }
+      {
+        status: 404,
+      }
     );
   }
-  const { data: session } = useSession()
 
   // Check if the user is the owner of the review
-  if (review.username !== session?.user?.name) {
+  if (review.username !== username) {
     return Response.json(
       { message: 'unauthorized' },
-      { status: 401 }
+      {
+        status: 401,
+      }
     );
   }
-  // Remove the review from the product
-  await ProductModel.findByIdAndUpdate(
-    productToUpdate._id,
-    {
-      $pull: { reviews: reviewId },
-      $inc: { numReviews: -1 }
-    },
-    { new: true }
-  );
 
-  // Delete the review
   await ReviewModel.findByIdAndDelete(reviewId);
 
-  // Recalculate the average rating after removing the review
-  const totalRating = productToUpdate.reviews.reduce((acc: number, review: any) => {
-    if (review._id.toString() !== reviewId) {
-      return acc + review.rating;
-    }
-    return acc;
-  }, 0);
+  // Update the product's average rating and number of reviews
+  const product = await ProductModel.findById(productId);
+  if (product) {
+    const reviews = await ReviewModel.find({ product: productId });
+    const totalRating = reviews.reduce((acc, review) => acc + review.rating, 0);
+    const newAverageRating = reviews.length ? totalRating / reviews.length : 0;
 
-  const newAverageRating = productToUpdate.numReviews > 0 ? totalRating / productToUpdate.numReviews : 0;
+    await ProductModel.findByIdAndUpdate(productId, {
+      $set: { rating: newAverageRating },
+      $inc: { numReviews: -1 },
+    });
+  }
 
-  // Update the product's rating
-  productToUpdate.rating = newAverageRating;
-  await productToUpdate.save();
+  return Response.json({ message: 'Review deleted' });
 
-  return Response.json({ message: 'Review deleted successfully' });
 }) as any;
 
 
