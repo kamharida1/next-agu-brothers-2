@@ -107,10 +107,10 @@ const Form = () => {
         </form>
         <div className="divider"> OR </div>
         <button
-          onClick={() => signIn('github', { callbackUrl })}
+          onClick={() => signIn('google', { callbackUrl })}
           className="btn"
         >
-          Continue with Github
+          Continue with Google
         </button>
         <div className="divider"> </div>
         <div>
