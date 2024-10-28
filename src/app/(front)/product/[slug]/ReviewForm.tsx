@@ -133,8 +133,8 @@ const ReviewForm = forwardRef<HTMLFormElement, { slug: string }>((props, ref) =>
                 })}
                 className="textarea textarea-bordered w-full "
               ></textarea>
-              {errors.title?.message && (
-                <div className="text-error">{errors.title.message}</div>
+              {errors.comment?.message && (
+                <div className="text-error">{errors.comment.message}</div>
               )}
             </div>
             <div className="mt-4">
