@@ -95,8 +95,15 @@ export const POST = auth(async (...request: any) => {
   },
   { new: true }
   ).exec()
+  if (!product || !title || !comment || !username || !rating) {
+    return Response.json(
+      { message: 'All fields are required' },
+      {
+        status: 400,
+      }
+    )
+  }
   return Response.json({ message: 'Review added' })
-
 }) as any
 
 // User can only delete their own review
