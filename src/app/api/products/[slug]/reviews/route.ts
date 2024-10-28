@@ -72,6 +72,14 @@ export const POST = auth(async (...request: any) => {
       }
     )
   }
+  if (!productToUpdate || !title || !comment || !username || !rating) {
+    return Response.json(
+      { message: 'All fields are required' },
+      {
+        status: 400,
+      }
+    )
+  }
   // Calculate the new average rating
   const reviews = await ReviewModel.find({ product: productToUpdate._id })
   const totalRating = reviews.reduce((acc, review) => acc + review.rating, 0)
@@ -95,14 +103,6 @@ export const POST = auth(async (...request: any) => {
   },
   { new: true }
   ).exec()
-  if (!product || !title || !comment || !username || !rating) {
-    return Response.json(
-      { message: 'All fields are required' },
-      {
-        status: 400,
-      }
-    )
-  }
   return Response.json({ message: 'Review added' })
 }) as any
 
