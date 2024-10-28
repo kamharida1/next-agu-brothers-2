@@ -66,7 +66,10 @@ export default function ProductDetails({
   const { trigger: userDeleteReview, isMutating: isDeletingUserReview } =
     useSWRMutation(
       `api/products/${params.slug}/reviews`,
-      async (url: string, { arg }: { arg: { username: string } }) => {
+      async (
+        url: string,
+        { arg }: { arg: { productId: string; reviewId: string } }
+      ) => {
         const response = await fetch(url, {
           method: 'DELETE',
           headers: {
@@ -74,13 +77,18 @@ export default function ProductDetails({
           },
           body: JSON.stringify(arg),
         })
+  
         if (!response.ok) {
           const data = await response.json()
           toast.error(data.message)
           throw new Error(data.message)
         }
+  
         toast.success('Review deleted successfully')
-        return response.json()
+  
+        // Check if the response body is empty
+        const text = await response.text()
+        return text ? JSON.parse(text) : {}
       }
     )
 
@@ -97,8 +105,8 @@ export default function ProductDetails({
   }
 
   // User can delete their own review
-  const handleUserDelete = async () => {
-    await userDeleteReview({ username: session?.user?.name ?? '' })
+  const handleUserDelete = async (reviewId: string) => {
+    await userDeleteReview({ productId: product._id, reviewId })
     mutate(`/api/products/${params.slug}/reviews`) // Re-fetch updated reviews
     mutate(`/api/products/${params.slug}`) // Re-fetch updated product
   }
@@ -271,7 +279,7 @@ export default function ProductDetails({
                       ) : (
                         <div className="mt-4">
                           <button
-                            onClick={() => review._id && handleUserDelete()}
+                            onClick={() => review._id && handleUserDelete(review._id)}
                             className="btn btn-sm btn-error"
                           >
                             {review._id && isDeletingUserReview
