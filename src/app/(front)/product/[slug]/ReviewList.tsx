@@ -6,6 +6,7 @@ import { FaStar } from "react-icons/fa";
 
 export default function ReviewList({ reviews }: { reviews: Review[] }) {
   if (!reviews) return <div>Loading...</div>;
+  
   return (
     <div className="p-4 md:p-0">
       <h2 className="text-2xl font-bold">Reviews</h2>

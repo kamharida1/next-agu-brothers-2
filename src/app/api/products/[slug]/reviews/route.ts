@@ -2,6 +2,8 @@ import { auth } from "@/lib/auth"
 import dbConnect from "@/lib/dbConnect"
 import ProductModel, { Product } from "@/lib/models/ProductModel"
 import ReviewModel from "@/lib/models/ReviewModel"
+import { useSession } from 'next-auth/react'
+
 
 export const GET = auth(async (...request: any) => {
   // if (!req.auth) {
@@ -108,6 +110,7 @@ export const DELETE = auth(async (...request: any) => {
       }
     )
   }
+  const { data: session } = useSession()
   const { username } = await req.json()
   await dbConnect()
   const product = await ProductModel.findOne({ slug: params.slug })
@@ -128,6 +131,27 @@ export const DELETE = auth(async (...request: any) => {
       }
     )
   }
+
+  // Check if the user is an admin or the owner of the review
+  if (!session?.user.isAdmin && review.username !== username) {
+    return Response.json(
+      { message: 'unauthorized' },
+      {
+        status: 401,
+      }
+    )
+  }
+
   await ReviewModel.findByIdAndDelete(review._id)
+  // const review = await ReviewModel.findOne({ product: product._id, username: username })
+  // if (!review) {
+  //   return Response.json(
+  //     { message: 'Review not found' },
+  //     {
+  //       status: 404,
+  //     }
+  //   )
+  // }
+  // await ReviewModel.findByIdAndDelete(review._id)
   return Response.json({ message: 'Review deleted' })
 }) as any
