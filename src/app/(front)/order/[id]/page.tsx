@@ -15,7 +15,7 @@ export default function OrderDetailsPage({
   params: { id: string }
 }) {
   return (
-    <OrderDet
+    <OrderInfo
       orderId={params.id}
     />
   )
