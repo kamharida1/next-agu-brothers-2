@@ -16,42 +16,42 @@ import useSWR, { mutate } from 'swr'
 import { useSession } from 'next-auth/react'
 import productServices from '@/lib/services/productService'
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { slug: string }
-}) {
-  const product = await productServices.getBySlug(params.slug)
-  if (!product) {
-    return { title: 'Product not found' }
-  }
-  return {
-    title: product.name,
-    description: product.description,
-    alternates: {
-      canonical: `/product/${product.slug}`,
-    },
-    category: product.cat,
-    openGraph: {
-      title: product.name,
-      description: product.description,
-      images: product.images.map((image: string) => ({
-        url: image,
-        alt: product.name,
-      })),
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: product.name,
-      description: product.description,
-      images: product.images.map((image: string) => ({
-        url: image,
-        alt: product.name,
-      })),
-    },
+// export async function generateMetadata({
+//   params,
+// }: {
+//   params: { slug: string }
+// }) {
+//   const product = await productServices.getBySlug(params.slug)
+//   if (!product) {
+//     return { title: 'Product not found' }
+//   }
+//   return {
+//     title: product.name,
+//     description: product.description,
+//     alternates: {
+//       canonical: `/product/${product.slug}`,
+//     },
+//     category: product.cat,
+//     openGraph: {
+//       title: product.name,
+//       description: product.description,
+//       images: product.images.map((image: string) => ({
+//         url: image,
+//         alt: product.name,
+//       })),
+//     },
+//     twitter: {
+//       card: 'summary_large_image',
+//       title: product.name,
+//       description: product.description,
+//       images: product.images.map((image: string) => ({
+//         url: image,
+//         alt: product.name,
+//       })),
+//     },
 
-  }
-}
+//   }
+// }
 
 const formatDate = (dateString: any) => {
   return format(new Date(dateString), 'MMMM do yyyy, h:mm:ss a')
