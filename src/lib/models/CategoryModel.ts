@@ -1,6 +1,6 @@
-import mongoose, {model, models, Schema} from "mongoose";
+import mongoose from "mongoose";
 
-const CategorySchema = new Schema({
+const CategorySchema = new mongoose.Schema({
   name: {type:String,required:true},
   parent: {type:mongoose.Types.ObjectId, ref:'Category'},
   properties: [{type:Object}]

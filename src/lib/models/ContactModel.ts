@@ -1,7 +1,7 @@
 import { time } from "console";
 import mongoose, { Schema } from "mongoose";
 
-const ContactSchema = new Schema({
+const ContactSchema = new mongoose.Schema({
   name: {type:String,required:true},
   email: {type:String,required:true},
   phone: {type:String},

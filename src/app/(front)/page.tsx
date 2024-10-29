@@ -5,7 +5,6 @@ import productServices from "@/lib/services/productService";
 import { Metadata } from "next";
 import Link from "next/link";
 import PageSkeleton from "./ui/skeletons/PageSkeleton";
-
 import ProductCard from "@/components/products/ProductCard";
 
 export const metadata: Metadata = {
@@ -27,23 +26,24 @@ export default async function Home() {
 
   return (
     <>
-      <div className="block items-center">
+      <div className="container mx-auto p-4">
         {/* Latest Products */}
-        <h1 className="text-xl md:text-2xl text-center font-semibold m-4">
+        <h1 className="text-xl md:text-2xl text-center font-semibold my-6">
           Latest Products
         </h1>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 m-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4  gap-6">
           {latestProducts.map((product: Product) => (
             <ProductCard key={product.slug} product={product} />
           ))}
         </div>
       </div>
 
-      <div className="block">
-        <h1 className="text-xl md:text-2xl text-center font-semibold m-4">
+      <div className="container mx-auto p-4">
+        {/* Featured Products */}
+        <h1 className="text-xl md:text-2xl text-center font-semibold my-6">
           Featured Products
         </h1>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 m-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4  gap-6">
           {featuredProducts.map((product: Product) => (
             <ProductCard key={product.slug} product={product} />
           ))}
