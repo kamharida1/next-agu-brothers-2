@@ -3,8 +3,9 @@
 import { Product } from "@/lib/models/ProductModel";
 import productServices from "@/lib/services/productService";
 import { Metadata } from "next";
+import Link from "next/link";
 import PageSkeleton from "./ui/skeletons/PageSkeleton";
-import ProductItem from "@/components/products/ProductItem";
+import ProductCard from "@/components/products/ProductCard";
 
 export const metadata: Metadata = {
   title: process.env.NEXT_PUBLIC_APP_NAME || "Agu Brothers Electronics",
@@ -32,7 +33,7 @@ export default async function Home() {
         </h1>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4  gap-6">
           {latestProducts.map((product: Product) => (
-            <ProductItem key={product.slug} product={product} />
+            <ProductCard key={product.slug} product={product} />
           ))}
         </div>
       </div>
@@ -44,7 +45,7 @@ export default async function Home() {
         </h1>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4  gap-6">
           {featuredProducts.map((product: Product) => (
-            <ProductItem key={product.slug} product={product} />
+            <ProductCard key={product.slug} product={product} />
           ))}
         </div>
       </div>
