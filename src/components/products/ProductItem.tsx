@@ -17,35 +17,33 @@ export default function ProductItem({ product }: { product: Product }) {
   };
 
   return (
-    <div className="card card-compact w-full md:w-72 bg-base-100 shadow-xl m-4 hover:shadow-2xl transition-shadow transform hover:scale-105">
+    <div className="card shadow-lg border border-gray-200">
       <Link href={`/product/${product.slug}`}>
-        <figure className="relative overflow-hidden rounded-t-lg">
+        <figure className="p-4">
           <CldImage
             src={product.images[0]}
             alt={product.name}
-            width="300"
-            height="300"
+            width={200}
+            height={200}
             crop="fit"
             sizes="100vw"
-            className="object-cover w-full h-48 md:h-64 transition-transform transform hover:scale-105"
+            className="object-cover max-w-full sm:w-60 h-40 sm:h-60 md:h-48"
           />
         </figure>
       </Link>
-      <div className="card-body p-4 md:p-6">
+      <div className="card-body p-4">
         <Link href={`/product/${product.slug}`}>
-          <h2 className="card-title text-base md:text-lg font-medium hover:font-bold transition-colors">
+          <h2 className="card-title text-base md:text-lg font-medium hover:font-bold">
             {product.name}
           </h2>
         </Link>
         <Rating
           value={product.rating}
-          caption={
-            product.numReviews === 1 ? "1 review" : `${product.numReviews} reviews`
-          }
+          caption={`${product.numReviews} ${product.numReviews === 1 ? "review" : "reviews"}`}
         />
-        <p className="text-sm mt-2">{product.brand}</p>
-        <div className="flex items-center justify-between mt-4">
-          <span className="text-xl font-semibold text-primary">
+        <p className="text-sm mt-1">{product.brand}</p>
+        <div className="flex items-center justify-between mt-3">
+          <span className="text-lg font-semibold text-primary">
             {formatPrice(product.price)}
           </span>
           <Link href={`/product/${product.slug}`}>
@@ -59,11 +57,11 @@ export default function ProductItem({ product }: { product: Product }) {
           e.preventDefault();
           handleWishList(product);
         }}
-        className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-lg z-10 items-center justify-center transition-colors hover:bg-gray-200"
+        className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-sm hover:bg-gray-100 transition-colors"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          className={`w-5 h-5 fill-current ${
+          className={`w-5 h-5 ${
             items.some((p) => p._id === product._id)
               ? "text-red-500"
               : "text-gray-500"
