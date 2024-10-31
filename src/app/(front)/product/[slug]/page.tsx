@@ -1,15 +1,17 @@
-import productServices from "@/lib/services/productService"
-import ProductDetails from "./ProductDetails"
+import productServices from "@/lib/services/productService";
+import ProductDetails from "./ProductDetails";
 
 export async function generateMetadata({
   params,
 }: {
-  params: { slug: string }
+  params: { slug: string };
 }) {
-  try{
-    const product = await productServices.getBySlug(params.slug)
+  try {
+    const product = JSON.parse(
+      JSON.stringify(productServices.getBySlug(params.slug))
+    );
     if (!product) {
-      return { title: 'Product not found' }
+      return { title: "Product not found" };
     }
     return {
       title: product.name,
@@ -27,7 +29,7 @@ export async function generateMetadata({
         })),
       },
       twitter: {
-        card: 'summary_large_image',
+        card: "summary_large_image",
         title: product.name,
         description: product.description,
         images: product.images.map((image: string) => ({
@@ -35,31 +37,26 @@ export async function generateMetadata({
           alt: product.name,
         })),
       },
-    } 
-    
-  }catch(error){
-    console.error(error)
-    return { 
-      title: 'Product not found',
-      description: 'Product not found'
-     }
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      title: "Product not found",
+      description: "Product not found",
+    };
   }
 }
-export async function generateStaticParams() {
-  const products = await productServices.getLatest()
-  if (!products) {
-    return []
-  }
-  return products.map((product) => ({
-     slug: product.slug ,
-  }))
-}
-
 
 export default async function ProductDetailsPage({
   params,
 }: {
-  params: { slug: string }
+  params: { slug: string };
 }) {
-  return <ProductDetails params={{ slug: params.slug }} />
+  const product = JSON.parse(
+    JSON.stringify(productServices.getBySlug(params.slug))
+  );
+  if (!product) {
+    return <div>Product not found</div>;
+  }
+  return <ProductDetails product={product} />;
 }
