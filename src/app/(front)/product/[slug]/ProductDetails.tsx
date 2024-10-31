@@ -14,26 +14,17 @@ import ReviewForm from './ReviewForm'
 import useSWRMutation from 'swr/mutation'
 import useSWR, { mutate } from 'swr'
 import { useSession } from 'next-auth/react'
-import productServices from '@/lib/services/productService'
+import { Product } from '@/lib/models/ProductModel'
 
 const formatDate = (dateString: any) => {
   return format(new Date(dateString), 'MMMM do yyyy, h:mm:ss a')
 }
 
 
-export default function ProductDetails({
-  params,
-}: {
-  params: {
-    slug: string
-  }
-}) {
+export default function ProductDetails({product}: {product: Product}) {
   const { data: session } = useSession()
-  const { data: product, error: productError } = useSWR(
-    `/api/products/${params.slug}`
-  )
   const { data: reviews, error: reviewsError } = useSWR(
-    `/api/products/${params.slug}/reviews`
+    `/api/products/${product?.slug}/reviews`
   )
 
   // Delete a review
@@ -67,7 +58,7 @@ export default function ProductDetails({
   
    // Delete a user review
    const { trigger: deleteUserReview, isMutating: isDeletingUserReview } = useSWRMutation(
-    `/api/products/${params.slug}/reviews`,
+    `/api/products/${product.slug}/reviews`,
     async (
       url: string,
       { arg }: { arg: { username: string, productId: string; reviewId: string } }
@@ -94,7 +85,6 @@ export default function ProductDetails({
     }
   )
 
-  if (productError) return <div>Error loading product: {productError.message}</div>
 
   if (!product) return <div>Loading...</div>
   
@@ -102,16 +92,24 @@ export default function ProductDetails({
 
   // Delete a user review
   const handleUserDelete = async (reviewId: string) => {
-    await deleteUserReview({ username: session?.user.name as string, productId: product._id, reviewId })
-    mutate(`/api/products/${params.slug}/reviews`) // Re-fetch updated reviews
-    mutate(`/api/products/${params.slug}`) // Re-fetch updated product
+    if (session?.user.name && product._id) {
+      await deleteUserReview({ username: session?.user.name, productId: product._id, reviewId })
+    } else {
+      toast.error('User name is not available')
+    }
+    mutate(`/api/products/${product.slug}/reviews`) // Re-fetch updated reviews
+    mutate(`/api/products/${product.slug}`) // Re-fetch updated product
   }
 
   // Delete a review
   const handleDelete = async (reviewId: string) => {
-    await deleteReview({ productId: product._id, reviewId })
-    mutate(`/api/products/${params.slug}/reviews`) // Re-fetch updated reviews
-    mutate(`/api/products/${params.slug}`) // Re-fetch updated product
+    if (product._id) {
+      await deleteReview({ productId: product._id, reviewId })
+    } else {
+      toast.error('Product ID is not available')
+    }
+    mutate(`/api/products/${product.slug}/reviews`) // Re-fetch updated reviews
+    mutate(`/api/products/${product.slug}`) // Re-fetch updated product
   }
 
   return (
