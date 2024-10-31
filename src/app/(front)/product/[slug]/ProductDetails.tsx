@@ -21,7 +21,7 @@ const formatDate = (dateString: any) => {
 }
 
 
-export default function ProductDetails({product}: {product: Product}) {
+export default function ProductDetails({product}: {product: any}) {
   const { data: session } = useSession()
   const { data: reviews, error: reviewsError } = useSWR(
     `/api/products/${product?.slug}/reviews`
