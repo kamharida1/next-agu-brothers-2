@@ -38,7 +38,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${poppins.className} antialiased`}>
         <Providers>
-          <div className="drawer">
+          <div className="drawer z-150">
             <DrawerButton />
             <div className="drawer-content flex flex-col min-h-screen">
               <Header />
