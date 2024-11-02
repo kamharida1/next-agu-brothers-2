@@ -61,7 +61,8 @@ export default function ProductImages({ images }: ProductImagesProps) {
                 ? 'border-gray-300 rounded-lg'
                 : 'border-transparent'
             }`}
-            onClick={() => openModal(image)} 
+           // the following smaller images, when clicked, will switch to the larger image above 
+            onClick={() => setActiveImage(image)}
           >
             <CldImage
               src={image}
