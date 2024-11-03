@@ -169,7 +169,7 @@ const Form = () => {
         <div>
         Already have an account?{' '}
           <Link className="link" href={`/signin?callbackUrl=${callbackUrl}`}>
-            Register
+            Login
           </Link>
         </div>
       </div>
