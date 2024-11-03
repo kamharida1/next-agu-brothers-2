@@ -68,38 +68,38 @@ export const config = {
       }
       return session;
     },
-    async signIn({ user, account, profile }: any) {
-      console.log("Google Profile Data:", profile);
-      console.log("Google Account Data:", account);
-      try {
-        await dbConnect();
-        if (account.provider === "google") {
-          const existingUser = await UserModel.findOne({
-            email: profile.email,
-          });
-          if (!existingUser) {
-            // Create new user
-            const newUser = new UserModel({
-              name: profile.name,
-              email: profile.email,
-              password: null, // Google users don't have a password
-              isAdmin: false,
-            });
-            await newUser.save();
-            user._id = newUser._id;
-            user.isAdmin = newUser.isAdmin;
-          } else {
-            // Use existing user
-            user._id = existingUser._id;
-            user.isAdmin = existingUser.isAdmin;
-          }
-        }
-        return true;
-      } catch (error) {
-        console.error("Error during sign-in:", error);
-        return false; // Deny access if any error occurs
-      }
-    },
+    // async signIn({ user, account, profile }: any) {
+    //   console.log("Google Profile Data:", profile);
+    //   console.log("Google Account Data:", account);
+    //   try {
+    //     await dbConnect();
+    //     if (account.provider === "google") {
+    //       const existingUser = await UserModel.findOne({
+    //         email: profile.email,
+    //       });
+    //       if (!existingUser) {
+    //         // Create new user
+    //         const newUser = new UserModel({
+    //           name: profile.name,
+    //           email: profile.email,
+    //           password: null, // Google users don't have a password
+    //           isAdmin: false,
+    //         });
+    //         await newUser.save();
+    //         user._id = newUser._id;
+    //         user.isAdmin = newUser.isAdmin;
+    //       } else {
+    //         // Use existing user
+    //         user._id = existingUser._id;
+    //         user.isAdmin = existingUser.isAdmin;
+    //       }
+    //     }
+    //     return true;
+    //   } catch (error) {
+    //     console.error("Error during sign-in:", error);
+    //     return false; // Deny access if any error occurs
+    //   }
+    // },
   },
 };
 
