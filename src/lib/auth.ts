@@ -85,6 +85,8 @@ export const config = {
         const newUser = new UserModel({
           email,
           name,
+          isAdmin: false,
+          password: null
         })
         await newUser.save();
       }
