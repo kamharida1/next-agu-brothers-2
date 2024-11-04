@@ -72,7 +72,7 @@ export const config = {
       session.user.id = token.id;
       return session;
     },
-    async signIn({ user, account, profile, email, credentials }: any) {
+    async signIn({ user, account }: any) {
       if (account.provider === 'google') {
         await dbConnect();
         const existingUser = await UserModel.findOne({ email: user.email });
