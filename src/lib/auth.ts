@@ -68,53 +68,6 @@ export const config = {
       }
       return session;
     },
-    async signIn({ user, account }: any) {
-      console.log("Google Profile Data:", user);
-      console.log("Google Account Data:", account);
-      try {
-        await dbConnect();
-        if (account.provider === "google") {
-          const existingUser = await UserModel.findOne({
-            email: user.email,
-          });
-          if (!existingUser) {
-            // Create new user
-            const newUser = new UserModel({
-              name: user.name,
-              email: user.email,
-            });
-            await newUser.save();
-            user._id = newUser._id;
-            user.isAdmin = newUser.isAdmin;
-          } else {
-            // Use existing user
-            user._id = existingUser._id;
-            user.isAdmin = existingUser.isAdmin;
-          }
-        }
-        return true;
-      } catch (error) {
-        console.error("Error during sign-in:", error);
-        return false; // Deny access if any error occurs
-      }
-    },
-    // async signIn({user}) {
-    //   console.log("inside callback")
-    //   await dbConnect()
-    //   console.log("connected",user)
-    //   const u = await UserModel.findOne({email:user.email})
-    //   console.log("found",u) 
-    //   const email = user.email;
-    //   const name = user.name;
-    //   if(!u){
-    //     const newUser = new UserModel({
-    //       email,
-    //       name,
-    //     })
-    //     await newUser.save();
-    //   }
-    //   return true
-    // },
   },
 };
 
