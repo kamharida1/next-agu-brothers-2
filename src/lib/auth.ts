@@ -14,9 +14,9 @@ export const config = {
         params: {
           prompt: "consent",
           access_type: "offline",
-          response_type: "code"
-        }
-      }
+          response_type: "code",
+        },
+      },
     }),
     CredentialsProvider({
       credentials: {
@@ -71,65 +71,34 @@ export const config = {
     },
     session: async ({ session, token }: any) => {
       // Connect to database and fetch the user data
-      await dbConnect()
-      const user = await UserModel.findOne({ email: session.user?.email })
-      
+      await dbConnect();
+      const user = await UserModel.findOne({ email: session.user?.email });
+
       // Attach additional user properties to the session
       if (user) {
-        session.user.id = user._id.toString()
-        session.user.isAdmin = user.isAdmin
+        session.user.id = user._id.toString();
+        session.user.isAdmin = user.isAdmin;
       }
 
-      return session
+      return session;
     },
-    async signIn({ user, account, profile }: any) {
-      await dbConnect()  // Connect to MongoDB
+    async signIn({ user, account, profile, email, credentials }: any) {
+      if (account.provider === "google") {
+        await dbConnect();
+        const existingUser = await UserModel.findOne({ email: user.email });
 
-      // Check if the user exists in the database
-      const existingUser = await UserModel.findOne({ email: user.email })
-      if (!existingUser) {
-        // If the user does not exist, create a new user document
-        const newUser = new UserModel({
-          name: user.name,
-          email: user.email,
-          password: "",  // Since using Google auth, password is not stored
-          isAdmin: false,
-        })
-        await newUser.save()  // Save new user to database
+        if (!existingUser) {
+          const newUser = new UserModel({
+            name: user.name,
+            email: user.email,
+            password: null, // Google users won't have a password
+            isAdmin: false, // Set default admin status
+          });
+          await newUser.save();
+        }
       }
-
-      return true // Return true to proceed with sign-in
+      return true;
     },
-    // async signIn({ user, account, profile }: any) {
-    //   console.log("Google Profile Data:", profile);
-    //   console.log("Google Account Data:", account);
-    //   try {
-    //     await dbConnect();
-    //     if (account.provider === "google") {
-    //       const existingUser = await UserModel.findOne({
-    //         email: profile.email,
-    //       });
-    //       if (!existingUser) {
-    //         // Create new user
-    //         const newUser = new UserModel({
-    //           name: profile.name,
-    //           email: profile.email,
-    //         });
-    //         await newUser.save();
-    //         user._id = newUser._id;
-    //         user.isAdmin = newUser.isAdmin;
-    //       } else {
-    //         // Use existing user
-    //         user._id = existingUser._id;
-    //         user.isAdmin = existingUser.isAdmin;
-    //       }
-    //     }
-    //     return true;
-    //   } catch (error) {
-    //     console.error("Error during sign-in:", error);
-    //     return false; // Deny access if any error occurs
-    //   }
-    // },
   },
 };
 
