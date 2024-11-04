@@ -84,6 +84,10 @@ export const config = {
             name: profile.name,
             email: profile.email,
             isAdmin: false,
+            password: "",
+            cart: [],
+            addresses: [],
+            wishlist: []
           })
           await user.save();
         }
