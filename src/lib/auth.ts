@@ -43,10 +43,11 @@ export const config = {
     error: "/signin",
   },
   callbacks: {
-    async jwt({ user, trigger, session, account, token }: any) {
+    async jwt({ user, trigger, session, profile, account, token }: any) {
       // Persist the OAuth access_token to the token right after signin
       if (account) {
         token.accessToken = account.access_token;
+        token.id = profile.id;
       }
       if (user) {
         token.user = {
@@ -66,32 +67,30 @@ export const config = {
       //  console.log('jwt', token)
       return token;
     },
-    session: async ({ session, token, user }: any) => {
-      if (user) {
-        session.user = token.user;
-      }
-      session.accessToken = token.accessToken
+    session: async ({ session, token }: any) => {
+      session.accessToken = token.accessToken;
+      session.user.id = token.id;
       return session;
     },
-    async signIn({user}: any) {
-      console.log("inside callback")
-      await dbConnect()
-      console.log("connected",user)
-      const u = await UserModel.findOne({email:user.email})
-      console.log("found",u) 
+    async signIn({ user }: any) {
+      console.log("inside callback");
+      await dbConnect();
+      console.log("connected", user);
+      const u = await UserModel.findOne({ email: user.email });
+      console.log("found", u);
       const email = user.email;
       const name = user.name;
-      if(!u){
+      if (!u) {
         const newUser = new UserModel({
           email,
           name,
           isAdmin: false,
-          password: null
-        })
+          password: null,
+        });
         await newUser.save();
       }
-      return true
-    }
+      return true;
+    },
   },
 };
 
