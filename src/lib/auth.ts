@@ -66,7 +66,36 @@ export const config = {
       if (token) {
         session.user = token.user;
       }
+      const sessionUser = await UserModel.findOne({
+        email: session.user.email,
+      });
+      session.user.id = sessionUser._id;
+
       return session;
+    },
+    async signIn({ profile }: any) {
+      console.log(profile);
+      try {
+        await dbConnect();
+        const userExist = await UserModel.findOne({ email: profile.email });
+        console.log("userExist", userExist);
+        if (!userExist) {
+          const user = await UserModel.create({
+            name: profile.name,
+            email: profile.email,
+            isAdmin: false,
+            password: "",
+            cart: [],
+            addresses: [],
+            wishlist: []
+          })
+          await user.save();
+        }
+        return true
+      } catch (error) {
+        console.log(error);
+        return false;
+      }
     },
   },
 };

@@ -20,7 +20,9 @@ const UserSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: true,
+    },
+    image:{
+      type: String,
     },
     isAdmin: { type: Boolean, required: true, default: false },
     cart: {
