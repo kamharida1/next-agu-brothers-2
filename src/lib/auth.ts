@@ -73,10 +73,11 @@ export const config = {
 
       return session;
     },
-    async signIn({ profile }: any) {
+    async signIn({ profile, account }: any) {
       console.log(profile);
       try {
         await dbConnect();
+        if (account.provider === "google") {
         const userExist = await UserModel.findOne({ email: profile.email });
         console.log("userExist", userExist);
         if (!userExist) {
@@ -91,6 +92,7 @@ export const config = {
           })
           await user.save();
         }
+      }
         return true
       } catch (error) {
         console.log(error);
