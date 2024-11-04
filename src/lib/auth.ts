@@ -72,22 +72,20 @@ export const config = {
       session.user.id = token.id;
       return session;
     },
-    async signIn({ user }: any) {
-      console.log("inside callback");
-      await dbConnect();
-      console.log("connected", user);
-      const u = await UserModel.findOne({ email: user.email });
-      console.log("found", u);
-      const email = user.email;
-      const name = user.name;
-      if (!u) {
-        const newUser = new UserModel({
-          email,
-          name,
-          isAdmin: false,
-          password: null,
-        });
-        await newUser.save();
+    async signIn({ user, account, profile, email, credentials }: any) {
+      if (account.provider === 'google') {
+        await dbConnect();
+        const existingUser = await UserModel.findOne({ email: user.email });
+
+        if (!existingUser) {
+          const newUser = new UserModel({
+            name: user.name,
+            email: user.email,
+            password: null, // Google users won't have a password
+            isAdmin: false, // Set default admin status
+          });
+          await newUser.save();
+        }
       }
       return true;
     },
