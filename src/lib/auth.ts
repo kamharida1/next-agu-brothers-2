@@ -10,13 +10,6 @@ export const config = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      authorization: {
-        params: {
-          prompt: "consent",
-          access_type: "offline",
-          response_type: "code",
-        },
-      },
     }),
     CredentialsProvider({
       credentials: {
@@ -70,35 +63,41 @@ export const config = {
       return token;
     },
     session: async ({ session, token }: any) => {
-      // Connect to database and fetch the user data
-      await dbConnect();
-      const user = await UserModel.findOne({ email: session.user?.email });
-
-      // Attach additional user properties to the session
-      if (user) {
-        session.user.id = user._id.toString();
-        session.user.isAdmin = user.isAdmin;
+      if (token) {
+        session.user = token.user;
       }
-
       return session;
     },
-    async signIn({ user, account, profile, email, credentials }: any) {
-      if (account.provider === "google") {
-        await dbConnect();
-        const existingUser = await UserModel.findOne({ email: user.email });
-
-        if (!existingUser) {
-          const newUser = new UserModel({
-            name: user.name,
-            email: user.email,
-            password: null, // Google users won't have a password
-            isAdmin: false, // Set default admin status
-          });
-          await newUser.save();
-        }
-      }
-      return true;
-    },
+    // async signIn({ user, account, profile }: any) {
+    //   console.log("Google Profile Data:", profile);
+    //   console.log("Google Account Data:", account);
+    //   try {
+    //     await dbConnect();
+    //     if (account.provider === "google") {
+    //       const existingUser = await UserModel.findOne({
+    //         email: profile.email,
+    //       });
+    //       if (!existingUser) {
+    //         // Create new user
+    //         const newUser = new UserModel({
+    //           name: profile.name,
+    //           email: profile.email,
+    //         });
+    //         await newUser.save();
+    //         user._id = newUser._id;
+    //         user.isAdmin = newUser.isAdmin;
+    //       } else {
+    //         // Use existing user
+    //         user._id = existingUser._id;
+    //         user.isAdmin = existingUser.isAdmin;
+    //       }
+    //     }
+    //     return true;
+    //   } catch (error) {
+    //     console.error("Error during sign-in:", error);
+    //     return false; // Deny access if any error occurs
+    //   }
+    // },
   },
 };
 
