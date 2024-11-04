@@ -43,7 +43,12 @@ export const config = {
     error: "/signin",
   },
   callbacks: {
-    async jwt({ user, trigger, session, token }: any) {
+    async jwt({ user, trigger, session, profile, account, token }: any) {
+      // Persist the OAuth access_token to the token right after signin
+      if (account) {
+        token.accessToken = account.access_token;
+        token.id = profile.id;
+      }
       if (user) {
         token.user = {
           _id: user._id,
@@ -63,10 +68,26 @@ export const config = {
       return token;
     },
     session: async ({ session, token }: any) => {
-      if (token) {
-        session.user = token.user;
-      }
+      session.accessToken = token.accessToken;
+      session.user.id = token.id;
       return session;
+    },
+    async signIn({ user, account }: any) {
+      if (account.provider === 'google') {
+        await dbConnect();
+        const existingUser = await UserModel.findOne({ email: user.email });
+
+        if (!existingUser) {
+          const newUser = new UserModel({
+            name: user.name,
+            email: user.email,
+            password: null, // Google users won't have a password
+            isAdmin: false, // Set default admin status
+          });
+          await newUser.save();
+        }
+      }
+      return true;
     },
   },
 };
