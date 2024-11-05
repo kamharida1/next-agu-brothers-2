@@ -59,7 +59,7 @@ export const config = {
           name: session.user.name,
         };
       }
-      //  console.log('jwt', token)
+    
       return token;
     },
     session: async ({ session, token }: any) => {
