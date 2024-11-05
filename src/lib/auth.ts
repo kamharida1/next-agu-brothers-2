@@ -77,9 +77,6 @@ export const {
   signIn,
   signOut,
 } = NextAuth(config);
-
-
-// import NextAuth from "next-auth";
 // import CredentialsProvider from "next-auth/providers/credentials";
 // import dbConnect from "./dbConnect";
 // import UserModel from "./models/UserModel";
