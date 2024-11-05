@@ -5,7 +5,7 @@ import UserModel from "./models/UserModel";
 import bcrypt from "bcryptjs";
 import GoogleProvider from "next-auth/providers/google";
 
-export const config = {
+export const authOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
@@ -49,7 +49,7 @@ export const config = {
           _id: user._id,
           email: user.email,
           name: user.name,
-          isAdmin: user.isAdmin,
+          isAdmin: user.isAdmin || false,
         };
       }
       if (trigger === "update" && session) {
@@ -66,10 +66,11 @@ export const config = {
       if (token) {
         session.user = token.user;
       }
-      const sessionUser = await UserModel.findOne({
-        email: session.user.email,
-      });
-      session.user.id = sessionUser._id;
+      const sessionUser = await UserModel.findOne({ email: session.user.email });
+      if (sessionUser) {
+        session.user.id = sessionUser._id;
+        session.user.isAdmin = sessionUser.isAdmin; // Ensures isAdmin is added to session
+      }
 
       return session;
     },
@@ -107,4 +108,4 @@ export const {
   auth,
   signIn,
   signOut,
-} = NextAuth(config);
+} = NextAuth(authOptions);
