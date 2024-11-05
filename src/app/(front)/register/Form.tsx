@@ -2,7 +2,7 @@
 import { useEffect } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { useSession } from 'next-auth/react'
+import { signIn, useSession } from 'next-auth/react'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import toast from 'react-hot-toast'
 
@@ -158,11 +158,16 @@ const Form = () => {
             </button>
           </div>
         </form>
-
+        <div className="divider"> OR </div>
+        <button
+          onClick={() => signIn('google', { callbackUrl })}
+          className="btn"
+        >
+          Continue with Google
+        </button>
         <div className="divider"> </div>
         <div>
-          {' '}
-          Already have an account?{' '}
+        Already have an account?{' '}
           <Link className="link" href={`/signin?callbackUrl=${callbackUrl}`}>
             Login
           </Link>

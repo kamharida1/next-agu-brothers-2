@@ -14,29 +14,18 @@ import ReviewForm from './ReviewForm'
 import useSWRMutation from 'swr/mutation'
 import useSWR, { mutate } from 'swr'
 import { useSession } from 'next-auth/react'
-import productServices from '@/lib/services/productService'
+import { Product } from '@/lib/models/ProductModel'
 
 const formatDate = (dateString: any) => {
   return format(new Date(dateString), 'MMMM do yyyy, h:mm:ss a')
 }
 
-
-export default function ProductDetails({
-  params,
-}: {
-  params: {
-    slug: string
-  }
-}) {
+export default function ProductDetails({ product }: { product: any }) {
   const { data: session } = useSession()
-  const { data: product, error: productError } = useSWR(
-    `/api/products/${params.slug}`
-  )
   const { data: reviews, error: reviewsError } = useSWR(
-    `/api/products/${params.slug}/reviews`
+    `/api/products/${product?.slug}/reviews`
   )
 
-  // Delete a review
   const { trigger: deleteReview, isMutating: isDeleting } = useSWRMutation(
     `/api/admin/products/reviews`,
     async (
@@ -59,18 +48,16 @@ export default function ProductDetails({
 
       toast.success('Review deleted successfully')
 
-      // Check if the response body is empty
       const text = await response.text()
       return text ? JSON.parse(text) : {}
     }
   )
-  
-   // Delete a user review
-   const { trigger: deleteUserReview, isMutating: isDeletingUserReview } = useSWRMutation(
-    `/api/products/${params.slug}/reviews`,
+
+  const { trigger: deleteUserReview, isMutating: isDeletingUserReview } = useSWRMutation(
+    `/api/products/${product.slug}/reviews`,
     async (
       url: string,
-      { arg }: { arg: { username: string, productId: string; reviewId: string } }
+      { arg }: { arg: { username: string; productId: string; reviewId: string } }
     ) => {
       const response = await fetch(url, {
         method: 'DELETE',
@@ -88,36 +75,37 @@ export default function ProductDetails({
 
       toast.success('Review deleted successfully')
 
-      // Check if the response body is empty
       const text = await response.text()
       return text ? JSON.parse(text) : {}
     }
   )
 
-  if (productError) return <div>Error loading product: {productError.message}</div>
-
   if (!product) return <div>Loading...</div>
-  
- 
 
-  // Delete a user review
   const handleUserDelete = async (reviewId: string) => {
-    await deleteUserReview({ username: session?.user.name as string, productId: product._id, reviewId })
-    mutate(`/api/products/${params.slug}/reviews`) // Re-fetch updated reviews
-    mutate(`/api/products/${params.slug}`) // Re-fetch updated product
+    if (session?.user.name && product._id) {
+      await deleteUserReview({ username: session?.user.name, productId: product._id, reviewId })
+    } else {
+      toast.error('User name is not available')
+    }
+    mutate(`/api/products/${product.slug}/reviews`)
+    mutate(`/api/products/${product.slug}`)
   }
 
-  // Delete a review
   const handleDelete = async (reviewId: string) => {
-    await deleteReview({ productId: product._id, reviewId })
-    mutate(`/api/products/${params.slug}/reviews`) // Re-fetch updated reviews
-    mutate(`/api/products/${params.slug}`) // Re-fetch updated product
+    if (product._id) {
+      await deleteReview({ productId: product._id, reviewId })
+    } else {
+      toast.error('Product ID is not available')
+    }
+    mutate(`/api/products/${product.slug}/reviews`)
+    mutate(`/api/products/${product.slug}`)
   }
 
   return (
     <>
-      <div className="text-sm breadcrumbs  border-b-2 border-b-orange-600">
-        <ul className="dark:text-black">
+      <div className="text-sm breadcrumbs border-b-2 border-orange-600 py-2 px-4">
+        <ul className="text-black dark:text-white">
           <li>
             <Link href={'/'}>
               <svg
@@ -142,17 +130,17 @@ export default function ProductDetails({
           </li>
         </ul>
       </div>
-      <div className="my-4 ">
-        <Link href="/" className="text-blue-500 hover:underline cursor-pointer">
+      <div className="my-4 px-4 md:px-0">
+        <Link href="/" className="text-blue-500 hover:underline">
           Back to products
         </Link>
       </div>
-      <div className="grid md:grid-cols-5 md:gap-6 ">
-        <div className="md:col-span-2">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 px-4 md:px-0">
+        <div className="lg:col-span-2">
           <ProductImages images={product.images} />
         </div>
-        <div className="md:col-span-2">
-          <div className="space-y-4 ">
+        <div className="lg:col-span-2">
+          <div className="space-y-4">
             <h1 className="text-2xl font-bold">{product.name}</h1>
             <Rating
               value={product.rating}
@@ -185,51 +173,47 @@ export default function ProductDetails({
             </div>
           </div>
         </div>
-        <div>
-          <div className="card bg-base-200 shadow-xl my-3 md:my-0">
-            <div className="card-body">
-              <div className="flex justify-between mb-2">
-                <div>Price</div>
-                <div>{formatPrice(product.price)}</div>
-              </div>
-              <div className="flex justify-between mb-2">
-                <div>Status</div>
-                <div>
-                  {product.countInStock > 0 ? (
-                    <span className="text-green-500">In stock</span>
-                  ) : (
-                    <span className="text-red-500">Out of stock</span>
-                  )}
-                </div>
-              </div>
-              {/* Render the "Only 1 item remaining" message */}
-              {product.countInStock === 1 && (
-                <div className="text-orange-600 text-sm">
-                  Only 1 item remaining!
-                </div>
-              )}
-              {product.countInStock !== 0 && (
-                <div className="card-actions justify-center">
-                  <AddToCart
-                    item={{
-                      ...convertDocToObj(product),
-                      qty: 0,
-                      weight: product.weight,
-                      countInStock: product.countInStock,
-                    }}
-                  />
-                </div>
-              )}
+        <div className="card bg-base-200 shadow-xl my-3 lg:my-0">
+          <div className="card-body">
+            <div className="flex justify-between mb-2">
+              <div>Price</div>
+              <div>{formatPrice(product.price)}</div>
             </div>
+            <div className="flex justify-between mb-2">
+              <div>Status</div>
+              <div>
+                {product.countInStock > 0 ? (
+                  <span className="text-green-500">In stock</span>
+                ) : (
+                  <span className="text-red-500">Out of stock</span>
+                )}
+              </div>
+            </div>
+            {product.countInStock === 1 && (
+              <div className="text-orange-600 text-sm">
+                Only 1 item remaining!
+              </div>
+            )}
+            {product.countInStock !== 0 && (
+              <div className="card-actions justify-center">
+                <AddToCart
+                  item={{
+                    ...convertDocToObj(product),
+                    qty: 0,
+                    weight: product.weight,
+                    countInStock: product.countInStock,
+                  }}
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>
-      <h1 className="card-title mt-6 text-2xl font-bold">Reviews</h1>
-      <div className="grid md:grid-cols-4 gap-6 my-6">
+      <h1 className="card-title mt-6 text-2xl font-bold text-center">Reviews</h1>
+      <div className="grid lg:grid-cols-4 gap-6 my-6 px-4 md:px-0">
         {product._id && <ReviewForm slug={product.slug} />}
-        <div className="md:col-span-2">
+        <div className="lg:col-span-2">
           <div className="card bg-base-200 shadow-xl">
-            {/* Render reviews if available */}
             <div className="card-body">
               <h2 className="card-title text-xl font-semibold">
                 {reviews
@@ -266,31 +250,19 @@ export default function ProductDetails({
                           by {review.username}
                         </small>
                       </div>
-                      {session?.user.isAdmin ? (
-                        <div className="mt-4">
-                          <button
-                            onClick={() =>
-                              review._id && handleDelete(review._id)
-                            }
-                            className="btn btn-sm btn-error"
-                          >
-                            {review._id && isDeleting
-                              ? 'Deleting...'
-                              : 'Delete'}
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="mt-4">
-                          <button
-                            onClick={() => review._id && handleUserDelete(review._id)}
-                            className="btn btn-sm btn-error"
-                          >
-                            {review._id && isDeletingUserReview
-                              ? 'Deleting...'
-                              : 'Delete'}
-                          </button>
-                        </div>
-                      )}
+                      <div className="mt-4">
+                        <button
+                          onClick={() =>
+                            review._id &&
+                            (session?.user.isAdmin
+                              ? handleDelete(review._id)
+                              : handleUserDelete(review._id))
+                          }
+                          className="btn btn-sm btn-error w-full"
+                        >
+                          {isDeleting || isDeletingUserReview ? 'Deleting...' : 'Delete'}
+                        </button>
+                      </div>
                     </li>
                   ))}
               </ul>

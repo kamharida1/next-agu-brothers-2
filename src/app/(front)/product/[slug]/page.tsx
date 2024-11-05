@@ -61,5 +61,9 @@ export default async function ProductDetailsPage({
 }: {
   params: { slug: string }
 }) {
-  return <ProductDetails params={{ slug: params.slug }} />
+  const product = await productServices.getBySlug(params.slug)
+  if (!product) {
+    return <div>Product not found</div>
+  }
+  return <ProductDetails  product={product} />
 }
