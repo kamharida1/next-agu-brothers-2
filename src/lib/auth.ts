@@ -50,6 +50,7 @@ export const authOptions = {
           email: user.email,
           name: user.name,
           isAdmin: user.isAdmin || false,
+          isPasswordUpdated: user.isPasswordUpdated, // Pass this to token
         };
       }
       if (trigger === "update" && session) {
@@ -70,9 +71,11 @@ export const authOptions = {
     async signIn({ user, account, profile }: any) {
       try {
         await dbConnect();
-        
+
         if (account.provider === "google") {
-          const existingUser = await UserModel.findOne({ email: profile.email });
+          const existingUser = await UserModel.findOne({
+            email: profile.email,
+          });
           if (!existingUser) {
             // Create new user
             const newUser = new UserModel({
@@ -80,6 +83,7 @@ export const authOptions = {
               email: profile.email,
               password: null, // Google users don't have a password
               isAdmin: false,
+              isPasswordUpdated: false,
             });
             await newUser.save();
             user._id = newUser._id;
@@ -88,6 +92,14 @@ export const authOptions = {
             // Use existing user
             user._id = existingUser._id;
             user.isAdmin = existingUser.isAdmin;
+          }
+        } else if (account.provider === "credentials") {
+          // For credential logins, assume they have a password and set `isPasswordUpdated` to true if it's not already
+          if (!user.isPasswordUpdated) {
+            await UserModel.findByIdAndUpdate(user._id, {
+              isPasswordUpdated: true,
+            });
+            user.isPasswordUpdated = true;
           }
         }
         return true;
@@ -103,5 +115,5 @@ export const {
   handlers: { GET, POST },
   auth,
   signIn,
-  signOut,                                 
-} = NextAuth(authOptions)
+  signOut,
+} = NextAuth(authOptions);
