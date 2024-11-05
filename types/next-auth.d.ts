@@ -11,5 +11,7 @@ declare module 'next-auth' {
   export interface User extends DefaultUser { 
     _id?: string
     isAdmin?: boolean
+    isPasswordUpdated: boolean
+    password: string
   }
 }

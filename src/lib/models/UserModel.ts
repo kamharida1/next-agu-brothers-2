@@ -1,11 +1,12 @@
-import mongoose from 'mongoose'
+import mongoose from "mongoose";
 
 export type User = {
-  _id: string
-  name: string
-  email: string
-  isAdmin: boolean
-}
+  _id: string;
+  name: string;
+  email: string;
+  isAdmin: boolean;
+  isPasswordUpdated: boolean;
+};
 
 const UserSchema = new mongoose.Schema(
   {
@@ -21,7 +22,11 @@ const UserSchema = new mongoose.Schema(
     password: {
       type: String,
     },
-    image:{
+    isPasswordUpdated: { 
+      type: Boolean, 
+      default: false 
+    }, 
+    image: {
       type: String,
     },
     isAdmin: { type: Boolean, required: true, default: false },
@@ -33,14 +38,16 @@ const UserSchema = new mongoose.Schema(
       type: Array,
       default: [],
     },
-    wishlist: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Product',
-    }]
+    wishlist: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+      },
+    ],
   },
   { timestamps: true }
-)
+);
 
-const UserModel = mongoose.models?.User || mongoose.model('User', UserSchema)
+const UserModel = mongoose.models?.User || mongoose.model("User", UserSchema);
 
-export default UserModel
+export default UserModel;
