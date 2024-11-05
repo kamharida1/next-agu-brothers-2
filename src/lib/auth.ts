@@ -59,46 +59,13 @@ export const authOptions = {
           name: session.user.name,
         };
       }
-      //  console.log('jwt', token)
       return token;
     },
     session: async ({ session, token }: any) => {
       if (token) {
         session.user = token.user;
       }
-      const sessionUser = await UserModel.findOne({ email: session.user.email });
-      if (sessionUser) {
-        session.user.id = sessionUser._id;
-        session.user.isAdmin = sessionUser.isAdmin; // Ensures isAdmin is added to session
-      }
-
       return session;
-    },
-    async signIn({ profile, account }: any) {
-      console.log(profile);
-      try {
-        await dbConnect();
-        if (account.provider === "google") {
-        const userExist = await UserModel.findOne({ email: profile.email });
-        console.log("userExist", userExist);
-        if (!userExist) {
-          const user = await UserModel.create({
-            name: profile.name,
-            email: profile.email,
-            isAdmin: false,
-            password: "",
-            cart: [],
-            addresses: [],
-            wishlist: []
-          })
-          await user.save();
-        }
-      }
-        return true
-      } catch (error) {
-        console.log(error);
-        return false;
-      }
     },
   },
 };
@@ -107,5 +74,5 @@ export const {
   handlers: { GET, POST },
   auth,
   signIn,
-  signOut,
-} = NextAuth(authOptions);
+  signOut,                                 
+} = NextAuth(authOptions)
