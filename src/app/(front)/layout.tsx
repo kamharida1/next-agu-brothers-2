@@ -1,3 +1,4 @@
+import PasswordUpdatePrompt from "@/components/PasswordUpdatePrompt"
 
 export default function FrontLayout({
   children,
@@ -8,6 +9,7 @@ export default function FrontLayout({
 }) {
   return (
     <main className="flex-grow md:p-4">
+      <PasswordUpdatePrompt />
       {children}
       {modal}
       <div id="modal-root" />
