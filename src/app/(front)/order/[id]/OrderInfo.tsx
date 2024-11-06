@@ -215,7 +215,7 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
     isAPI: true,
   };
 
-  const token = "PK_TEST_98a4f6909c45b5dc0bdbb0d87230c5de";
+  const token = "PK_LIVE_cde77f17cd31a0f5eaeae94fc44f7317";
 
   // Trigger payment modal via HydrogenPay script
   async function openDialogModal() {
@@ -678,7 +678,7 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
                     <span>{formatPrice(paymentResult?.debitedAmount)}</span>
                   </div>
                 )}
-                {!isPaid && paymentMethod === "HydrogenPay" && (
+                 {!isPaid && paymentMethod === "HydrogenPay" && (
                   <div>
                     <ul>
                       <li>
@@ -688,7 +688,7 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
                           onClick={() => openDialogModal()}
                           id="hydrogen-pay-button"
                         >
-                          {loading ? "Processing..." : "Pay with HydrogenPay"}
+                          {loading ? "Processing..." : "Checkout"}
                         </button>
                       </li>
                     </ul>
