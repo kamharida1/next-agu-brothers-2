@@ -3,9 +3,9 @@
 import { Product } from "@/lib/models/ProductModel";
 import productServices from "@/lib/services/productService";
 import { Metadata } from "next";
-import Link from "next/link";
 import PageSkeleton from "./ui/skeletons/PageSkeleton";
 import ProductCard from "@/components/products/ProductCard";
+import PasswordUpdatePrompt from "@/components/PasswordUpdatePrompt";
 
 export const metadata: Metadata = {
   title: process.env.NEXT_PUBLIC_APP_NAME || "Agu Brothers Electronics",
@@ -26,8 +26,10 @@ export default async function Home() {
 
   return (
     <>
+      <PasswordUpdatePrompt />
       <div className="container mx-auto p-4">
         {/* Latest Products */}
+
         <h1 className="text-xl md:text-2xl text-center font-semibold my-6">
           Latest Products
         </h1>
