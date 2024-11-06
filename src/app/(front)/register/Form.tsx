@@ -1,24 +1,26 @@
-'use client'
-import { useEffect } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { signIn, useSession } from 'next-auth/react'
-import { useForm, SubmitHandler } from 'react-hook-form'
-import toast from 'react-hot-toast'
+"use client";
+import { useEffect, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import { signIn, useSession } from "next-auth/react";
+import { useForm, SubmitHandler } from "react-hook-form";
+import toast from "react-hot-toast";
+import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 
 type Inputs = {
-  name: string
-  email: string
-  password: string
-  confirmPassword: string
-}
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+};
 
 const Form = () => {
-  const { data: session } = useSession()
-  const params = useSearchParams()
-  const router = useRouter()
+  const { data: session } = useSession();
+  const params = useSearchParams();
+  const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
 
-  let callbackUrl = params.get('callbackUrl') || 'https://www.agubrothers.com'
+  let callbackUrl = params.get("callbackUrl") || "https://www.agubrothers.com";
   const {
     register,
     handleSubmit,
@@ -26,47 +28,48 @@ const Form = () => {
     formState: { errors, isSubmitting },
   } = useForm<Inputs>({
     defaultValues: {
-      email: '',
-      password: '',
+      email: "",
+      password: "",
     },
-  })
+  });
 
   useEffect(() => {
     if (session && session.user) {
-      router.push(callbackUrl)
+      router.push(callbackUrl);
     }
-  }, [callbackUrl, params, router, session])
+  }, [callbackUrl, params, router, session]);
 
   const formSubmit: SubmitHandler<Inputs> = async (form) => {
-    const { name, email, password } = form
+    const { name, email, password } = form;
 
     try {
-      const res = await fetch('/api/auth/register', {
-        method: 'POST',
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           name,
           email,
           password,
         }),
-      })
+      });
       if (res.ok) {
         return router.push(
           `/signin?callbackUrl=${callbackUrl}&success=Account has been created`
-        )
+        );
       } else {
-        const data = await res.json()
-        throw new Error(data.message)
+        const data = await res.json();
+        throw new Error(data.message);
       }
     } catch (err: any) {
-      const error = err.message && err.message.indexOf('E11000')===0
-        ? 'Email already exists'
-        : err.message || 'error'
-      toast.error(err.message || 'error')
+      const error =
+        err.message && err.message.indexOf("E11000") === 0
+          ? "Email already exists"
+          : err.message || "error";
+      toast.error(err.message || "error");
     }
-  }
+  };
 
   return (
     <div className="max-w-sm  mx-auto card bg-base-300 my-4">
@@ -80,8 +83,8 @@ const Form = () => {
             <input
               type="text"
               id="name"
-              {...register('name', {
-                required: 'Name is required',
+              {...register("name", {
+                required: "Name is required",
               })}
               className="input input-bordered w-full max-w-sm"
             />
@@ -96,13 +99,16 @@ const Form = () => {
             <input
               type="text"
               id="email"
-              {...register('email', {
-                required: 'Email is required',
+              {...register("email", {
+                required: "Email is required",
                 pattern: {
                   value: /[a-z0-9]+@[a-z]+\.[a-z]{2,3}/,
-                  message: 'Email is invalid',
+                  message: "Email is invalid",
                 },
               })}
+              onInput={(e) => {
+                e.currentTarget.value = e.currentTarget.value.toLowerCase();
+              }}
               className="input input-bordered w-full max-w-sm"
             />
             {errors.email?.message && (
@@ -113,14 +119,24 @@ const Form = () => {
             <label className="label" htmlFor="password">
               Password
             </label>
-            <input
-              type="password"
-              id="password"
-              {...register('password', {
-                required: 'Password is required',
-              })}
-              className="input input-bordered w-full max-w-sm"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                id="password"
+                {...register("password", {
+                  required: "Password is required",
+                })}
+                className="input input-bordered w-full max-w-sm pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500"
+                aria-label="Toggle password visibility"
+              >
+                {showPassword ? <AiFillEyeInvisible /> : <AiFillEye />}
+              </button>
+            </div>
             {errors.password?.message && (
               <div className="text-error">{errors.password.message}</div>
             )}
@@ -129,18 +145,28 @@ const Form = () => {
             <label className="label" htmlFor="confirmPassword">
               Confirm Password
             </label>
-            <input
-              type="password"
-              id="confirmPassword"
-              {...register('confirmPassword', {
-                required: 'Confirm Password is required',
-                validate: (value) => {
-                  const { password } = getValues()
-                  return password === value || 'Passwords should match!'
-                },
-              })}
-              className="input input-bordered w-full max-w-sm"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                id="confirmPassword"
+                {...register("confirmPassword", {
+                  required: "Confirm Password is required",
+                  validate: (value) => {
+                    const { password } = getValues();
+                    return password === value || "Passwords should match!";
+                  },
+                })}
+                className="input input-bordered w-full max-w-sm"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500"
+                aria-label="Toggle password visibility"
+              >
+                {showPassword ? <AiFillEyeInvisible /> : <AiFillEye />}
+              </button>
+            </div>
             {errors.confirmPassword?.message && (
               <div className="text-error">{errors.confirmPassword.message}</div>
             )}
@@ -160,21 +186,21 @@ const Form = () => {
         </form>
         <div className="divider"> OR </div>
         <button
-          onClick={() => signIn('google', { callbackUrl })}
+          onClick={() => signIn("google", { callbackUrl })}
           className="btn"
         >
           Continue with Google
         </button>
         <div className="divider"> </div>
         <div>
-        Already have an account?{' '}
+          Already have an account?{" "}
           <Link className="link" href={`/signin?callbackUrl=${callbackUrl}`}>
             Login
           </Link>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Form
+export default Form;

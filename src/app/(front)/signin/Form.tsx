@@ -1,9 +1,10 @@
 'use client'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { signIn, useSession } from 'next-auth/react'
 import { useForm, SubmitHandler } from 'react-hook-form'
+import { AiFillEye, AiFillEyeInvisible } from 'react-icons/ai'
 
 type Inputs = {
   email: string
@@ -15,6 +16,8 @@ const Form = () => {
   const params = useSearchParams()
   let callbackUrl = params.get('callbackUrl') || 'https://www.agubrothers.com'
   const router = useRouter()
+  const [showPassword, setShowPassword] = useState(false)
+
 
   const {
     register,
@@ -80,14 +83,24 @@ const Form = () => {
             <label className="label" htmlFor="password">
               Password
             </label>
-            <input
-              type="password"
-              id="password"
-              {...register('password', {
-                required: 'Password is required',
-              })}
-              className="input input-bordered w-full max-w-sm"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                id="password"
+                {...register('password', {
+                  required: 'Password is required',
+                })}
+                className="input input-bordered w-full max-w-sm pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500"
+                aria-label="Toggle password visibility"
+              >
+                {showPassword ? <AiFillEyeInvisible /> : <AiFillEye />}
+              </button>
+            </div>
             {errors.password?.message && (
               <div className="text-error">{errors.password.message}</div>
             )}
