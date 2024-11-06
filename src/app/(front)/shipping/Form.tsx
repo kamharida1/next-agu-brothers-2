@@ -6,10 +6,13 @@ import useCartService from '@/lib/hooks/useCartStore'
 import { CheckoutSteps } from '@/components/CheckoutSteps'
 import { ShippingAddress } from '@/lib/models/OrderModel'
 import { shippingRates } from '@/lib/shipping'
+import { useSession } from 'next-auth/react'
 
 const Form = () => {
   const router = useRouter()
   const { saveShippingAddress, shippingAddress } = useCartService()
+  const {data: session} = useSession()
+  
   const {
     register,
     handleSubmit,
@@ -19,7 +22,7 @@ const Form = () => {
     defaultValues: {
       fullName: '',
       address: '',
-      email: '',
+      email: session?.user.email ?? undefined,
       city: '',
       postalCode: '',
       country: '',
