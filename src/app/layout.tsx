@@ -7,6 +7,7 @@ import DrawerButton from "@/components/DrawerButton";
 import Sidebar from "@/components/Sidebar";
 import Link from "next/link";
 import Header from "@/components/header/header";
+import PasswordUpdatePrompt from "@/components/PasswordUpdatePrompt";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -43,6 +44,7 @@ export default function RootLayout({
             <div className="drawer-content flex flex-col min-h-screen">
               <Header />
               <main className="flex-1">{children}</main>
+              <PasswordUpdatePrompt />
               <footer className="footer p-10 bg-base-200 text-base-content">
                 <div className="container mx-auto">
                   <aside className="grid grid-cols-1 md:grid-cols-4 gap-8 w-full">
