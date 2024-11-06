@@ -6,10 +6,13 @@ import useCartService from '@/lib/hooks/useCartStore'
 import { CheckoutSteps } from '@/components/CheckoutSteps'
 import { ShippingAddress } from '@/lib/models/OrderModel'
 import { shippingRates } from '@/lib/shipping'
+import { useSession } from 'next-auth/react'
 
 const Form = () => {
   const router = useRouter()
   const { saveShippingAddress, shippingAddress } = useCartService()
+  const {data: session} = useSession()
+  
   const {
     register,
     handleSubmit,
@@ -27,15 +30,19 @@ const Form = () => {
     },
   })
 
+ 
   useEffect(() => {
+    // Populate form fields with session and stored address data only on mount
+    if (session?.user.email) {
+      setValue('email', session.user.email)
+    }
     setValue('fullName', shippingAddress.fullName || '')
     setValue('address', shippingAddress.address || '')
     setValue('city', shippingAddress.city || '')
     setValue('postalCode', shippingAddress.postalCode || '')
-    setValue('country', shippingAddress.country || '')
-    setValue('email', shippingAddress.email || '')
+    setValue('country', shippingAddress.country || 'Nigeria')
     setValue('phone', shippingAddress.phone || '')
-  }, [setValue, shippingAddress])
+  }, [setValue, session, shippingAddress])
 
   const formSubmit: SubmitHandler<ShippingAddress> = async (form) => {
     saveShippingAddress(form)
