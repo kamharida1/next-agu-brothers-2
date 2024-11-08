@@ -125,12 +125,6 @@ const Form = () => {
         >
           Continue with Google
         </button>
-        <button
-          onClick={() => signIn('facebook', { callbackUrl })}
-          className="btn"
-        >
-          Continue with Facebook
-        </button>
         <div className="divider"> </div>
         <div>
           Need an account?{' '}
