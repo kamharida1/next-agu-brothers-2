@@ -1,10 +1,11 @@
+// pages/api/auth/[...nextauth].ts
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
+import FacebookProvider from "next-auth/providers/facebook";
 import dbConnect from "./dbConnect";
 import UserModel from "./models/UserModel";
 import bcrypt from "bcryptjs";
-import GoogleProvider from "next-auth/providers/google";
-import FacebookProvider from "next-auth/providers/facebook"
 
 export const authOptions = {
   providers: [
@@ -14,29 +15,24 @@ export const authOptions = {
     }),
     FacebookProvider({
       clientId: process.env.FACEBOOK_CLIENT_ID,
-      clientSecret: process.env.FACEBOOK_CLIENT_SECRET
+      clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
     }),
     CredentialsProvider({
       credentials: {
-        email: {
-          type: "email",
-        },
+        email: { type: "email" },
         password: { type: "password" },
       },
       async authorize(credentials) {
         await dbConnect();
-        if (credentials == null) return null;
+        if (!credentials) return null;
 
         const user = await UserModel.findOne({ email: credentials.email });
-
-        if (user) {
+        if (user && user.isAuthorized !== false) { // Check isAuthorized
           const isMatch = await bcrypt.compare(
             credentials.password as string,
             user.password
           );
-          if (isMatch) {
-            return user;
-          }
+          if (isMatch) return user;
         }
         return null;
       },
@@ -55,19 +51,15 @@ export const authOptions = {
           email: user.email,
           name: user.name,
           isAdmin: user.isAdmin || false,
-          isPasswordUpdated: user.isPasswordUpdated, // Pass this to token
+          isPasswordUpdated: user.isPasswordUpdated,
         };
       }
       if (trigger === "update" && session) {
-        token.user = {
-          ...token.user,
-          email: session.user.email,
-          name: session.user.name,
-        };
+        token.user = { ...token.user, email: session.user.email, name: session.user.name };
       }
       return token;
     },
-    session: async ({ session, token }: any) => {
+    async session({ session, token }: any) {
       if (token) {
         session.user = token.user;
       }
@@ -77,16 +69,36 @@ export const authOptions = {
       try {
         await dbConnect();
 
-        if (account.provider === "google") {
-          const existingUser = await UserModel.findOne({
-            email: profile.email,
-          });
+        if (account.provider === "facebook") {
+          let existingUser = await UserModel.findOne({ facebookId: profile.id });
+
           if (!existingUser) {
-            // Create new user
+            existingUser = new UserModel({
+              name: profile.name,
+              email: profile.email,
+              facebookId: profile.id,
+              password: null,
+              isAdmin: false,
+              isPasswordUpdated: false,
+              isAuthorized: true,
+            });
+            await existingUser.save();
+          }
+
+          if (existingUser.isAuthorized === false) {
+            return false; // Block sign-in if user is deauthorized
+          }
+
+          user._id = existingUser._id;
+          user.isAdmin = existingUser.isAdmin;
+          user.isAuthorized = existingUser.isAuthorized;
+        } else if (account.provider === "google") {
+          const existingUser = await UserModel.findOne({ email: profile.email });
+          if (!existingUser) {
             const newUser = new UserModel({
               name: profile.name,
               email: profile.email,
-              password: null, // Google users don't have a password
+              password: null,
               isAdmin: false,
               isPasswordUpdated: false,
             });
@@ -94,16 +106,15 @@ export const authOptions = {
             user._id = newUser._id;
             user.isAdmin = newUser.isAdmin;
           } else {
-            // Use existing user
+            if (existingUser.isAuthorized === false) {
+              return false; // Block sign-in if user is deauthorized
+            }
             user._id = existingUser._id;
             user.isAdmin = existingUser.isAdmin;
           }
         } else if (account.provider === "credentials") {
-          // For credential logins, assume they have a password and set `isPasswordUpdated` to true if it's not already
           if (!user.isPasswordUpdated) {
-            await UserModel.findByIdAndUpdate(user._id, {
-              isPasswordUpdated: true,
-            });
+            await UserModel.findByIdAndUpdate(user._id, { isPasswordUpdated: true });
             user.isPasswordUpdated = true;
           }
         }
@@ -116,9 +127,4 @@ export const authOptions = {
   },
 };
 
-export const {
-  handlers: { GET, POST },
-  auth,
-  signIn,
-  signOut,
-} = NextAuth(authOptions);
+export const { handlers: { GET, POST }, auth, signIn, signOut } = NextAuth(authOptions);
