@@ -19,6 +19,14 @@ const UserSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
+    facebookId: {
+      type: String,
+      unique: true, // Ensure only one record per Facebook user
+    },
+    isAuthorized: {
+      type: Boolean,
+      default: true, // Default to true; set to false when deauthorized
+    },
     password: {
       type: String,
     },
