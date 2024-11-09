@@ -44,11 +44,12 @@ export default function ProductImages({ images }: ProductImagesProps) {
       <div className="text-center justify-center">
         <CldImage
           src={activeImage}
-          width={300}
-          height={300}
-          className="object-cover w-[500px] h-[520px] rounded-lg"
+          width={500}
+          height={500}
+          className="rounded-lg"
           alt="Product"
           onClick={() => openModal(activeImage)} 
+          aspectRatio="16:9"
         />
       </div>
 

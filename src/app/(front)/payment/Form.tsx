@@ -29,7 +29,7 @@ const Form = () => {
         <div className="card-body">
           <h1 className="card-title">Payment Method</h1>
           <form onSubmit={handleSubmit}>
-            {['Remita', 'HydrogenPay'].map((payment) => (
+            {['Transfer', 'Cash On Delivery'].map((payment) => (
               <div key={payment}>
                 <label className="label cursor-pointer">
                   <span className="label-text">{payment}</span>
