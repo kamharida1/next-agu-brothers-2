@@ -41,7 +41,11 @@ export default function ProductList() {
       </div>
       <div className="block">
         {/* Responsive grid for different screen sizes */}
+        <div className="text-left px-4 mt-4 mb-4 text-xl font-medium text-gray-700">
+            Total Products: <span className="font-bold text-black">{products.length}</span>
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 m-4">
+         
           {products.map((product: Product) => (
             <div key={product.slug} className="border border-gray-200 p-4 rounded-lg hover:shadow-lg transition-shadow">
               <Link href={`/product/${product.slug}`}>

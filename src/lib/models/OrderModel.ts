@@ -33,6 +33,7 @@ import mongoose, { Types } from 'mongoose'
          country: { type: String, required: true },
          email: { type: String, required: true },
          phone: { type: String, required: true },
+         is_default: { type: Boolean, default: false }, 
        },
        paymentMethod: { type: String, required: true },
        paymentResult: {
@@ -114,4 +115,5 @@ export type ShippingAddress = {
   country: string
   email: string
   phone: string
+  is_default?: boolean
 }
