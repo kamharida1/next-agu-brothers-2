@@ -171,7 +171,7 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
   async function onApproveMonnifyOrder(data: any) {
     try {
       const response = await fetch(
-        `/api/orders/${orderId}/capture-monnify-order`,
+        `/api/orders/capture-monnify-order`,
         {
           method: "POST",
           headers: {
@@ -214,7 +214,7 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
       customerFullName: shippingAddress.fullName,
       customerEmail: shippingAddress.email,
       apiKey: "MK_PROD_TPNN9Q74H1",
-      contractCode: "2893747607",
+      contractCode: "176278549691",
       paymentDescription: "Monnify Payment",
       onLoadStart: () => {
         console.log("loading has started");
