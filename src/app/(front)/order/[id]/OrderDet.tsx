@@ -39,6 +39,18 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
   const [paidAt, setPaidAt] = useState("");
   const [isCashModalVisible, setIsCashModalVisible] = useState(false); // Cash on Delivery modal
 
+  useEffect(() => {
+    // Dynamically add Monnify SDK script to the document
+    const script = document.createElement("script");
+    script.src = "https://sdk.monnify.com/plugin/monnify.js";
+    script.async = true;
+    document.body.appendChild(script);
+
+    // Cleanup the script when the component unmounts
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
 
   // User can delete their order using useSWRMutation
   const { trigger: userDeleteOrder, isMutating: isUserDeleting } =
@@ -156,7 +168,69 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
     }
   }
 
-  async function makePayment(e: React.FormEvent) {}
+  async function onApproveMonnifyOrder(data: any) {
+    try {
+      const response = await fetch(
+        `/api/orders/${orderId}/capture-monnify-order`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        }
+      );
+
+      if (!response.ok) {
+        // If the response is not OK, throw an error with the status code
+        const errorMessage = await response.text(); // Fetch the error message from the response
+        throw new Error(
+          `HTTP error! Status: ${response.status} - ${errorMessage}`
+        );
+      }
+
+      const orderData = await response.json();
+
+      // Handle successful response
+      toast.success("Order paid successfully");
+      return orderData;
+    } catch (error) {
+      // Handle fetch or JSON parsing error
+      console.error("Error processing order payment:", error);
+      toast.error("Failed to process payment. Please try again.");
+    }
+  }
+
+  const monnifyPay = () => {
+    if (typeof (window as any).MonnifySDK === "undefined") {
+      console.error("Monnify SDK not loaded");
+      return;
+    }
+
+    (window as any).MonnifySDK.initialize({
+      amount: totalPrice,
+      currency: "NGN",
+      reference: new String(new Date().getTime()),
+      customerFullName: shippingAddress.fullName,
+      customerEmail: shippingAddress.email,
+      apiKey: "MK_PROD_TPNN9Q74H1",
+      contractCode: "2893747607",
+      paymentDescription: "Monnify Payment",
+      onLoadStart: () => {
+        console.log("loading has started");
+      },
+      onLoadComplete: () => {
+        console.log("SDK is UP");
+      },
+      onComplete: (response: any) => {
+        console.log("Payment Successful", response);
+        onApproveMonnifyOrder(response);
+      },
+      onClose: (data: any) => {
+        console.log(data);
+      },
+    });
+  };
 
   return (
     <>
@@ -401,6 +475,21 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
                   >
                     Cash on Delivery Instructions
                   </button>
+                )}
+                {!isPaid && paymentMethod === "Moniepoint" && (
+                  <div>
+                    <ul>
+                      <li>
+                        {/* <MonnifyButton orderId={orderId} /> */}
+                        <button
+                          className="btn btn-primary w-full my-2"
+                          onClick={() => monnifyPay()}
+                        >
+                          Pay with Monnify
+                        </button>
+                      </li>
+                    </ul>
+                  </div>
                 )}
                 {/* User can delete unpaid order */}
                 {!isPaid && !session?.user.isAdmin && (

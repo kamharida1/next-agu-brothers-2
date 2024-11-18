@@ -76,7 +76,9 @@ export default async function SearchPage({
         {/* Department Filter */}
         <div tabIndex={0} className="collapse collapse-arrow mb-4">
           <input type="checkbox" />
-          <div className="collapse-title btn text-lg font-semibold">Department</div>
+          <div className="collapse-title btn text-lg font-semibold">
+            Department
+          </div>
           <div className="collapse-content">
             <ul className="space-y-2">
               <li>
@@ -145,70 +147,80 @@ export default async function SearchPage({
           </div>
         </div>
       </div>
-
       <div className="md:col-span-4 p-4 bg-base-100 rounded-lg shadow-md">
-  {/* Results Info and Sort */}
-  <div className="flex flex-col sm:flex-row items-center justify-between py-4 border-b border-gray-300 mb-4">
-    {/* Results Info */}
-    <div className="text-sm md:text-base text-center sm:text-left mb-4 sm:mb-0">
-      <span className="font-semibold">{products.length === 0 ? "No" : countProducts} Results</span>
-      {q !== "all" && ` : ${q}`}
-      {category !== "all" && ` : ${category}`}
-      {price !== "all" && ` : Price ${price}`}
-      {rating !== "all" && ` : Rating ${rating} & up`}
-      {(q !== "all" || category !== "all" || price !== "all" || rating !== "all") && (
-        <Link href="/search" className="btn btn-xs btn-ghost ml-2">
-          Clear
-        </Link>
-      )}
-    </div>
-
-    {/* Sort By */}
-    <div tabIndex={0} className="collapse collapse-arrow w-full sm:w-auto">
-      <input type="checkbox" />
-      <div className="collapse-title btn w-full sm:w-auto">
-        Sort by: {sort.charAt(0).toUpperCase() + sort.slice(1)}
-      </div>
-      <div className="collapse-content w-full sm:w-auto bg-base-100 rounded-md shadow-md">
-        <ul className="menu p-2 space-y-1 text-sm">
-          {sortOrders.map((s) => (
-            <li key={s} className="flex justify-center">
-              <Link
-                href={getFilterUrl({ s })}
-                className={`link ${sort === s ? "link-primary font-semibold" : ""}`}
-              >
-                {s.charAt(0).toUpperCase() + s.slice(1)}
+        {/* Results Info and Sort */}
+        <div className="flex flex-col sm:flex-row items-center justify-between py-4 border-b border-gray-300 mb-4">
+          {/* Results Info */}
+          <div className="text-sm md:text-base text-center sm:text-left mb-4 sm:mb-0">
+            <span className="font-semibold">
+              {products.length === 0 ? "No" : countProducts} Results
+            </span>
+            {q !== "all" && ` : ${q}`}
+            {category !== "all" && ` : ${category}`}
+            {price !== "all" && ` : Price ${price}`}
+            {rating !== "all" && ` : Rating ${rating} & up`}
+            {(q !== "all" ||
+              category !== "all" ||
+              price !== "all" ||
+              rating !== "all") && (
+              <Link href="/search" className="btn btn-xs btn-ghost ml-2">
+                Clear
               </Link>
-            </li>
+            )}
+          </div>
+
+          {/* Sort By */}
+          <div
+            tabIndex={0}
+            className="collapse collapse-arrow w-full sm:w-auto"
+          >
+            <input type="checkbox" />
+            <div className="collapse-title btn w-full sm:w-auto">
+              Sort by: {sort.charAt(0).toUpperCase() + sort.slice(1)}
+            </div>
+            <div className="collapse-content w-full sm:w-auto bg-base-100 rounded-md shadow-md">
+              <ul className="menu p-2 space-y-1 text-sm">
+                {sortOrders.map((s) => (
+                  <li key={s} className="flex justify-center">
+                    <Link
+                      href={getFilterUrl({ s })}
+                      className={`link ${
+                        sort === s ? "link-primary font-semibold" : ""
+                      }`}
+                    >
+                      {s.charAt(0).toUpperCase() + s.slice(1)}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        {/* Product Grid */}
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {products.map((product: Product) => (
+            <ProductItem key={product.slug} product={product} />
           ))}
-        </ul>
+        </div>
+
+        {/* Pagination */}
+        {products.length > 0 && (
+          <div className="join flex justify-center mt-6">
+            {Array.from(Array(pages).keys()).map((p) => (
+              <Link
+                key={p}
+                className={`join-item btn ${
+                  Number(page) === p + 1 ? "btn-active" : ""
+                }`}
+                href={getFilterUrl({ pg: `${p + 1}` })}
+              >
+                {p + 1}
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
-    </div>
-  </div>
-
-  {/* Product Grid */}
-  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-    {products.map((product: Product) => (
-      <ProductItem key={product.slug} product={product} />
-    ))}
-  </div>
-
-  {/* Pagination */}
-  {products.length > 0 && (
-    <div className="join flex justify-center mt-6">
-      {Array.from(Array(pages).keys()).map((p) => (
-        <Link
-          key={p}
-          className={`join-item btn ${Number(page) === p + 1 ? "btn-active" : ""}`}
-          href={getFilterUrl({ pg: `${p + 1}` })}
-        >
-          {p + 1}
-        </Link>
-      ))}
-    </div>
-  )}
-</div>
-
     </div>
   );
 }
