@@ -11,7 +11,7 @@ import Script from "next/script";
 import { useEffect, useState } from "react";
 import { usePaystackPayment } from "react-paystack";
 
-// Extend the Window interface to include handlePgData
+
 declare global {
   interface Window {
     handlePgData: any;
