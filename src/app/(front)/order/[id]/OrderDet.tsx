@@ -10,7 +10,7 @@ import { AiOutlineCloseCircle } from "react-icons/ai";
 import Script from "next/script";
 import { useEffect, useState } from "react";
 
-// Extend the Window interface to include handlePgData
+
 declare global {
   interface Window {
     handlePgData: any;

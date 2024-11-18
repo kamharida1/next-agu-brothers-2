@@ -8,7 +8,6 @@ import { useSession } from 'next-auth/react'
 
 const ContactForm = () => {
   const { data: session } = useSession()
-  // user's email
   const email = session?.user?.email as string
 
   const [formData, setFormData] = useState({
