@@ -467,7 +467,7 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
                     </ul>
                   </div>
                 )}
-                {!isPaid && paymentMethod === 'Cash on Delivery' && (
+                {!isPaid && paymentMethod === 'Cash On Delivery' && (
                   <button
                     className="btn btn-primary w-full hover:bg-blue-600 transition duration-300 ease-in-out px-8 py-2 text-white rounded-md shadow-lg"
                     onClick={() => setIsCashModalVisible(true)}
