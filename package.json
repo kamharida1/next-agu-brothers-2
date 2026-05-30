@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.100.1",
     "@paypal/react-paypal-js": "^8.3.0",
     "@tiptap/pm": "^2.4.0",
     "@tiptap/react": "^2.4.0",
