@@ -1,79 +1,70 @@
-"use client";
-
-import { Product } from "@/lib/models/ProductModel";
-import Link from "next/link";
-import React from "react";
-import { Rating } from "./Rating";
-import CldImage from "../CldImage";
-import useWishListStore from "@/lib/hooks/useWishListStore";
-import { formatPrice } from "@/lib/utils";
+'use client'
+import { Product } from '@/lib/models/ProductModel'
+import Link from 'next/link'
+import { Rating } from './Rating'
+import CldImage from '../CldImage'
+import useWishListStore from '@/lib/hooks/useWishListStore'
+import { formatPrice } from '@/lib/utils'
+import { FiHeart } from 'react-icons/fi'
 
 export default function ProductItem({ product }: { product: Product }) {
-  const { addItem, removeItem, items } = useWishListStore();
+  const { addItem, removeItem, items } = useWishListStore()
+  const isWishlisted = items.some((p) => p._id === product._id)
+  const inStock = product.countInStock > 0
 
-  const handleWishList = (product: Product) => {
-    const isWishlisted = items.some((p) => p._id === product._id);
-    isWishlisted ? removeItem(product) : addItem(product);
-  };
+  const handleWishList = (e: React.MouseEvent) => {
+    e.preventDefault()
+    isWishlisted ? removeItem(product) : addItem(product)
+  }
 
   return (
-    <div className="card shadow-lg border border-gray-200">
-      <Link href={`/product/${product.slug}`}>
-        <figure className="p-4">
+    <div className="amazon-card relative group flex flex-col">
+      {/* Wishlist */}
+      <button
+        type="button"
+        onClick={handleWishList}
+        className={`absolute top-2 right-2 z-10 w-8 h-8 rounded-full bg-white/90 shadow
+                    flex items-center justify-center opacity-0 group-hover:opacity-100
+                    transition-opacity hover:bg-white ${isWishlisted ? '!opacity-100' : ''}`}
+      >
+        <FiHeart className={`w-4 h-4 ${isWishlisted ? 'text-[#CC0C39] fill-current' : 'text-[#565959]'}`} />
+      </button>
+
+      <Link href={`/product/${product.slug}`} className="flex flex-col flex-1">
+        {/* Image */}
+        <div className="bg-white flex items-center justify-center p-4" style={{ aspectRatio: '1/1' }}>
           <CldImage
             src={product.images[0]}
             alt={product.name}
             width={200}
             height={200}
             crop="fit"
-            sizes="100vw"
-            className="object-cover max-w-full sm:w-60 h-40 sm:h-60 md:h-48"
+            className="object-contain w-full h-full group-hover:scale-105 transition-transform duration-300"
           />
-        </figure>
-      </Link>
-      <div className="card-body p-4">
-        <Link href={`/product/${product.slug}`}>
-          <h2 className="card-title text-base md:text-lg font-medium hover:font-bold">
+        </div>
+
+        {/* Info */}
+        <div className="p-3 border-t border-[#F7F8F8] flex flex-col gap-1.5 flex-1">
+          <h2 className="text-sm text-[#0F1111] line-clamp-2 leading-snug group-hover:text-[#CC0C39]">
             {product.name}
           </h2>
-        </Link>
-        <Rating
-          value={product.rating}
-          caption={`${product.numReviews} ${product.numReviews === 1 ? "review" : "reviews"}`}
-        />
-        <p className="text-sm mt-1">{product.brand}</p>
-        <div className="flex items-center justify-between mt-3">
-          <span className="text-lg font-semibold text-primary">
-            {formatPrice(product.price)}
-          </span>
-          <Link href={`/product/${product.slug}`}>
-            <button className="btn btn-primary btn-sm">View Details</button>
-          </Link>
+          <Rating value={product.rating} caption={`${product.numReviews} reviews`} />
+          {product.brand && <p className="text-xs text-[#565959]">{product.brand}</p>}
+          <div className="mt-auto pt-1 flex items-center justify-between">
+            <span className="text-lg font-bold text-[#0F1111]">{formatPrice(product.price)}</span>
+          </div>
+          {inStock
+            ? <p className="text-[#007600] text-xs">In Stock</p>
+            : <p className="text-[#CC0C39] text-xs">Out of Stock</p>
+          }
         </div>
+      </Link>
+
+      <div className="p-3 pt-0">
+        <Link href={`/product/${product.slug}`}>
+          <button className="btn-amazon w-full text-sm py-1.5 rounded-md">See Details</button>
+        </Link>
       </div>
-      <button
-        type="button"
-        onClick={(e) => {
-          e.preventDefault();
-          handleWishList(product);
-        }}
-        className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-sm hover:bg-gray-100 transition-colors"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className={`w-5 h-5 ${
-            items.some((p) => p._id === product._id)
-              ? "text-red-500"
-              : "text-gray-500"
-          }`}
-          viewBox="0 0 16 16"
-        >
-          <path
-            fillRule="evenodd"
-            d="M8 14.25l-1.45-1.32C3.1 10.07 0 7.21 0 4.5 0 2.42 1.5 1 4 1c1.34 0 2.64.76 4 2.11C9.36 1.76 10.66 1 12 1c2.5 0 4 1.42 4 3.5 0 2.71-3.1 5.57-6.55 8.43L8 14.25z"
-          />
-        </svg>
-      </button>
     </div>
-  );
+  )
 }

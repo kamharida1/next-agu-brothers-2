@@ -2,34 +2,86 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-}
+@layer base {
+  * { scroll-behavior: smooth; box-sizing: border-box; }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
+  body {
+    @apply antialiased bg-[#EAEDED] text-[#0F1111];
+    font-family: var(--font-open-sans), 'Amazon Ember', Arial, sans-serif;
   }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { @apply bg-[#EAEDED]; }
+  ::-webkit-scrollbar-thumb { @apply bg-[#D5D9D9] rounded-full; }
+  ::-webkit-scrollbar-thumb:hover { @apply bg-amazon-orange; }
+
+  a { @apply text-[#007185]; }
+  a:hover { @apply text-amazon-red underline; }
 }
 
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+@layer components {
+  /* Amazon-style buttons */
+  .btn-amazon {
+    @apply bg-gradient-to-b from-[#FFD814] to-[#FF9900] text-[#0F1111] font-normal
+           border border-[#FCD200] rounded-lg px-4 py-2 text-sm cursor-pointer
+           hover:from-[#F7CA00] hover:to-[#F0A500] active:from-[#E8C000] active:to-[#E09400]
+           shadow-sm transition-all duration-100;
+  }
+
+  .btn-amazon-outline {
+    @apply bg-gradient-to-b from-white to-[#F7F8F8] text-[#0F1111] font-normal
+           border border-[#D5D9D9] rounded-lg px-4 py-2 text-sm cursor-pointer
+           hover:bg-[#F7F8F8] active:bg-[#EAEDED] shadow-sm transition-all duration-100;
+  }
+
+  .btn-amazon-nav {
+    @apply text-white text-sm font-normal border border-transparent rounded px-2 py-1
+           hover:border-white transition-colors duration-100 cursor-pointer;
+  }
+
+  /* Amazon product card */
+  .amazon-card {
+    @apply bg-white border border-transparent hover:border-[#D5D9D9] rounded-sm
+           shadow-none hover:shadow-md transition-all duration-150 overflow-hidden;
+  }
+
+  /* Amazon input */
+  .amazon-input {
+    @apply w-full px-3 py-2 border border-[#D5D9D9] rounded-md text-[#0F1111] text-sm
+           focus:outline-none focus:border-[#FF9900] focus:ring-2 focus:ring-[#FF9900]/20
+           bg-white placeholder:text-[#6C6C6C];
+  }
+
+  /* Amazon section heading */
+  .amazon-section-title {
+    @apply text-xl font-bold text-[#0F1111] border-b border-[#D5D9D9] pb-2 mb-4;
+  }
+
+  /* Prime badge */
+  .prime-badge {
+    @apply text-[#00A8E1] text-xs font-bold tracking-tight;
+  }
+
+  /* In stock */
+  .in-stock { @apply text-[#007600] font-medium text-sm; }
+  .out-stock { @apply text-[#CC0C39] font-medium text-sm; }
 }
 
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 }
-
-

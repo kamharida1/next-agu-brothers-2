@@ -2,56 +2,60 @@
 
 import useCartService from "@/lib/hooks/useCartStore";
 import { OrderItem } from "@/lib/models/OrderModel";
-import clsx from "clsx";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { FiShoppingCart, FiMinus, FiPlus } from "react-icons/fi";
 import toast from 'react-hot-toast';
 
-import { useEffect, useState } from "react";
-import { FaShoppingCart } from "react-icons/fa";
-
-export default function AddToCart({ item, brand }: { item: OrderItem;  brand?: string }) { 
-  const router = useRouter()
+export default function AddToCart({ item, compact }: { item: OrderItem; compact?: boolean }) {
   const { items, increase, decrease } = useCartService()
   const [existItem, setExistItem] = useState<OrderItem | undefined>()
 
-  useEffect(() => { 
+  useEffect(() => {
     setExistItem(items.find((x) => x.slug === item.slug))
   }, [item, items])
-  
-  const addToCartHandler = () => { 
+
+  const addToCartHandler = () => {
     increase(item)
-     // Show toast notification
-     toast.success(
-      `${item.name} has been added to your cart!`,
-      {
-        icon: <FaShoppingCart />,
-        duration: 3000,
-        style: {
-          borderRadius: '8px',
-         backgroundColor: '#666',
-          color: '#fff',
-        },
-      }
-    );
+    toast.success(`${item.name} added to cart!`, {
+      icon: '🛒',
+      duration: 2000,
+    })
   }
 
-  return (existItem && !brand ) ? (
-    <div>
-      <button className="btn" type="button" onClick={() => decrease(existItem)}>
-        -
-      </button>
-      <span className="px-2">{existItem.qty}</span>
-      <button className="btn" type="button" onClick={() => increase(existItem)}>
-        +
-      </button>
-  </div>
-  ) : (
-      <button
-        onClick={addToCartHandler}
-        type="button"
-        className={clsx('btn btn-primary', brand ? 'btn-small' : 'w-full')}
-      >
-        Add to Cart
-      </button>
+  if (existItem) {
+    return (
+      <div className="flex items-center border border-base-300 rounded-xl overflow-hidden">
+        <button
+          type="button"
+          className="w-10 h-10 flex items-center justify-center hover:bg-base-200 transition-colors"
+          onClick={() => decrease(existItem)}
+        >
+          <FiMinus className="w-4 h-4" />
+        </button>
+        <span className="flex-1 text-center font-semibold text-sm py-2">
+          {existItem.qty}
+        </span>
+        <button
+          type="button"
+          className="w-10 h-10 flex items-center justify-center hover:bg-base-200 transition-colors"
+          onClick={() => increase(existItem)}
+          disabled={existItem.qty >= item.countInStock}
+        >
+          <FiPlus className="w-4 h-4" />
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <button
+      onClick={addToCartHandler}
+      type="button"
+      className={`btn btn-primary gap-2 ${compact ? 'btn-sm' : 'w-full'}`}
+      disabled={item.countInStock === 0}
+    >
+      <FiShoppingCart className="w-4 h-4" />
+      {item.countInStock === 0 ? 'Out of Stock' : 'Add to Cart'}
+    </button>
   )
-} 
+}

@@ -3,7 +3,6 @@ import Link from 'next/link'
 import React from 'react'
 import { Bar, Doughnut, Line } from 'react-chartjs-2'
 import useSWR from 'swr'
-
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -18,163 +17,222 @@ import {
   ArcElement,
 } from 'chart.js'
 import { formatPrice } from '@/lib/utils'
+import {
+  FiShoppingBag,
+  FiPackage,
+  FiUsers,
+  FiDollarSign,
+  FiArrowRight,
+  FiTrendingUp,
+} from 'react-icons/fi'
 
 ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Filler,
-  Legend,
-  BarElement,
-  ArcElement
+  CategoryScale, LinearScale, PointElement, LineElement,
+  Title, Tooltip, Filler, Legend, BarElement, ArcElement
 )
 
-export const options = {
+const chartOptions = {
   responsive: true,
+  maintainAspectRatio: false,
   plugins: {
-    legend: {
-      position: 'top',
-    },
+    legend: { position: 'top' as const },
+  },
+  scales: {
+    y: { beginAtZero: true },
   },
 }
 
-const Dashboard = () => {
-  const { data: summary, error } = useSWR(`/api/admin/orders/summary`)
+const StatCard = ({
+  title,
+  value,
+  icon,
+  href,
+  color,
+  subtitle,
+}: {
+  title: string
+  value: string | number
+  icon: React.ReactNode
+  href: string
+  color: string
+  subtitle?: string
+}) => (
+  <div className={`card bg-base-100 shadow border border-base-200`}>
+    <div className="card-body p-5">
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-sm text-base-content/60 font-medium">{title}</p>
+          <p className="text-2xl font-bold mt-1">{value}</p>
+          {subtitle && <p className="text-xs text-base-content/50 mt-1">{subtitle}</p>}
+        </div>
+        <div className={`p-3 rounded-xl ${color}`}>
+          {icon}
+        </div>
+      </div>
+      <Link href={href} className="text-xs text-primary hover:underline flex items-center gap-1 mt-2">
+        View details <FiArrowRight className="w-3 h-3" />
+      </Link>
+    </div>
+  </div>
+)
 
-  if (error) return error.message
-  if (!summary) return 'Loading...'
+const Dashboard = () => {
+  const { data: summary, error } = useSWR('/api/admin/orders/summary')
+
+  if (error) return (
+    <div className="alert alert-error">
+      <span>Failed to load dashboard data: {error.message}</span>
+    </div>
+  )
+
+  if (!summary) return (
+    <div className="flex items-center justify-center py-16">
+      <span className="loading loading-spinner loading-lg text-primary"></span>
+    </div>
+  )
 
   const salesData = {
     labels: summary.salesData.map((x: { _id: string }) => x._id),
-    datasets: [
-      {
-        fill: true,
-        label: 'Sales',
-        data: summary.salesData.map(
-          (x: { totalSales: number }) => x.totalSales
-        ),
-        borderColor: 'rgb(53, 162, 235)',
-        backgroundColor: 'rgba(53, 162, 235, 0.5)',
-      },
-    ],
+    datasets: [{
+      fill: true,
+      label: 'Revenue (₦)',
+      data: summary.salesData.map((x: { totalSales: number }) => x.totalSales),
+      borderColor: 'rgb(251, 191, 36)',
+      backgroundColor: 'rgba(251, 191, 36, 0.1)',
+      tension: 0.4,
+    }],
   }
+
   const ordersData = {
     labels: summary.salesData.map((x: { _id: string }) => x._id),
-    datasets: [
-      {
-        fill: true,
-        label: 'Orders',
-        data: summary.salesData.map(
-          (x: { totalOrders: number }) => x.totalOrders
-        ),
-        borderColor: 'rgb(53, 162, 235)',
-        backgroundColor: 'rgba(53, 162, 235, 0.5)',
-      },
-    ],
+    datasets: [{
+      fill: true,
+      label: 'Orders',
+      data: summary.salesData.map((x: { totalOrders: number }) => x.totalOrders),
+      borderColor: 'rgb(59, 130, 246)',
+      backgroundColor: 'rgba(59, 130, 246, 0.1)',
+      tension: 0.4,
+    }],
   }
+
   const productsData = {
-    labels: summary.productsData.map((x: { _id: string }) => x._id), // 2022/01 2022/03
-    datasets: [
-      {
-        label: 'Category',
-        data: summary.productsData.map(
-          (x: { totalProducts: number }) => x.totalProducts
-        ),
-        backgroundColor: [
-          'rgba(255, 99, 132, 0.2)',
-          'rgba(54, 162, 235, 0.2)',
-          'rgba(255, 206, 86, 0.2)',
-          'rgba(75, 192, 192, 0.2)',
-          'rgba(153, 102, 255, 0.2)',
-          'rgba(255, 159, 64, 0.2)',
-        ],
-        borderColor: [
-          'rgba(255, 99, 132, 1)',
-          'rgba(54, 162, 235, 1)',
-          'rgba(255, 206, 86, 1)',
-          'rgba(75, 192, 192, 1)',
-          'rgba(153, 102, 255, 1)',
-          'rgba(255, 159, 64, 1)',
-        ],
-      },
-    ],
+    labels: summary.productsData.map((x: { _id: string }) => x._id),
+    datasets: [{
+      label: 'Products by Category',
+      data: summary.productsData.map((x: { totalProducts: number }) => x.totalProducts),
+      backgroundColor: [
+        'rgba(251, 191, 36, 0.8)',
+        'rgba(59, 130, 246, 0.8)',
+        'rgba(16, 185, 129, 0.8)',
+        'rgba(239, 68, 68, 0.8)',
+        'rgba(139, 92, 246, 0.8)',
+        'rgba(249, 115, 22, 0.8)',
+      ],
+      borderWidth: 0,
+    }],
   }
+
   const usersData = {
-    labels: summary.usersData.map((x: { _id: string }) => x._id), // 2022/01 2022/03
-    datasets: [
-      {
-        label: 'Users',
-        borderColor: 'rgb(53, 162, 235)',
-        backgroundColor: 'rgba(53, 162, 235, 0.5)',
-        data: summary.usersData.map(
-          (x: { totalUsers: number }) => x.totalUsers
-        ),
-      },
-    ],
+    labels: summary.usersData.map((x: { _id: string }) => x._id),
+    datasets: [{
+      label: 'New Users',
+      borderColor: 'rgb(16, 185, 129)',
+      backgroundColor: 'rgba(16, 185, 129, 0.7)',
+      data: summary.usersData.map((x: { totalUsers: number }) => x.totalUsers),
+    }],
   }
 
   return (
-    <div>
-      <div className="my-4 stats inline-grid md:flex  shadow stats-vertical   md:stats-horizontal">
-        <div className="stat">
-          <div className="stat-title">Sales</div>
-          <div className="stat-value text-primary">
-            {formatPrice(summary.ordersPrice)}
-          </div>
-          <div className="stat-desc">
-            <Link href="/admin/orders">View sales</Link>
+    <div className="space-y-6">
+      {/* Welcome Banner */}
+      <div className="bg-gradient-to-r from-primary to-primary/80 text-white rounded-2xl p-6 flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-bold">Welcome back, Admin!</h2>
+          <p className="text-white/70 text-sm mt-1">Here&apos;s what&apos;s happening with your store today.</p>
+        </div>
+        <FiTrendingUp className="w-12 h-12 text-white/30" />
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        <StatCard
+          title="Total Revenue"
+          value={formatPrice(summary.ordersPrice)}
+          icon={<FiDollarSign className="w-5 h-5 text-warning" />}
+          href="/admin/orders"
+          color="bg-warning/15"
+          subtitle="All time sales"
+        />
+        <StatCard
+          title="Total Orders"
+          value={summary.ordersCount}
+          icon={<FiShoppingBag className="w-5 h-5 text-primary" />}
+          href="/admin/orders"
+          color="bg-primary/15"
+          subtitle="Includes all statuses"
+        />
+        <StatCard
+          title="Total Products"
+          value={summary.productsCount}
+          icon={<FiPackage className="w-5 h-5 text-success" />}
+          href="/admin/products"
+          color="bg-success/15"
+          subtitle="Active listings"
+        />
+        <StatCard
+          title="Total Users"
+          value={summary.usersCount}
+          icon={<FiUsers className="w-5 h-5 text-info" />}
+          href="/admin/users"
+          color="bg-info/15"
+          subtitle="Registered accounts"
+        />
+      </div>
+
+      {/* Charts Row 1 */}
+      <div className="grid lg:grid-cols-2 gap-6">
+        <div className="card bg-base-100 shadow border border-base-200">
+          <div className="card-body">
+            <h3 className="font-semibold text-base">Revenue Overview</h3>
+            <div className="h-56">
+              <Line data={salesData} options={chartOptions} />
+            </div>
           </div>
         </div>
-        <div className="stat">
-          <div className="stat-title"> Orders</div>
-          <div className="stat-value text-primary">{summary.ordersCount}</div>
-          <div className="stat-desc">
-            <Link href="/admin/orders">View orders</Link>
-          </div>
-        </div>
-        <div className="stat">
-          <div className="stat-title">Products</div>
-          <div className="stat-value text-primary">{summary.productsCount}</div>
-          <div className="stat-desc">
-            <Link href="/admin/products">View products</Link>
-          </div>
-        </div>
-        <div className="stat">
-          <div className="stat-title">Users</div>
-          <div className="stat-value text-primary">{summary.usersCount}</div>
-          <div className="stat-desc">
-            <Link href="/admin/users">View users</Link>
+        <div className="card bg-base-100 shadow border border-base-200">
+          <div className="card-body">
+            <h3 className="font-semibold text-base">Orders Trend</h3>
+            <div className="h-56">
+              <Line data={ordersData} options={chartOptions} />
+            </div>
           </div>
         </div>
       </div>
-      <div className="grid md:grid-cols-2 gap-4">
-        <div>
-          <h2 className="text-xl py-2">Sales Report</h2>
-          <Line data={salesData} />
-        </div>
-        <div>
-          <h2 className="text-xl py-2">Orders Report</h2>
-          <Line data={ordersData} />
-        </div>
-      </div>
-      <div className="grid md:grid-cols-2 gap-4">
-        <div>
-          <h2 className="text-xl py-2">Products Report</h2>
-          <div className="flex items-center justify-center h-80 w-96 ">
-            {' '}
-            <Doughnut data={productsData} />
+
+      {/* Charts Row 2 */}
+      <div className="grid lg:grid-cols-2 gap-6">
+        <div className="card bg-base-100 shadow border border-base-200">
+          <div className="card-body">
+            <h3 className="font-semibold text-base">Products by Category</h3>
+            <div className="h-56 flex items-center justify-center">
+              <Doughnut
+                data={productsData}
+                options={{ ...chartOptions, maintainAspectRatio: true }}
+              />
+            </div>
           </div>
         </div>
-        <div>
-          <h2 className="text-xl py-2">Users Report</h2>
-          <Bar data={usersData} />
+        <div className="card bg-base-100 shadow border border-base-200">
+          <div className="card-body">
+            <h3 className="font-semibold text-base">User Registrations</h3>
+            <div className="h-56">
+              <Bar data={usersData} options={chartOptions} />
+            </div>
+          </div>
         </div>
       </div>
     </div>
   )
 }
 
-export default Dashboard  
+export default Dashboard

@@ -1,61 +1,83 @@
-"use client";
-
-import { Product } from "@/lib/models/ProductModel";
-import Link from "next/link";
-import CldImage from "../CldImage";
-import useWishListStore from "@/lib/hooks/useWishListStore";
-import { formatPrice } from "@/lib/utils";
+'use client'
+import { Product } from '@/lib/models/ProductModel'
+import Link from 'next/link'
+import CldImage from '../CldImage'
+import useWishListStore from '@/lib/hooks/useWishListStore'
+import { formatPrice } from '@/lib/utils'
+import { FiHeart } from 'react-icons/fi'
 
 export default function ProductCard({ product }: { product: Product }) {
-  const { addItem, removeItem, items } = useWishListStore();
+  const { addItem, removeItem, items } = useWishListStore()
+  const isWishlisted = items.some((p) => p._id === product._id)
+  const inStock = product.countInStock > 0
 
-  //toggle wishlist
-  const handleWishList = (product: Product) => {
-    const isWishlisted = items.some((p) => p._id === product._id);
-    isWishlisted ? removeItem(product) : addItem(product);
-  };
+  const handleWishList = (e: React.MouseEvent) => {
+    e.preventDefault()
+    isWishlisted ? removeItem(product) : addItem(product)
+  }
+
   return (
-    <div className="card shadow-lg border border-gray-200">
-      <Link href={`/product/${product.slug}`}>
-        <figure className="p-4">
+    <div className="amazon-card relative flex flex-col group">
+      {/* Wishlist */}
+      <button
+        type="button"
+        onClick={handleWishList}
+        className={`absolute top-2 right-2 z-10 w-8 h-8 rounded-full bg-white/90 shadow
+                    flex items-center justify-center opacity-0 group-hover:opacity-100
+                    transition-opacity hover:bg-white ${isWishlisted ? '!opacity-100' : ''}`}
+        aria-label="Toggle wishlist"
+      >
+        <FiHeart className={`w-4 h-4 ${isWishlisted ? 'text-[#CC0C39] fill-current' : 'text-[#565959]'}`} />
+      </button>
+
+      <Link href={`/product/${product.slug}`} className="flex flex-col flex-1">
+        {/* Image */}
+        <div className="relative bg-white flex items-center justify-center p-4" style={{ aspectRatio: '1/1' }}>
           <CldImage
             src={product.images[0]}
             alt={product.name}
             width={200}
             height={200}
-            className="object-cover max-w-full sm:w-60 h-40 sm:h-60 md:h-48"
+            className="object-contain w-full h-full group-hover:scale-105 transition-transform duration-300"
           />
-        </figure>
-        <div className="card-body p-4">
-          <h2 className="card-title text-md md:text-lg font-semibold">
+          {!inStock && (
+            <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
+              <span className="bg-[#CC0C39] text-white text-xs font-bold px-3 py-1 rounded-sm">Out of Stock</span>
+            </div>
+          )}
+        </div>
+
+        {/* Info */}
+        <div className="p-3 border-t border-[#F7F8F8] flex flex-col flex-1 gap-1">
+          {product.brand && (
+            <p className="text-[10px] text-[#565959] uppercase tracking-wider">{product.brand}</p>
+          )}
+          <h3 className="text-sm text-[#0F1111] line-clamp-2 leading-snug group-hover:text-[#CC0C39]">
             {product.name}
-          </h2>
-          <p className="text-md md:text-lg font-semibold text-orange-600">
-            {formatPrice(product.price)}
-          </p>
+          </h3>
+
+          {/* Stars */}
+          {product.rating > 0 && (
+            <div className="flex items-center gap-1">
+              <div className="flex">
+                {[1,2,3,4,5].map((s) => (
+                  <svg key={s} className={`w-3.5 h-3.5 ${s <= Math.round(product.rating) ? 'text-[#FF9900]' : 'text-[#D5D9D9]'} fill-current`} viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                ))}
+              </div>
+              <span className="text-[11px] text-[#007185]">({product.numReviews})</span>
+            </div>
+          )}
+
+          <div className="mt-auto pt-1">
+            <span className="text-lg font-bold text-[#0F1111]">{formatPrice(product.price)}</span>
+          </div>
+          {inStock && (
+            <p className="text-[#007600] text-xs">In Stock</p>
+          )}
         </div>
       </Link>
-      {/* Add a heart button for wishlist */}
-      <button
-        type="button"
-        onClick={() => handleWishList(product)}
-        className="absolute top-6 right-6 p-2  bg-white btn-sm rounded-full shadow-lg items-center justify-center"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className={`w-4 h-4 fill-current ${
-            items.some((p) => p._id === product._id)
-              ? "text-red-500"
-              : "text-gray-500"
-          }`}
-          viewBox="0 0 16 16"
-        >
-          <path
-            fillRule="evenodd"
-            d="M8 14.25l-1.45-1.32C3.1 10.07 0 7.21 0 4.5 0 2.42 1.5 1 4 1c1.34 0 2.64.76 4 2.11C9.36 1.76 10.66 1 12 1c2.5 0 4 1.42 4 3.5 0 2.71-3.1 5.57-6.55 8.43L8 14.25z"
-          />
-        </svg>
-      </button>
     </div>
-  );
+  )
 }

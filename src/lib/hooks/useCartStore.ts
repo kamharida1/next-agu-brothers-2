@@ -21,7 +21,7 @@ const initialState: Cart = {
   shippingPrice: 0,
   taxPrice: 0,
   totalPrice: 0,
-  paymentMethod: "PayPal",
+  paymentMethod: "Paystack",
   shippingAddress: {
     fullName: "",
     address: "",

@@ -1,210 +1,317 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import useCartService from '@/lib/hooks/useCartStore'
 import { CheckoutSteps } from '@/components/CheckoutSteps'
 import Link from 'next/link'
 import Image from 'next/image'
 import toast from 'react-hot-toast'
-import useSWRMutation from 'swr/mutation'
 import { formatPrice } from '@/lib/utils'
+import { PaystackButton } from 'react-paystack'
+import { useSession } from 'next-auth/react'
 
 const Form = () => {
   const router = useRouter()
+  const { data: session } = useSession()
   const {
-    paymentMethod,
-    shippingAddress,
-    items,
-    itemsPrice,
-    taxPrice,
-    shippingPrice,
-    totalPrice,
-    clear,
+    paymentMethod, shippingAddress, items,
+    itemsPrice, taxPrice, shippingPrice, totalPrice, clear,
   } = useCartService()
-  console.log(shippingPrice, totalPrice)
 
-  const { trigger: placeOrder, isMutating: isPlacing } = useSWRMutation(
-    `/api/orders`,
-    async (url) => {
-      const res = await fetch(url, {
+  const [mounted, setMounted] = useState(false)
+  const [isPlacing, setIsPlacing] = useState(false)
+
+  useEffect(() => { setMounted(true) }, [])
+
+  useEffect(() => {
+    if (mounted) {
+      if (!paymentMethod) router.push('/payment')
+      else if (items.length === 0) router.push('/')
+    }
+  }, [mounted, paymentMethod, items.length, router])
+
+  // ── Cash on Delivery ──────────────────────────────────────────
+  const placeCODOrder = async () => {
+    setIsPlacing(true)
+    try {
+      const res = await fetch('/api/orders', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          paymentMethod,
-          shippingAddress,
-          items,
-          itemsPrice,
-          taxPrice,
-          shippingPrice,
-          totalPrice,
+          paymentMethod, shippingAddress, items,
+          itemsPrice, taxPrice, shippingPrice, totalPrice,
         }),
       })
       const data = await res.json()
-
       if (res.ok) {
         clear()
-        toast.success('Order placed successfully')
-        return router.push(`/order/${data.order._id}`)
+        toast.success('Order placed! We\'ll collect payment on delivery.')
+        router.push(`/order/${data.order._id}`)
       } else {
         toast.error(data.message)
       }
+    } finally {
+      setIsPlacing(false)
     }
-  )
+  }
 
-  useEffect(() => {
-    if (!paymentMethod) {
-      return router.push('/payment')
+  // ── Paystack handlers ─────────────────────────────────────────
+  const paystackConfig = {
+    email: shippingAddress.email || session?.user?.email || '',
+    amount: Math.round(totalPrice * 100), // kobo
+    publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || '',
+    reference: `agubros_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+  }
+
+  const handlePaystackSuccess = useCallback(async (response: any) => {
+    setIsPlacing(true)
+    try {
+      const res = await fetch('/api/orders/create-paid', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items, shippingAddress, paymentMethod,
+          paystackReference: response.reference,
+        }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        clear()
+        toast.success('Payment confirmed! Your order is placed.')
+        router.push(`/order/${data.order._id}`)
+      } else {
+        toast.error(data.message || 'Order creation failed. Contact support.')
+      }
+    } finally {
+      setIsPlacing(false)
     }
-    if (items.length === 0) {
-      return router.push('/')
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [paymentMethod, router])
+  }, [items, shippingAddress, paymentMethod, clear, router])
 
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  const handlePaystackClose = () => {
+    toast('Payment cancelled. Your order has not been placed.', { icon: 'ℹ️' })
+  }
 
-  if (!mounted) return <></>
+  if (!mounted) return null
+
+  const isPaystack = paymentMethod === 'Paystack'
 
   return (
-    <div>
-      <CheckoutSteps current={4} />
+    <div className="bg-[#EAEDED] min-h-screen">
+      <CheckoutSteps current={3} />
 
-      <div className="grid md:grid-cols-4 md:gap-5 my-4 mx-2">
-        <div className="overflow-x-auto md:col-span-3">
-          <div className="card bg-base-300">
-            <div className="card-body">
-              <h2 className="card-title">Shipping Address</h2>
-              <p>{shippingAddress.fullName}</p>
-              <p>{shippingAddress.email}</p>
-              <p>{shippingAddress.phone}</p>
-              <p>
-                {shippingAddress.address}, {shippingAddress.city},{' '}
-                {shippingAddress.postalCode}, {shippingAddress.country}{' '}
-              </p>
-              <div>
-                <Link className="btn" href="/shipping">
-                  Edit
-                </Link>
-              </div>
-            </div>
-          </div>
-          <div className="card bg-base-300 mt-4 ">
-            <div className="card-body">
-              <h2 className="card-title">Payment Method</h2>
-              <p>{paymentMethod}</p>
-              <div>
-                <Link className="btn" href="/payment">
-                  Edit
-                </Link>
-              </div>
-            </div>
-          </div>
-          <div className="card bg-base-300 mt-4 ">
-            <div className="card-body">
-              <h2 className="card-title">Items</h2>
-              <table className="table ">
-                <thead>
-                  <tr>
-                    <th>Item</th>
-                    <th>Quantity</th>
-                    <th>Price</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {items.map((item) => (
-                    <tr key={item.slug}>
-                      <td>
-                        <Link
-                          href={`/product/${item.slug}`}
-                          className="flex items-center"
-                        >
-                          <Image
-                            src={item.image}
-                            alt={item.name}
-                            width={50}
-                            height={50}
-                          ></Image>
-                          <span className="px-2">{item.name}</span>
-                        </Link>
-                      </td>
-                      <td>
-                        <span>{item.qty}</span>
-                      </td>
-                      <td>
-                        {formatPrice(item.price)} <span>x {item.qty}</span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <div>
-                <Link className="btn" href="/cart">
-                  Edit
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div>
-          <div className="card bg-base-300 mt-4">
-            <div className="card-body">
-              <h2 className="card-title">Order Summary</h2>
-              <ul className="space-y-3">
-                <li>
-                  <div className=" flex justify-between">
-                    <div>Items</div>
-                    <div>
-                      {formatPrice(itemsPrice)}
-                    </div>
-                  </div>
-                </li>
-                <li>
-                  <div className=" flex justify-between">
-                    <div>Tax</div>
-                    <div>
-                      {formatPrice(taxPrice)}
-                    </div>
-                  </div>
-                </li>
-                <li>
-                  <div className=" flex justify-between">
-                    <div>Shipping</div>
-                    <div>
-                      {formatPrice(shippingPrice)}
-                    </div>
-                  </div>
-                </li>
-                <li>
-                  <div className=" flex justify-between">
-                    <div>Total</div>
-                    <div>
-                      {formatPrice(totalPrice)}
-                    </div>
-                  </div>
-                </li>
+      <div className="max-w-[1200px] mx-auto px-4 py-6">
+        <h1 className="text-2xl font-medium text-[#0F1111] mb-5">Review your order</h1>
 
-                <li>
-                  <button
-                    onClick={() => placeOrder()}
-                    disabled={isPlacing}
-                    className="btn btn-primary w-full"
-                  >
-                    {isPlacing && (
-                      <span className="loading loading-spinner"></span>
+        <div className="flex flex-col lg:flex-row gap-4 items-start">
+
+          {/* ── Left: Delivery + Payment + Items ── */}
+          <div className="flex-1 space-y-3 min-w-0">
+
+            {/* Delivery */}
+            <div className="bg-white rounded-sm shadow-sm p-5">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h2 className="font-bold text-[#0F1111] mb-2">Delivery address</h2>
+                  <p className="text-sm font-medium text-[#0F1111]">{shippingAddress.fullName}</p>
+                  <p className="text-sm text-[#565959]">{shippingAddress.address}</p>
+                  <p className="text-sm text-[#565959]">
+                    {shippingAddress.city}, {shippingAddress.postalCode}, {shippingAddress.country}
+                  </p>
+                  <p className="text-sm text-[#565959]">{shippingAddress.phone}</p>
+                  <p className="text-sm text-[#007185] mt-1">{shippingAddress.email}</p>
+                </div>
+                <Link href="/shipping" className="text-sm text-[#007185] hover:text-[#CC0C39] hover:underline flex-shrink-0">
+                  Change
+                </Link>
+              </div>
+            </div>
+
+            {/* Payment */}
+            <div className="bg-white rounded-sm shadow-sm p-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="font-bold text-[#0F1111] mb-1">Payment method</h2>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-[#565959]">
+                      {isPaystack ? '💳 Pay Online (Paystack)' : '🚚 Cash on Delivery'}
+                    </span>
+                    {isPaystack && (
+                      <span className="text-[10px] bg-[#FF9900] text-white px-1.5 py-0.5 rounded-sm font-bold">SECURE</span>
                     )}
-                    Place Order
-                  </button>
-                </li>
-              </ul>
+                  </div>
+                </div>
+                <Link href="/payment" className="text-sm text-[#007185] hover:text-[#CC0C39] hover:underline">
+                  Change
+                </Link>
+              </div>
+            </div>
+
+            {/* Items */}
+            <div className="bg-white rounded-sm shadow-sm p-5">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="font-bold text-[#0F1111]">
+                  Order items ({items.reduce((a, c) => a + c.qty, 0)})
+                </h2>
+                <Link href="/cart" className="text-sm text-[#007185] hover:text-[#CC0C39] hover:underline">
+                  Edit cart
+                </Link>
+              </div>
+
+              <div className="space-y-4 divide-y divide-[#D5D9D9]">
+                {items.map((item) => (
+                  <div key={item.slug} className="flex gap-4 pt-4 first:pt-0">
+                    <Link href={`/product/${item.slug}`} className="flex-shrink-0">
+                      <Image
+                        src={item.image}
+                        alt={item.name}
+                        width={72}
+                        height={72}
+                        className="object-contain rounded-sm border border-[#D5D9D9]"
+                      />
+                    </Link>
+                    <div className="flex-1 min-w-0">
+                      <Link href={`/product/${item.slug}`}>
+                        <p className="text-sm text-[#007185] hover:text-[#CC0C39] hover:underline line-clamp-2 font-medium">
+                          {item.name}
+                        </p>
+                      </Link>
+                      <p className="text-[#007600] text-xs mt-0.5 font-medium">In Stock</p>
+                      <p className="text-sm text-[#565959] mt-0.5">Qty: {item.qty}</p>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <p className="font-bold text-sm text-[#0F1111]">{formatPrice(item.price * item.qty)}</p>
+                      <p className="text-xs text-[#565959] mt-0.5">{formatPrice(item.price)} each</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* CTA at bottom of items on mobile */}
+              <div className="mt-6 lg:hidden">
+                <OrderCTA
+                  isPaystack={isPaystack}
+                  isPlacing={isPlacing}
+                  totalPrice={totalPrice}
+                  paystackConfig={paystackConfig}
+                  onPaystackSuccess={handlePaystackSuccess}
+                  onPaystackClose={handlePaystackClose}
+                  onCOD={placeCODOrder}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* ── Right: Summary + Pay ── */}
+          <div className="w-full lg:w-80 flex-shrink-0 space-y-3">
+            <div className="bg-white rounded-sm shadow-sm p-5">
+              <OrderCTA
+                isPaystack={isPaystack}
+                isPlacing={isPlacing}
+                totalPrice={totalPrice}
+                paystackConfig={paystackConfig}
+                onPaystackSuccess={handlePaystackSuccess}
+                onPaystackClose={handlePaystackClose}
+                onCOD={placeCODOrder}
+              />
+
+              <p className="text-xs text-[#565959] mt-3 leading-relaxed">
+                By placing your order, you agree to Agu Brothers&apos;{' '}
+                <Link href="/terms-and-conditions" className="text-[#007185] hover:underline">Conditions of Use</Link>
+                {' '}and{' '}
+                <Link href="/privacy-policy" className="text-[#007185] hover:underline">Privacy Notice</Link>.
+              </p>
+
+              {/* Order summary */}
+              <div className="border-t border-[#D5D9D9] mt-4 pt-4 space-y-2">
+                <h3 className="font-bold text-[#0F1111] text-sm mb-3">Order Summary</h3>
+                {[
+                  ['Items', formatPrice(itemsPrice)],
+                  ['Shipping & handling', formatPrice(shippingPrice)],
+                  ['Tax (0.6%)', formatPrice(taxPrice)],
+                ].map(([label, val]) => (
+                  <div key={label as string} className="flex justify-between text-sm text-[#0F1111]">
+                    <span className="text-[#565959]">{label}:</span>
+                    <span>{val}</span>
+                  </div>
+                ))}
+                <div className="border-t border-[#D5D9D9] pt-3 mt-2">
+                  <div className="flex justify-between font-bold text-lg text-[#CC0C39]">
+                    <span>Order total:</span>
+                    <span>{formatPrice(totalPrice)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Security badge */}
+            <div className="bg-white rounded-sm shadow-sm p-4 flex items-center gap-3">
+              <svg className="w-8 h-8 text-[#007600] flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 1.944A11.954 11.954 0 012.166 5C2.056 5.649 2 6.319 2 7c0 5.225 3.34 9.67 8 11.317C14.66 16.67 18 12.225 18 7c0-.682-.057-1.35-.166-2.001A11.954 11.954 0 0110 1.944zM11 14a1 1 0 11-2 0 1 1 0 012 0zm0-7a1 1 0 10-2 0v3a1 1 0 102 0V7z" clipRule="evenodd" />
+              </svg>
+              <div>
+                <p className="text-xs font-bold text-[#0F1111]">Safe & secure checkout</p>
+                <p className="text-xs text-[#565959] mt-0.5">
+                  {isPaystack ? 'Payments processed by Paystack — SSL encrypted' : 'Cash collected on delivery'}
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </div>
+    </div>
+  )
+}
+
+// ── Extracted CTA so it can render in both mobile and desktop positions ──
+function OrderCTA({
+  isPaystack, isPlacing, totalPrice, paystackConfig,
+  onPaystackSuccess, onPaystackClose, onCOD,
+}: {
+  isPaystack: boolean
+  isPlacing: boolean
+  totalPrice: number
+  paystackConfig: any
+  onPaystackSuccess: (res: any) => void
+  onPaystackClose: () => void
+  onCOD: () => void
+}) {
+  if (isPlacing) {
+    return (
+      <button disabled className="btn-amazon w-full py-3 rounded-md text-sm flex items-center justify-center gap-2">
+        <span className="loading loading-spinner loading-xs"></span>
+        Processing your order…
+      </button>
+    )
+  }
+
+  if (isPaystack) {
+    return (
+      <div className="space-y-2">
+        <PaystackButton
+          {...paystackConfig}
+          onSuccess={onPaystackSuccess}
+          onClose={onPaystackClose}
+          className="btn-amazon w-full py-3 rounded-md text-sm font-medium cursor-pointer text-center block"
+          text={`Pay ${formatPrice(totalPrice)} with Paystack`}
+        />
+        <p className="text-xs text-center text-[#565959]">
+          You&apos;ll be charged immediately. Order is confirmed after payment.
+        </p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-2">
+      <button
+        onClick={onCOD}
+        className="btn-amazon w-full py-3 rounded-md text-sm font-medium"
+      >
+        Place your order
+      </button>
+      <p className="text-xs text-center text-[#565959]">
+        Payment collected on delivery. Order may be cancelled before dispatch.
+      </p>
     </div>
   )
 }

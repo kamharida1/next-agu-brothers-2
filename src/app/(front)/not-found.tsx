@@ -1,19 +1,35 @@
 import Link from 'next/link'
-import { FaFrown } from 'react-icons/fa'
-
 
 export default function NotFound() {
   return (
-    <main className="flex h-full flex-col items-center justify-center gap-2">
-      <FaFrown className="w-10 text-gray-400" />
-      <h2 className="text-xl font-semibold">404 Not Found</h2>
-      <p>Could not find the requested data.</p>
-      <Link
-        href="/"
-        className="mt-4 rounded-md bg-blue-500 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-400"
-      >
-        Go Back
-      </Link>
-    </main>
+    <div className="bg-[#EAEDED] min-h-screen flex items-center justify-center px-4">
+      <div className="text-center max-w-lg">
+        <div className="text-8xl mb-6">🔍</div>
+        <h1 className="text-4xl font-bold text-[#CC0C39] mb-2">Oops!</h1>
+        <h2 className="text-2xl font-medium text-[#0F1111] mb-3">
+          We&apos;re sorry, we couldn&apos;t find that page
+        </h2>
+        <p className="text-[#565959] mb-8">
+          The Web address you entered is not a functioning page on our site.
+        </p>
+        <div className="bg-white rounded-sm shadow-sm p-6 text-left space-y-2">
+          <p className="font-bold text-sm text-[#0F1111] mb-3">Try these instead:</p>
+          <ul className="space-y-2 text-sm">
+            {[
+              { href: '/', label: 'Go to Agu Brothers Home Page' },
+              { href: '/all-products', label: 'Browse all products' },
+              { href: '/search', label: 'Search for something' },
+              { href: '/contact-us', label: 'Get help from Customer Service' },
+            ].map(l => (
+              <li key={l.href}>
+                <Link href={l.href} className="text-[#007185] hover:underline hover:text-[#CC0C39]">
+                  › {l.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
   )
 }
