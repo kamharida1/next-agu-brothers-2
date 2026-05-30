@@ -57,7 +57,7 @@ const Menu = () => {
               </svg>
             </span>
           </label>
-          <ul tabIndex={0} className="dropdown-content bg-white shadow-xl border border-[#D5D9D9] rounded-sm w-56 mt-1 py-2 z-[100] text-[#0F1111]">
+          <ul tabIndex={0} className="dropdown-content bg-white shadow-xl border border-[#D5D9D9] rounded-sm w-56 max-w-[calc(100vw-1rem)] right-0 mt-1 py-2 z-[100] text-[#0F1111]">
             <li className="px-4 py-2 border-b border-[#D5D9D9]">
               <p className="text-xs text-[#565959]">{session.user.email}</p>
             </li>
