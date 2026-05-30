@@ -3,7 +3,8 @@ import ProductModel from '@/lib/models/ProductModel'
 import OrderModel, { OrderItem, ShippingAddress } from '@/lib/models/OrderModel'
 import { round2 } from '@/lib/utils'
 import { auth } from '@/lib/auth'
-import { shippingRates } from "@/lib/shipping";
+import { shippingRates } from "@/lib/shipping"
+import { sendOrderConfirmationEmail, sendAdminOrderNotification } from '@/lib/email'
 
 
 export const POST = auth(async (req: any) => {
@@ -48,11 +49,14 @@ export const POST = auth(async (req: any) => {
     })
 
     const createdOrder = await newOrder.save()
+
+    // Send emails (non-blocking)
+    sendOrderConfirmationEmail(createdOrder).catch(() => {})
+    sendAdminOrderNotification(createdOrder).catch(() => {})
+
     return Response.json(
       { message: 'Order has been created', order: createdOrder },
-      {
-        status: 201,
-      }
+      { status: 201 }
     )
   } catch (err: any) {
     return Response.json(

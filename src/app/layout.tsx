@@ -7,6 +7,7 @@ import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
 import Header from '@/components/header/header'
 import BackToTop from '@/components/BackToTop'
+import WhatsAppButton from '@/components/WhatsAppButton'
 
 const openSans = Open_Sans({
   subsets: ['latin'],
@@ -82,6 +83,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <div className="drawer-content flex flex-col min-h-screen">
               <Header />
               <main className="flex-1 bg-[#EAEDED]">{children}</main>
+              <WhatsAppButton />
 
               {/* ── Footer ── */}
               <footer>

@@ -4,6 +4,7 @@ import OrderModel, { OrderItem, ShippingAddress } from '@/lib/models/OrderModel'
 import ProductModel from '@/lib/models/ProductModel'
 import { round2 } from '@/lib/utils'
 import { shippingRates } from '@/lib/shipping'
+import { sendOrderConfirmationEmail, sendAdminOrderNotification } from '@/lib/email'
 
 // Creates an order AND marks it as paid after verifying the Paystack reference.
 // Used for Paystack checkout so payment + order creation is a single atomic step.
@@ -88,6 +89,10 @@ export const POST = auth(async (req: any) => {
         $inc: { countInStock: -item.qty },
       })
     }
+
+    // Send emails (non-blocking)
+    sendOrderConfirmationEmail(order).catch(() => {})
+    sendAdminOrderNotification(order).catch(() => {})
 
     return Response.json({ message: 'Order created and paid', order }, { status: 201 })
   } catch (err: any) {
