@@ -53,6 +53,34 @@ export default async function Home() {
   const featured = JSON.parse(JSON.stringify(featuredProducts))
   const latest   = JSON.parse(JSON.stringify(latestProducts))
 
+  const localBusinessJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'ElectronicsStore',
+    name: 'Agu Brothers Electronics',
+    image: `${BASE_URL}/og-home.jpg`,
+    url: BASE_URL,
+    telephone: '+234-909-923-4242',
+    priceRange: '₦₦',
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: '33 Ogui Road',
+      addressLocality: 'Enugu',
+      addressRegion: 'Enugu State',
+      addressCountry: 'NG',
+    },
+    geo: {
+      '@type': 'GeoCoordinates',
+      latitude: 6.4521,
+      longitude: 7.5248,
+    },
+    openingHoursSpecification: [
+      { '@type': 'OpeningHoursSpecification', dayOfWeek: ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'], opens: '08:00', closes: '18:00' },
+      { '@type': 'OpeningHoursSpecification', dayOfWeek: ['Sunday'], opens: '12:00', closes: '16:00' },
+    ],
+    servesCuisine: undefined,
+    hasMap: 'https://maps.google.com/?q=33+Ogui+Road+Enugu+Nigeria',
+  }
+
   const organizationJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
@@ -89,6 +117,7 @@ export default async function Home() {
 
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }} />
     <div className="bg-[#EAEDED] min-h-screen">
@@ -171,8 +200,8 @@ export default async function Home() {
                 </Link>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-1">
-                {latest.map((product: Product) => (
-                  <ProductCard key={product.slug} product={product} />
+                {latest.map((product: Product, i: number) => (
+                  <ProductCard key={product.slug} product={product} priority={i < 4} />
                 ))}
               </div>
             </div>

@@ -1,8 +1,25 @@
+import { Metadata } from 'next'
 import CldImage from '@/components/CldImage'
 import AddToCart from '@/components/products/AddToCart'
 import { Product } from '@/lib/models/ProductModel'
 import productServices from '@/lib/services/productService'
 import { convertDocToObj, formatPrice } from '@/lib/utils'
+
+const BASE_URL = 'https://www.agubrothers.com'
+
+export async function generateMetadata({ params }: { params: { brand: string } }): Promise<Metadata> {
+  const brand = decodeURIComponent(params.brand)
+  return {
+    title: `${brand} Products | Agu Brothers Electronics`,
+    description: `Shop genuine ${brand} electronics and appliances at Agu Brothers. Best prices with fast delivery across Nigeria.`,
+    alternates: { canonical: `${BASE_URL}/${params.brand}` },
+    openGraph: {
+      title: `${brand} | Agu Brothers Electronics`,
+      description: `Shop ${brand} products at Agu Brothers Nigeria.`,
+      url: `${BASE_URL}/${params.brand}`,
+    },
+  }
+}
 import Link from 'next/link'
 import { Rating } from '@/components/products/Rating'
 

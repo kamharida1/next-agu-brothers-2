@@ -7,7 +7,7 @@ import useWishListStore from '@/lib/hooks/useWishListStore'
 import { formatPrice } from '@/lib/utils'
 import { FiHeart } from 'react-icons/fi'
 
-export default function ProductCard({ product }: { product: Product }) {
+export default function ProductCard({ product, priority = false }: { product: Product; priority?: boolean }) {
   const router = useRouter()
   const { addItem, removeItem, items } = useWishListStore()
   const isWishlisted = items.some((p) => p._id === product._id)
@@ -42,6 +42,7 @@ export default function ProductCard({ product }: { product: Product }) {
           alt={product.name}
           width={200}
           height={200}
+          priority={priority}
           className="object-contain w-full h-full"
         />
         {!inStock && (

@@ -1,5 +1,17 @@
 User-Agent: *
 Allow: /
-Disallow: /private/
+Disallow: /admin/
+Disallow: /api/
+Disallow: /cart
+Disallow: /checkout
+Disallow: /shipping
+Disallow: /payment
+Disallow: /place-order
+Disallow: /order/
+Disallow: /order-history
+Disallow: /profile
+Disallow: /signin
+Disallow: /register
+Disallow: /wishlist
 
 Sitemap: https://www.agubrothers.com/sitemap.xml

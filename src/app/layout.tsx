@@ -68,6 +68,13 @@ const FOOTER_LINKS = [
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
+      <head>
+        {/* Preconnect to Cloudinary for faster image loading */}
+        <link rel="preconnect" href="https://res.cloudinary.com" />
+        <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+        {/* Preconnect to Paystack */}
+        <link rel="preconnect" href="https://api.paystack.co" />
+      </head>
       <body className={`${openSans.variable} font-sans antialiased`}>
         <Providers>
           <div className="drawer z-50">
