@@ -3,13 +3,7 @@ import Settings from './Settings'
 import productServices from '@/lib/services/productService'
 
 export const metadata = {
-  title: 'Admin Settings',
-  robots: {
-    index: false,
-    follow: true,
-    nocache: true,
-  },
-}
+  robots: { index: false, follow: false },  title: 'Admin Settings',}
 export default async function AdminSettingsPage() {
   const latestProducts = await productServices.getLatest()
 

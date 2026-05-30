@@ -2,13 +2,7 @@ import AdminLayout from '@/components/admin/AdminLayout'
 import Profits from './Profits'
 
 export const metadata = {
-  title: 'Admin Settings',
-  robots: {
-    index: false,
-    follow: true,
-    nocache: true,
-  },
-}
+  robots: { index: false, follow: false },  title: 'Admin Settings',}
 export default async function AdminProfitsPage() {
   return (
     <AdminLayout activeItem="profits">

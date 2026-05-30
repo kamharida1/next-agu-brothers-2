@@ -5,9 +5,31 @@ import ProductCard from '@/components/products/ProductCard'
 import Link from 'next/link'
 import { FiArrowRight } from 'react-icons/fi'
 
+const BASE_URL = 'https://www.agubrothers.com'
+
 export const metadata: Metadata = {
-  title: 'Agu Brothers — Electronics & Home Appliances',
-  description: 'Shop premium home electronics: TVs, refrigerators, generators, air conditioners, and more. Fast delivery across Nigeria.',
+  title: 'Agu Brothers — Electronics & Home Appliances Nigeria',
+  description: 'Shop premium home electronics and appliances in Nigeria: TVs, refrigerators, generators, air conditioners, gas cookers, freezers. Fast delivery nationwide.',
+  alternates: { canonical: BASE_URL },
+  openGraph: {
+    title: 'Agu Brothers — Electronics & Home Appliances Nigeria',
+    description: 'Shop premium home electronics and appliances in Nigeria. TVs, fridges, generators, ACs and more. Fast nationwide delivery.',
+    url: BASE_URL,
+    siteName: 'Agu Brothers Electronics',
+    type: 'website',
+    images: [{
+      url: `${BASE_URL}/og-home.jpg`,
+      width: 1200,
+      height: 630,
+      alt: 'Agu Brothers Electronics — Nigeria',
+    }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Agu Brothers — Electronics & Home Appliances Nigeria',
+    description: 'Premium electronics and home appliances. Fast delivery across Nigeria.',
+    images: [`${BASE_URL}/og-home.jpg`],
+  },
 }
 
 const CATEGORY_ICONS: Record<string, string> = {
@@ -31,7 +53,44 @@ export default async function Home() {
   const featured = JSON.parse(JSON.stringify(featuredProducts))
   const latest   = JSON.parse(JSON.stringify(latestProducts))
 
+  const organizationJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'Agu Brothers Electronics',
+    url: BASE_URL,
+    logo: `${BASE_URL}/logo.png`,
+    contactPoint: {
+      '@type': 'ContactPoint',
+      telephone: '+234-909-923-4242',
+      contactType: 'Customer Service',
+      areaServed: 'NG',
+      availableLanguage: 'English',
+    },
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: '33 Ogui Road',
+      addressLocality: 'Enugu',
+      addressCountry: 'NG',
+    },
+    sameAs: [],
+  }
+
+  const websiteJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Agu Brothers Electronics',
+    url: BASE_URL,
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: { '@type': 'EntryPoint', urlTemplate: `${BASE_URL}/search?q={search_term_string}` },
+      'query-input': 'required name=search_term_string',
+    },
+  }
+
   return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }} />
     <div className="bg-[#EAEDED] min-h-screen">
       {/* ── Hero Banner ── */}
       <div className="relative overflow-hidden bg-gradient-to-r from-[#131921] via-[#232F3E] to-[#37475A] text-white">
@@ -177,5 +236,6 @@ export default async function Home() {
 
       </div>
     </div>
+    </>
   )
 }
