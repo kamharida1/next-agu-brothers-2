@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --header-height: 104px; /* dark bar ~64px + nav bar ~40px */
+}
+
 @layer base {
   * { scroll-behavior: smooth; box-sizing: border-box; }
 

@@ -3,7 +3,7 @@ import useCartService from '@/lib/hooks/useCartStore'
 import useLayoutService from '@/lib/hooks/useLayout'
 import { signIn, signOut, useSession } from 'next-auth/react'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import useWishListStore from '@/lib/hooks/useWishListStore'
 
 const Menu = () => {
@@ -11,18 +11,30 @@ const Menu = () => {
   const { items } = useCartService()
   const { items: wishlist } = useWishListStore()
   const [mounted, setMounted] = useState(false)
+  const [accountOpen, setAccountOpen] = useState(false)
   const { data: session } = useSession()
   const { init } = useCartService()
+  const dropdownRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => { setMounted(true) }, [])
 
-  const handleClick = () => {
-    ;(document.activeElement as HTMLElement).blur()
-  }
+  // Close when clicking outside
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setAccountOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  const close = () => setAccountOpen(false)
 
   const signoutHandler = () => {
     signOut({ callbackUrl: '/signin' })
     init()
+    close()
   }
 
   const cartCount = items.reduce((a, c) => a + c.qty, 0)
@@ -43,12 +55,19 @@ const Menu = () => {
 
       {/* Account */}
       {session?.user ? (
-        <div className="dropdown dropdown-bottom dropdown-end">
-          <label tabIndex={0} className="btn-amazon-nav flex flex-col leading-none cursor-pointer px-2 py-1">
-            <span className="hidden md:block text-[10px] text-[#CCCCCC]">Hello, {session.user.name?.split(' ')[0]}</span>
-            {/* Mobile: just a person icon */}
+        <div ref={dropdownRef} className="relative">
+          {/* Trigger */}
+          <button
+            onClick={() => setAccountOpen((o) => !o)}
+            className="btn-amazon-nav flex flex-col leading-none cursor-pointer px-2 py-1"
+          >
+            <span className="hidden md:block text-[10px] text-[#CCCCCC]">
+              Hello, {session.user.name?.split(' ')[0]}
+            </span>
+            {/* Mobile: person icon */}
             <svg className="md:hidden w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
             <span className="hidden md:flex text-white text-sm font-bold items-center gap-0.5">
               Account &amp; Lists
@@ -56,36 +75,57 @@ const Menu = () => {
                 <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
               </svg>
             </span>
-          </label>
-          <ul tabIndex={0} className="dropdown-content bg-white shadow-xl border border-[#D5D9D9] rounded-sm w-56 max-w-[calc(100vw-1rem)] right-0 mt-1 py-2 z-[100] text-[#0F1111]">
-            <li className="px-4 py-2 border-b border-[#D5D9D9]">
-              <p className="text-xs text-[#565959]">{session.user.email}</p>
-            </li>
-            {session.user.isAdmin && (
-              <li onClick={handleClick} className="hover:bg-[#F3F3F3]">
-                <Link href="/admin/dashboard" className="block px-4 py-2 text-sm">Admin Dashboard</Link>
-              </li>
-            )}
-            <li onClick={handleClick} className="hover:bg-[#F3F3F3]">
-              <Link href="/order-history" className="block px-4 py-2 text-sm">Returns & Orders</Link>
-            </li>
-            <li onClick={handleClick} className="hover:bg-[#F3F3F3]">
-              <Link href="/wishlist" className="block px-4 py-2 text-sm">
-                Wish List
-                {mounted && wishlist.length > 0 && (
-                  <span className="ml-2 text-[#CC0C39] font-bold text-xs">({wishlist.length})</span>
+          </button>
+
+          {/* Dropdown — fixed on mobile so it never overflows */}
+          {accountOpen && (
+            <>
+              {/* Backdrop for mobile */}
+              <div className="fixed inset-0 z-[98] md:hidden" onClick={close} />
+
+              <ul className="
+                fixed right-2 z-[99] py-2 mt-1
+                bg-white shadow-2xl border border-[#D5D9D9] rounded-sm
+                w-56 text-[#0F1111]
+                md:absolute md:right-0 md:fixed-none
+              " style={{ top: 'var(--header-height, 104px)' }}>
+                <li className="px-4 py-2 border-b border-[#D5D9D9]">
+                  <p className="text-xs font-semibold text-[#0F1111] truncate">{session.user.name}</p>
+                  <p className="text-xs text-[#565959] truncate">{session.user.email}</p>
+                </li>
+                {session.user.isAdmin && (
+                  <li className="hover:bg-[#F3F3F3]">
+                    <Link href="/admin/dashboard" onClick={close} className="block px-4 py-2.5 text-sm">
+                      Admin Dashboard
+                    </Link>
+                  </li>
                 )}
-              </Link>
-            </li>
-            <li onClick={handleClick} className="hover:bg-[#F3F3F3]">
-              <Link href="/profile" className="block px-4 py-2 text-sm">Account Settings</Link>
-            </li>
-            <li className="border-t border-[#D5D9D9] mt-1">
-              <button onClick={signoutHandler} className="w-full text-left px-4 py-2 text-sm hover:bg-[#F3F3F3]">
-                Sign Out
-              </button>
-            </li>
-          </ul>
+                <li className="hover:bg-[#F3F3F3]">
+                  <Link href="/order-history" onClick={close} className="block px-4 py-2.5 text-sm">
+                    Returns &amp; Orders
+                  </Link>
+                </li>
+                <li className="hover:bg-[#F3F3F3]">
+                  <Link href="/wishlist" onClick={close} className="flex items-center justify-between px-4 py-2.5 text-sm">
+                    Wish List
+                    {mounted && wishlist.length > 0 && (
+                      <span className="text-[#CC0C39] font-bold text-xs">({wishlist.length})</span>
+                    )}
+                  </Link>
+                </li>
+                <li className="hover:bg-[#F3F3F3]">
+                  <Link href="/profile" onClick={close} className="block px-4 py-2.5 text-sm">
+                    Account Settings
+                  </Link>
+                </li>
+                <li className="border-t border-[#D5D9D9] mt-1">
+                  <button onClick={signoutHandler} className="w-full text-left px-4 py-2.5 text-sm hover:bg-[#F3F3F3]">
+                    Sign Out
+                  </button>
+                </li>
+              </ul>
+            </>
+          )}
         </div>
       ) : (
         <button
@@ -93,9 +133,9 @@ const Menu = () => {
           className="btn-amazon-nav flex flex-col leading-none px-2 py-1"
         >
           <span className="hidden md:block text-[10px] text-[#CCCCCC]">Hello, sign in</span>
-          {/* Mobile: just person icon */}
           <svg className="md:hidden w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
           </svg>
           <span className="hidden md:flex text-white text-sm font-bold items-center gap-0.5">
             Account &amp; Lists
@@ -109,7 +149,7 @@ const Menu = () => {
       {/* Returns & Orders */}
       <Link href="/order-history" className="btn-amazon-nav hidden md:flex flex-col leading-none px-2 py-1">
         <span className="text-[10px] text-[#CCCCCC]">Returns</span>
-        <span className="text-white text-sm font-bold">& Orders</span>
+        <span className="text-white text-sm font-bold">&amp; Orders</span>
       </Link>
 
       {/* Cart */}
