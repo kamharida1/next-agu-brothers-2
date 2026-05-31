@@ -42,15 +42,15 @@ const FOOTER_LINKS = [
   {
     title: 'Make Money with Us',
     links: [
-      { href: '/careers',  label: 'Sell on Agu Brothers' },
-      { href: '/blog',     label: 'Become an Affiliate' },
+      { href: '/sell-on-agu-brothers', label: 'Sell on Agu Brothers' },
+      { href: '/affiliate',            label: 'Become an Affiliate' },
     ],
   },
   {
     title: 'Payment Products',
     links: [
-      { href: '/payment',         label: 'Paystack Payment' },
-      { href: '/order-history',   label: 'Agu Brothers Credit' },
+      { href: '/payment-methods', label: 'Payment Methods' },
+      { href: '/credit',          label: 'Agu Brothers Credit' },
     ],
   },
   {
@@ -58,7 +58,7 @@ const FOOTER_LINKS = [
     links: [
       { href: '/profile',               label: 'Your Account' },
       { href: '/order-history',         label: 'Your Orders' },
-      { href: '/shipping',              label: 'Shipping Rates' },
+      { href: '/shipping-rates',        label: 'Shipping Rates' },
       { href: '/terms-and-conditions',  label: 'Terms of Use' },
       { href: '/privacy-policy',        label: 'Privacy Notice' },
       { href: '/contact-us',            label: 'Help' },
@@ -125,7 +125,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                       <Link href="/contact-us" className="hover:underline hover:text-white">Help</Link>
                     </div>
                     <p className="text-xs text-center">
-                      © 2024 Agu Brothers Electronics. All rights reserved. Lagos, Nigeria.
+                      © 2025 Agu Brothers Electronics. All rights reserved. Enugu, Nigeria.
                     </p>
                     <div className="flex items-center gap-2 text-xs">
                       <span>Payments secured by</span>
