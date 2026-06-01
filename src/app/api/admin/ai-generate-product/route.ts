@@ -17,7 +17,7 @@ export const POST = auth(async (req: any) => {
   const categoryList = categories?.map((c: any) => c.name).join(', ') || 'Televisions, Refrigerators, Gas Cookers, Generators, Freezers, Washing Machines'
 
   const message = await client.messages.create({
-    model: 'claude-haiku-4-5-20251001',
+    model: 'claude-sonnet-4-6',
     max_tokens: 1024,
     messages: [
       {
@@ -41,13 +41,15 @@ Return ONLY valid JSON in this exact format (no markdown, no explanation):
     ],
   })
 
-  const text = message.content[0].type === 'text' ? message.content[0].text : ''
+  const raw = message.content[0].type === 'text' ? message.content[0].text : ''
+
+  // Strip markdown code fences if present (```json ... ``` or ``` ... ```)
+  const text = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim()
 
   try {
     const generated = JSON.parse(text)
     return Response.json(generated)
   } catch {
-    // If JSON parsing fails, return the raw text for debugging
-    return Response.json({ message: 'AI returned invalid JSON', raw: text }, { status: 500 })
+    return Response.json({ message: 'AI returned invalid JSON', raw }, { status: 500 })
   }
 }) as any
