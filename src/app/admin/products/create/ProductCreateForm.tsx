@@ -41,6 +41,7 @@ export default function ProductCreateForm() {
   const router = useRouter()
 
   const { data: categoriesData } = useSWR('/api/admin/categories')
+  const { data: existingBrands } = useSWR<string[]>('/api/products/brands')
 
   useEffect(() => {
     if (categoriesData) setCategories(categoriesData)
@@ -361,9 +362,18 @@ export default function ProductCreateForm() {
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-[#0F1111] mb-1">Brand</label>
-              <input {...register('brand', { required: 'Brand is required' })}
-                className="amazon-input" placeholder="e.g. Samsung, LG, Nexus" />
+              <input
+                {...register('brand', { required: 'Brand is required' })}
+                list="brand-suggestions"
+                className="amazon-input"
+                placeholder="e.g. Samsung, LG, Nexus"
+                autoComplete="off"
+              />
+              <datalist id="brand-suggestions">
+                {existingBrands?.map((b) => <option key={b} value={b} />)}
+              </datalist>
               {errors.brand && <p className="text-[#CC0C39] text-xs mt-1">{errors.brand.message}</p>}
+              <p className="text-xs text-[#565959] mt-1">Choose an existing brand or type a new one — it will be created automatically.</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-[#0F1111] mb-1">Category</label>

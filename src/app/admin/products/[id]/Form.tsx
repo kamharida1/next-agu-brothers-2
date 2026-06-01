@@ -53,6 +53,7 @@ export default function ProductEditForm({ productId }: { productId: string }) {
   const router = useRouter()
 
   const { data: categoriesData } = useSWR('/api/admin/categories')
+  const { data: existingBrands } = useSWR<string[]>('/api/products/brands')
   useEffect(() => {
    
     if (productData) {
@@ -220,11 +221,13 @@ export default function ProductEditForm({ productId }: { productId: string }) {
     name,
     required,
     pattern,
+    datalistId,
   }: {
     id: keyof ProductFormProps
     name: string
     required?: boolean
     pattern?: ValidationRule<RegExp>
+    datalistId?: string
   }) => (
     <div className="md:flex mb-6">
       <label className="label md:w-1/5" htmlFor={id}>
@@ -253,8 +256,13 @@ export default function ProductEditForm({ productId }: { productId: string }) {
               required: required && `${name} is required`,
               pattern,
             })}
+            list={datalistId}
+            autoComplete={datalistId ? 'off' : undefined}
             className="input input-bordered w-full max-w-md"
           />
+          {errors[id]?.message && (
+            <div className="text-error">{errors[id]?.message}</div>
+          )}
         </div>
       )}
     </div>
@@ -402,7 +410,10 @@ export default function ProductEditForm({ productId }: { productId: string }) {
           <FormInput name="Cost Price" id="costPrice" required />
           <FormInput name="Weight" id="weight" />
           <FormInput name="Discount Percentage" id="discountPercentage" />
-          <FormInput name="Brand" id="brand" required />
+          <FormInput name="Brand" id="brand" required datalistId="brand-suggestions-edit" />
+          <datalist id="brand-suggestions-edit">
+            {existingBrands?.map((b) => <option key={b} value={b} />)}
+          </datalist>
           <FormInput name="Description" id="description" required />
           <FormInput name="Count In Stock" id="countInStock" required />
           <FormInput name="Notes" id="notes" />
