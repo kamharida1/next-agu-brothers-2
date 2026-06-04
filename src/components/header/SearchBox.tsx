@@ -2,7 +2,8 @@
 import { useRouter } from 'next/navigation'
 import { useRef, useState, useEffect, useCallback } from 'react'
 import CldImage from '../CldImage'
-import { formatPrice } from '@/lib/utils'
+import { getSalePrice, hasDiscount } from '@/lib/productPricing'
+import Price from '@/components/products/Price'
 
 type Suggestion = {
   _id: string
@@ -10,6 +11,8 @@ type Suggestion = {
   slug: string
   images: string[]
   price: number
+  discountPercentage?: number
+  discountedPrice?: number
   cat: string
 }
 
@@ -128,9 +131,13 @@ export const SearchBox = () => {
               </div>
 
               {/* Price */}
-              <p className="text-sm font-bold text-[#0F1111] flex-shrink-0">
-                {formatPrice(s.price)}
-              </p>
+              <div className="flex-shrink-0">
+                <Price
+                  amount={getSalePrice(s)}
+                  compareAt={hasDiscount(s) ? s.price : undefined}
+                  size="sm"
+                />
+              </div>
             </button>
           ))}
 

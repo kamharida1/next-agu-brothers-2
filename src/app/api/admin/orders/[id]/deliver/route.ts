@@ -2,8 +2,8 @@
    import dbConnect from '@/lib/dbConnect'
    import OrderModel from '@/lib/models/OrderModel'
 
-   export const PUT = auth(async (...request: any) => {
-     const [req, { params }] = request
+   export const PUT = auth(async (req: any, context: any) => {
+  const params = await context.params
      if (!req.auth || !req.auth.user?.isAdmin) {
        return Response.json(
          { message: 'unauthorized' },

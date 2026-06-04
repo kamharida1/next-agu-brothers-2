@@ -2,29 +2,40 @@ import { Metadata } from 'next'
 import { Product } from '@/lib/models/ProductModel'
 import productServices from '@/lib/services/productService'
 import Link from 'next/link'
-import ProductItem from '@/components/products/ProductItem'
+import ProductCard from '@/components/products/ProductCard'
 
-const BASE_URL = 'https://www.agubrothers.com'
+import { BASE_URL, ROBOTS_INDEX } from '@/lib/seo'
 
-export async function generateMetadata({ params }: { params: { brand: string } }): Promise<Metadata> {
-  const brand = decodeURIComponent(params.brand)
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ brand: string }>
+}): Promise<Metadata> {
+  const { brand: brandParam } = await params
+  const brand = decodeURIComponent(brandParam)
   return {
     title: `${brand} Products | Agu Brothers Electronics`,
     description: `Shop genuine ${brand} electronics and appliances at Agu Brothers. Best prices with fast delivery across Nigeria.`,
-    alternates: { canonical: `${BASE_URL}/${params.brand}` },
+    robots: ROBOTS_INDEX,
+    alternates: { canonical: `${BASE_URL}/${brandParam}` },
     openGraph: {
       title: `${brand} | Agu Brothers Electronics`,
       description: `Shop ${brand} products at Agu Brothers Nigeria.`,
-      url: `${BASE_URL}/${params.brand}`,
+      url: `${BASE_URL}/${brandParam}`,
     },
   }
 }
 
-export default async function ProductsByBrand({ params }: { params: { brand: string } }) {
+export default async function ProductsByBrand({
+  params,
+}: {
+  params: Promise<{ brand: string }>
+}) {
+  const { brand: brandParam } = await params
   const items: Product[] = JSON.parse(
-    JSON.stringify(await productServices.getByBrand(params.brand))
+    JSON.stringify(await productServices.getByBrand(brandParam))
   )
-  const brand = decodeURIComponent(params.brand)
+  const brand = decodeURIComponent(brandParam)
 
   return (
     <div className="bg-[#EAEDED] min-h-screen">
@@ -58,7 +69,7 @@ export default async function ProductsByBrand({ params }: { params: { brand: str
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-1">
               {items.map((item) => (
-                <ProductItem key={item.slug} product={item} />
+                <ProductCard key={item.slug} product={item} showDetailsButton />
               ))}
             </div>
           )}

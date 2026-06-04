@@ -18,8 +18,7 @@ export const GET = auth(async (req: any) => {
 
 {/* ===============  POST /api/admin/categories =============== */}
 
-export const POST = auth(async (...p: any) => {
-  const [req, { params }] = p
+export const POST = auth(async (req: any) => {
   if (!req.auth || !req.auth.user?.isAdmin) {
     return Response.json(
       { message: 'unauthorized' },

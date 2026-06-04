@@ -3,7 +3,7 @@ import { Order } from '@/lib/models/OrderModel'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import useSWR from 'swr'
-import { formatPrice } from '@/lib/utils'
+import Price from '@/components/products/Price'
 import { format } from 'date-fns'
 
 const fmt = (d: string) => format(new Date(d), 'MMM d, yyyy')
@@ -61,7 +61,7 @@ export default function MyOrders() {
                     </div>
                     <div>
                       <p className="uppercase font-bold tracking-wider mb-0.5">Total</p>
-                      <p className="text-[#0F1111] font-bold">{formatPrice(order.totalPrice)}</p>
+                      <p><Price amount={order.totalPrice} size="md" /></p>
                     </div>
                     <div>
                       <p className="uppercase font-bold tracking-wider mb-0.5">Payment</p>

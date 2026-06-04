@@ -70,6 +70,53 @@
   /* In stock */
   .in-stock { @apply text-[#007600] font-medium text-sm; }
   .out-stock { @apply text-[#CC0C39] font-medium text-sm; }
+
+  /* Admin (Amazon Seller Central–inspired) */
+  .admin-panel {
+    @apply bg-white border border-[#D5D9D9] rounded-sm shadow-sm;
+  }
+  .admin-panel-header {
+    @apply px-4 py-3 border-b border-[#D5D9D9] bg-[#F7F8F8];
+  }
+  .admin-stat {
+    @apply admin-panel p-4;
+  }
+  .admin-table {
+    @apply w-full text-sm text-[#0F1111];
+  }
+  .admin-table thead {
+    @apply bg-[#F7F8F8] border-b border-[#D5D9D9];
+  }
+  .admin-table th {
+    @apply text-left text-xs font-bold text-[#565959] uppercase tracking-wide px-4 py-3 whitespace-nowrap;
+  }
+  .admin-table td {
+    @apply px-4 py-3 border-b border-[#EAEDED] align-middle;
+  }
+  .admin-table tbody tr:hover {
+    @apply bg-[#FAFAFA];
+  }
+  .admin-table tbody tr:last-child td {
+    @apply border-b-0;
+  }
+  .admin-badge-neutral {
+    @apply text-[#565959] bg-[#F0F2F2] px-2 py-0.5 rounded text-xs font-medium inline-block;
+  }
+  .admin-badge-success {
+    @apply text-[#007600] bg-[#E8F5E9] px-2 py-0.5 rounded text-xs font-medium inline-block;
+  }
+  .admin-badge-error {
+    @apply text-[#B12704] bg-[#FFF4F4] px-2 py-0.5 rounded text-xs font-medium inline-block;
+  }
+  .admin-btn-link {
+    @apply text-[#007185] text-sm font-medium hover:text-[#CC0C39] hover:underline;
+  }
+  .admin-select {
+    @apply amazon-input cursor-pointer appearance-none;
+  }
+  .admin-textarea {
+    @apply amazon-input min-h-[96px] resize-y;
+  }
 }
 
 @layer utilities {

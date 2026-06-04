@@ -16,7 +16,7 @@ import {
   BarElement,
   ArcElement,
 } from 'chart.js'
-import { formatPrice } from '@/lib/utils'
+import { formatPriceAmount } from '@/lib/utils'
 import {
   FiShoppingBag,
   FiPackage,
@@ -47,49 +47,52 @@ const StatCard = ({
   value,
   icon,
   href,
-  color,
   subtitle,
 }: {
   title: string
   value: string | number
   icon: React.ReactNode
   href: string
-  color: string
   subtitle?: string
 }) => (
-  <div className={`card bg-base-100 shadow border border-base-200`}>
-    <div className="card-body p-5">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-sm text-base-content/60 font-medium">{title}</p>
-          <p className="text-2xl font-bold mt-1">{value}</p>
-          {subtitle && <p className="text-xs text-base-content/50 mt-1">{subtitle}</p>}
-        </div>
-        <div className={`p-3 rounded-xl ${color}`}>
-          {icon}
-        </div>
+  <div className="admin-stat">
+    <div className="flex items-start justify-between gap-3">
+      <div>
+        <p className="text-xs font-medium text-[#565959]">{title}</p>
+        <p className="text-2xl font-bold text-[#0F1111] mt-1">{value}</p>
+        {subtitle && <p className="text-xs text-[#565959] mt-1">{subtitle}</p>}
       </div>
-      <Link href={href} className="text-xs text-primary hover:underline flex items-center gap-1 mt-2">
-        View details <FiArrowRight className="w-3 h-3" />
-      </Link>
+      <div className="p-2.5 rounded-sm bg-[#F7F8F8] border border-[#D5D9D9] text-[#FF9900]">
+        {icon}
+      </div>
     </div>
+    <Link
+      href={href}
+      className="text-xs text-[#007185] hover:text-[#CC0C39] flex items-center gap-1 mt-3"
+    >
+      View details <FiArrowRight className="w-3 h-3" />
+    </Link>
   </div>
 )
 
 const Dashboard = () => {
   const { data: summary, error } = useSWR('/api/admin/orders/summary')
 
-  if (error) return (
-    <div className="alert alert-error">
-      <span>Failed to load dashboard data: {error.message}</span>
-    </div>
-  )
+  if (error) {
+    return (
+      <div className="admin-panel p-4 text-sm text-[#B12704] bg-[#FFF4F4]">
+        Failed to load dashboard data: {error.message}
+      </div>
+    )
+  }
 
-  if (!summary) return (
-    <div className="flex items-center justify-center py-16">
-      <span className="loading loading-spinner loading-lg text-primary"></span>
-    </div>
-  )
+  if (!summary) {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <span className="loading loading-spinner loading-lg text-[#FF9900]" />
+      </div>
+    )
+  }
 
   const salesData = {
     labels: summary.salesData.map((x: { _id: string }) => x._id),
@@ -97,8 +100,8 @@ const Dashboard = () => {
       fill: true,
       label: 'Revenue (₦)',
       data: summary.salesData.map((x: { totalSales: number }) => x.totalSales),
-      borderColor: 'rgb(251, 191, 36)',
-      backgroundColor: 'rgba(251, 191, 36, 0.1)',
+      borderColor: '#FF9900',
+      backgroundColor: 'rgba(255, 153, 0, 0.12)',
       tension: 0.4,
     }],
   }
@@ -109,8 +112,8 @@ const Dashboard = () => {
       fill: true,
       label: 'Orders',
       data: summary.salesData.map((x: { totalOrders: number }) => x.totalOrders),
-      borderColor: 'rgb(59, 130, 246)',
-      backgroundColor: 'rgba(59, 130, 246, 0.1)',
+      borderColor: '#232F3E',
+      backgroundColor: 'rgba(35, 47, 62, 0.08)',
       tension: 0.4,
     }],
   }
@@ -145,89 +148,71 @@ const Dashboard = () => {
   return (
     <div className="space-y-6">
       {/* Welcome Banner */}
-      <div className="bg-gradient-to-r from-primary to-primary/80 text-white rounded-2xl p-6 flex items-center justify-between">
+      <div className="bg-[#131921] text-white rounded-sm p-6 flex items-center justify-between border border-[#3a4553]">
         <div>
-          <h2 className="text-xl font-bold">Welcome back, Admin!</h2>
-          <p className="text-white/70 text-sm mt-1">Here&apos;s what&apos;s happening with your store today.</p>
+          <h2 className="text-xl font-bold">Store overview</h2>
+          <p className="text-[#DDD] text-sm mt-1">
+            Sales, orders, and inventory at a glance.
+          </p>
         </div>
-        <FiTrendingUp className="w-12 h-12 text-white/30" />
+        <FiTrendingUp className="w-12 h-12 text-[#FF9900]/40" />
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <StatCard
           title="Total Revenue"
-          value={formatPrice(summary.ordersPrice)}
-          icon={<FiDollarSign className="w-5 h-5 text-warning" />}
+          value={formatPriceAmount(summary.ordersPrice)}
+          icon={<FiDollarSign className="w-5 h-5" />}
           href="/admin/orders"
-          color="bg-warning/15"
           subtitle="All time sales"
         />
         <StatCard
           title="Total Orders"
           value={summary.ordersCount}
-          icon={<FiShoppingBag className="w-5 h-5 text-primary" />}
+          icon={<FiShoppingBag className="w-5 h-5" />}
           href="/admin/orders"
-          color="bg-primary/15"
           subtitle="Includes all statuses"
         />
         <StatCard
           title="Total Products"
           value={summary.productsCount}
-          icon={<FiPackage className="w-5 h-5 text-success" />}
+          icon={<FiPackage className="w-5 h-5" />}
           href="/admin/products"
-          color="bg-success/15"
           subtitle="Active listings"
         />
         <StatCard
           title="Total Users"
           value={summary.usersCount}
-          icon={<FiUsers className="w-5 h-5 text-info" />}
+          icon={<FiUsers className="w-5 h-5" />}
           href="/admin/users"
-          color="bg-info/15"
           subtitle="Registered accounts"
         />
       </div>
 
-      {/* Charts Row 1 */}
-      <div className="grid lg:grid-cols-2 gap-6">
-        <div className="card bg-base-100 shadow border border-base-200">
-          <div className="card-body">
-            <h3 className="font-semibold text-base">Revenue Overview</h3>
-            <div className="h-56">
-              <Line data={salesData} options={chartOptions} />
-            </div>
+      <div className="grid lg:grid-cols-2 gap-4">
+        <div className="admin-panel p-5">
+          <h3 className="font-bold text-[#0F1111] text-sm mb-4">Revenue overview</h3>
+          <div className="h-56">
+            <Line data={salesData} options={chartOptions} />
           </div>
         </div>
-        <div className="card bg-base-100 shadow border border-base-200">
-          <div className="card-body">
-            <h3 className="font-semibold text-base">Orders Trend</h3>
-            <div className="h-56">
-              <Line data={ordersData} options={chartOptions} />
-            </div>
+        <div className="admin-panel p-5">
+          <h3 className="font-bold text-[#0F1111] text-sm mb-4">Orders trend</h3>
+          <div className="h-56">
+            <Line data={ordersData} options={chartOptions} />
           </div>
         </div>
-      </div>
-
-      {/* Charts Row 2 */}
-      <div className="grid lg:grid-cols-2 gap-6">
-        <div className="card bg-base-100 shadow border border-base-200">
-          <div className="card-body">
-            <h3 className="font-semibold text-base">Products by Category</h3>
-            <div className="h-56 flex items-center justify-center">
-              <Doughnut
-                data={productsData}
-                options={{ ...chartOptions, maintainAspectRatio: true }}
-              />
-            </div>
+        <div className="admin-panel p-5">
+          <h3 className="font-bold text-[#0F1111] text-sm mb-4">Products by category</h3>
+          <div className="h-56 flex items-center justify-center">
+            <Doughnut data={productsData} options={{ ...chartOptions, maintainAspectRatio: true }} />
           </div>
         </div>
-        <div className="card bg-base-100 shadow border border-base-200">
-          <div className="card-body">
-            <h3 className="font-semibold text-base">User Registrations</h3>
-            <div className="h-56">
-              <Bar data={usersData} options={chartOptions} />
-            </div>
+        <div className="admin-panel p-5">
+          <h3 className="font-bold text-[#0F1111] text-sm mb-4">User registrations</h3>
+          <div className="h-56">
+            <Bar data={usersData} options={chartOptions} />
           </div>
         </div>
       </div>

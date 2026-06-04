@@ -1,15 +1,32 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 
+const aboutJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'ElectronicsStore',
+  name: 'Agu Brothers Electronics',
+  description: 'Agu Brothers Electronics has been selling 100% brand new electronics and home appliances in Nigeria since 1979. We exclusively stock brand new products sourced from authorised distributors — no second-hand, no tokunbo, no refurbished goods.',
+  url: 'https://www.agubrothers.com',
+  telephone: '+234-909-923-4242',
+  foundingDate: '1979',
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: '33 Ogui Road',
+    addressLocality: 'Enugu',
+    addressRegion: 'Enugu State',
+    addressCountry: 'NG',
+  },
+}
+
 export const metadata: Metadata = {
   title: 'About Us | Agu Brothers Electronics',
-  description: 'Learn about Agu Brothers — Nigeria\'s trusted electronics and home appliances store since 1979.',
+  description: 'About Agu Brothers — Nigeria\'s trusted electronics store since 1979. We sell 100% brand new electronics and home appliances only. No tokunbo, no second-hand goods.',
 }
 
 const SECTIONS = [
   { title: 'Who We Are', content: 'We are dedicated to bringing the best in home electronics and appliances to our valued customers. From high-definition televisions to energy-efficient refrigerators, and from versatile gas cookers to powerful freezers, our mission is simple: to provide reliable, innovative, and affordable products that enhance your everyday life.' },
   { title: 'Our Story', content: 'Agu Brothers started with a vision to bridge the gap between technology and comfort. Founded in 1979, we began with a small range of electronic products, and over time expanded to cater to diverse customer needs. Today, we are proud to be a leading supplier of quality electronics, helping homes and businesses upgrade their lifestyle.' },
-  { title: 'Why Choose Us?', content: 'We believe in giving our customers the best value for their money. Our key strengths include Quality Assurance, Affordable Prices, Expert Support, and Customer Satisfaction. We partner with leading brands to bring you products that are built to last.' },
+  { title: 'Why Choose Us?', content: 'Every single product we sell is 100% brand new — sourced directly from authorised distributors and manufacturers. We do not sell second-hand, refurbished, or tokunbo goods of any kind. Our key strengths include Quality Assurance, Affordable Prices, Expert Support, and Customer Satisfaction. We partner with leading brands to bring you products that are built to last.' },
   { title: 'Our Mission', content: 'Our mission is to provide a seamless shopping experience for every customer, backed by superior products and unmatched service. We aim to be a trusted name in electronics retail, known for our commitment to quality, affordability, and reliability.' },
 ]
 
@@ -26,6 +43,8 @@ const PRODUCTS = [
 
 export default function About() {
   return (
+    <>
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(aboutJsonLd) }} />
     <div className="bg-[#EAEDED] min-h-screen">
       <div className="max-w-[1200px] mx-auto px-4 py-6">
         {/* Breadcrumb */}
@@ -37,8 +56,22 @@ export default function About() {
 
         {/* Hero */}
         <div className="bg-gradient-to-r from-[#131921] to-[#232F3E] text-white rounded-sm p-8 md:p-12 mb-4">
+          <div className="inline-block bg-[#007600] text-white text-xs font-bold px-3 py-1 rounded-sm uppercase tracking-wider mb-4">
+            100% Brand New Products Only
+          </div>
           <h1 className="text-3xl md:text-4xl font-bold mb-3">About Agu Brothers Electronics</h1>
-          <p className="text-[#CCCCCC] text-lg max-w-2xl">Nigeria&apos;s trusted source for quality electronics and home appliances since 1979.</p>
+          <p className="text-[#CCCCCC] text-lg max-w-2xl">Nigeria&apos;s trusted source for quality electronics and home appliances since 1979. Every product we sell is brand new.</p>
+        </div>
+
+        {/* Brand New Pledge Banner */}
+        <div className="bg-[#007600] text-white rounded-sm p-5 mb-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+          <div className="text-4xl flex-shrink-0">🆕</div>
+          <div>
+            <p className="font-bold text-lg">We Only Sell Brand New Products</p>
+            <p className="text-[#d4f0d4] text-sm mt-1 max-w-2xl">
+              Every item at Agu Brothers is sourced directly from authorised manufacturers and distributors. We have never sold, and will never sell, second-hand, refurbished, or tokunbo goods. When you shop with us, you get exactly what you pay for — a brand new product, sealed in its original packaging, with a full manufacturer&apos;s warranty.
+            </p>
+          </div>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-4">
@@ -103,5 +136,6 @@ export default function About() {
         </div>
       </div>
     </div>
+    </>
   )
 }

@@ -37,7 +37,28 @@ const getBySlug = cache(async (slug: string) => {
   return product as Product
 })
 
-const PAGE_SIZE = 8
+export const PAGE_SIZE = 8
+export const CATALOG_PAGE_SIZE = 24
+
+const getAllPaginated = cache(async ({ page = '1' }: { page?: string }) => {
+  await dbConnect()
+  const pageNum = Math.max(1, Number(page) || 1)
+
+  const products = await ProductModel.find({}, '-reviews')
+    .sort({ _id: -1 })
+    .skip(CATALOG_PAGE_SIZE * (pageNum - 1))
+    .limit(CATALOG_PAGE_SIZE)
+    .lean()
+
+  const countProducts = await ProductModel.countDocuments()
+
+  return {
+    products: products as Product[],
+    countProducts,
+    page: String(pageNum),
+    pages: Math.ceil(countProducts / CATALOG_PAGE_SIZE),
+  }
+})
 const getByQuery = cache(
   async ({
     q,
@@ -89,7 +110,7 @@ const getByQuery = cache(
         ? { price: 1 }
         : sort === 'highest'
         ? { price: -1 }
-        : sort === 'toprated'
+        : sort === 'rating' || sort === 'toprated'
         ? { rating: -1 }
         : { _id: -1 }
 
@@ -131,14 +152,32 @@ const getCategories = cache(async () => {
   return categories
 })
 
+const getRelated = cache(
+  async (slug: string, cat: string, brand: string, limit = 5) => {
+    await dbConnect()
+    const products = await ProductModel.find(
+      {
+        slug: { $ne: slug },
+        $or: [{ cat }, { brand }],
+      },
+      '-reviews'
+    )
+      .sort({ sold: -1, rating: -1, _id: -1 })
+      .limit(limit)
+      .lean()
+    return products as Product[]
+  }
+)
 
 const productServices = {
   getBySlug,
   getFeatured,
   getLatest,
   getByQuery,
+  getAllPaginated,
   getCategories,
   getByBrand,
+  getRelated,
 }
 
 export default productServices

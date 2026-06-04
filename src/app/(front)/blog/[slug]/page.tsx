@@ -1,21 +1,24 @@
 import CldImage from '@/components/CldImage'
 import blogServices from '@/lib/services/blogService'
+import { BASE_URL, ROBOTS_INDEX, ROBOTS_NOINDEX, truncateForMeta } from '@/lib/seo'
 import Link from 'next/link'
 
 export async function generateMetadata({
   params,
 }: {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }) {
-  const blog = await blogServices.getBlogBySlug(params.slug)
+  const { slug } = await params
+  const blog = await blogServices.getBlogBySlug(slug)
   if (!blog) {
-    return { title: 'Blog not found' }
+    return { title: 'Blog not found', robots: ROBOTS_NOINDEX }
   }
   return {
     title: blog.title,
-    description: blog.content,
+    description: truncateForMeta(blog.content || blog.title),
+    robots: ROBOTS_INDEX,
     alternates: {
-      canonical: `/blog/${blog.slug}`,
+      canonical: `${BASE_URL}/blog/${blog.slug}`,
     },
     openGraph: {
       title: blog.title,
@@ -33,11 +36,10 @@ export async function generateMetadata({
 export default async function BlogDetail({
   params,
 }: {
-  params: {
-    slug: string
-  }
+  params: Promise<{ slug: string }>
 }) {
-  const blog = await blogServices.getBlogBySlug(params.slug)
+  const { slug } = await params
+  const blog = await blogServices.getBlogBySlug(slug)
   if (!blog) {
     return <div>Blog Not Found</div>
   }

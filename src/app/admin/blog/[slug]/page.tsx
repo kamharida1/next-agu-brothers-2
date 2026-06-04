@@ -5,9 +5,10 @@ import Link from 'next/link'
 export async function generateMetadata({
   params,
 }: {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }) {
-  const blog = await blogServices.getBlogBySlug(params.slug)
+  const { slug } = await params
+  const blog = await blogServices.getBlogBySlug(slug)
   if (!blog) {
     return { title: 'Blog not found' }
   }
@@ -23,11 +24,10 @@ export async function generateMetadata({
 export default async function BlogDetail({
   params,
 }: {
-  params: {
-    slug: string
-  }
+  params: Promise<{ slug: string }>
 }) {
-  const blog = await blogServices.getBlogBySlug(params.slug)
+  const { slug } = await params
+  const blog = await blogServices.getBlogBySlug(slug)
   if (!blog) {
     return <div>Blog Not Found</div>
   }
@@ -36,7 +36,7 @@ export default async function BlogDetail({
       <Link href="/blog" className="text-blue-500 hover:underline mb-4 block">
         Back to blogs
       </Link>
-      <div className="card bg-base-100 shadow-xl mb-8">
+      <div className="admin-panel mb-8">
         <figure>
           {/* <img
             src={blog.image}

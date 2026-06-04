@@ -5,7 +5,7 @@ import CategoryCreateForm from './CategoryCreateForm'
 export const metadata = {
   title: 'Admin Category Create',
 }
-const AdminCategoriesPage = ({ params }: { params: { id: string } }) => {
+const AdminCategoriesPage = () => {
   return (
     <AdminLayout activeItem="categories">
       <CategoryCreateForm />

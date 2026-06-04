@@ -1,6 +1,7 @@
 "use client";
 import { OrderItem } from "@/lib/models/OrderModel";
-import { formatDate, formatPrice } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
+import Price from "@/components/products/Price";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
@@ -158,10 +159,10 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
                         <p className="text-sm text-[#007185] hover:text-[#CC0C39] hover:underline">{item.name}</p>
                       </Link>
                       <p className="text-sm text-[#565959] mt-0.5">Qty: {item.qty}</p>
-                      <p className="text-sm font-bold mt-0.5">{formatPrice(item.price)}</p>
+                      <p className="text-sm font-bold mt-0.5"><Price amount={item.price} size="sm" /></p>
                     </div>
                     <div className="text-right flex-shrink-0">
-                      <span className="font-bold text-sm">{formatPrice(item.price * item.qty)}</span>
+                      <Price amount={item.price * item.qty} size="sm" />
                     </div>
                   </div>
                 ))}
@@ -175,17 +176,21 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
             <div className="bg-white rounded-sm shadow-sm p-5">
               <h2 className="font-bold text-[#0F1111] mb-3 text-lg">Order Summary</h2>
               <div className="space-y-1.5 text-sm">
-                {[
-                  ['Items', formatPrice(itemsPrice)],
-                  ['Shipping', formatPrice(shippingPrice)],
-                  ['Tax', formatPrice(taxPrice)],
-                ].map(([l, v]) => (
-                  <div key={l} className="flex justify-between text-[#0F1111]">
-                    <span>{l}:</span><span>{v}</span>
+                {(
+                  [
+                    ['Items', itemsPrice],
+                    ['Shipping', shippingPrice],
+                    ['Tax', taxPrice],
+                  ] as const
+                ).map(([l, amount]) => (
+                  <div key={l} className="flex justify-between items-center text-[#0F1111]">
+                    <span>{l}:</span>
+                    <Price amount={amount} size="sm" />
                   </div>
                 ))}
-                <div className="flex justify-between font-bold text-lg border-t border-[#D5D9D9] pt-2 mt-2 text-[#CC0C39]">
-                  <span>Order Total:</span><span>{formatPrice(totalPrice)}</span>
+                <div className="flex justify-between items-center font-bold text-lg border-t border-[#D5D9D9] pt-2 mt-2 text-[#CC0C39]">
+                  <span>Order Total:</span>
+                  <Price amount={totalPrice} size="md" className="text-[#CC0C39]" />
                 </div>
               </div>
 

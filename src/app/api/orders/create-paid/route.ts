@@ -5,9 +5,16 @@ import ProductModel from '@/lib/models/ProductModel'
 import { round2 } from '@/lib/utils'
 import { shippingRates } from '@/lib/shipping'
 import { sendOrderConfirmationEmail, sendAdminOrderNotification } from '@/lib/email'
+import {
+  resolveOrderItemPrice,
+  validateOrderStock,
+  type ProductDocForOrder,
+} from '@/lib/productPricing'
+import { fulfillOrderStock } from '@/lib/orderStock'
 
-// Creates an order AND marks it as paid after verifying the Paystack reference.
-// Used for Paystack checkout so payment + order creation is a single atomic step.
+const ORDER_PRODUCT_FIELDS =
+  'name price discountPercentage discountedPrice countInStock'
+
 export const POST = auth(async (req: any) => {
   if (!req.auth) {
     return Response.json({ message: 'Unauthorized' }, { status: 401 })
@@ -22,7 +29,6 @@ export const POST = auth(async (req: any) => {
       return Response.json({ message: 'Paystack reference is required' }, { status: 400 })
     }
 
-    // Verify payment with Paystack before creating the order
     const verifyRes = await fetch(
       `https://api.paystack.co/transaction/verify/${paystackReference}`,
       {
@@ -35,33 +41,53 @@ export const POST = auth(async (req: any) => {
     const verifyData = await verifyRes.json()
 
     if (!verifyData.status || verifyData.data?.status !== 'success') {
-      return Response.json({ message: 'Payment verification failed. Please contact support.' }, { status: 400 })
+      return Response.json(
+        { message: 'Payment verification failed. Please contact support.' },
+        { status: 400 }
+      )
     }
 
     await dbConnect()
 
-    // Re-fetch prices from DB to prevent tampering
-    const dbProducts = await ProductModel.find(
-      { _id: { $in: items.map((x: any) => x._id) } },
-      'price countInStock'
-    )
+    const dbProducts = (await ProductModel.find(
+      { _id: { $in: items.map((x: { _id: string }) => x._id) } },
+      ORDER_PRODUCT_FIELDS
+    ).lean()) as ProductDocForOrder[]
 
-    const dbOrderItems = items.map((x: any) => {
+    const stockError = validateOrderStock(items, dbProducts)
+    if (stockError) {
+      return Response.json({ message: stockError }, { status: 400 })
+    }
+
+    const dbOrderItems = items.map((x: { _id: string; qty: number; name: string }) => {
       const dbProduct = dbProducts.find((p) => p._id.toString() === x._id)
       return {
         ...x,
         product: x._id,
-        price: dbProduct?.price ?? x.price,
+        price: resolveOrderItemPrice(dbProduct),
         _id: undefined,
       }
     })
 
-    const { itemsPrice, taxPrice, shippingPrice, totalPrice } = calcPrices(dbOrderItems, shippingAddress)
+    const { itemsPrice, taxPrice, shippingPrice, totalPrice } = calcPrices(
+      dbOrderItems,
+      shippingAddress
+    )
 
-    // Confirm Paystack amount matches (in kobo)
     const paidAmount = verifyData.data.amount / 100
     if (Math.abs(paidAmount - totalPrice) > 10) {
       return Response.json({ message: 'Payment amount mismatch' }, { status: 400 })
+    }
+
+    const stockFulfillError = await fulfillOrderStock(
+      dbOrderItems.map((item: OrderItem & { product: string }) => ({
+        product: item.product,
+        qty: item.qty,
+        name: item.name,
+      }))
+    )
+    if (stockFulfillError) {
+      return Response.json({ message: stockFulfillError }, { status: 400 })
     }
 
     const order = await OrderModel.create({
@@ -83,14 +109,6 @@ export const POST = auth(async (req: any) => {
       },
     })
 
-    // Decrement stock
-    for (const item of dbOrderItems) {
-      await ProductModel.findByIdAndUpdate(item.product, {
-        $inc: { countInStock: -item.qty },
-      })
-    }
-
-    // Send emails (non-blocking)
     sendOrderConfirmationEmail(order).catch(() => {})
     sendAdminOrderNotification(order).catch(() => {})
 
@@ -101,11 +119,13 @@ export const POST = auth(async (req: any) => {
 }) as any
 
 const calcPrices = (items: OrderItem[], shippingAddress: ShippingAddress) => {
-  const itemsPrice   = round2(items.reduce((a, i) => a + i.price * i.qty, 0))
-  const totalWeight  = items.reduce((a, i) => a + (i.weight ?? 0) * i.qty, 0)
-  const cityRates    = shippingRates[shippingAddress.city as keyof typeof shippingRates]
-  const shippingPrice = cityRates ? round2(cityRates.baseRate + cityRates.perKg * totalWeight) : 0
-  const taxPrice     = round2(0.006 * itemsPrice)
-  const totalPrice   = round2(itemsPrice + shippingPrice + taxPrice)
+  const itemsPrice = round2(items.reduce((a, i) => a + i.price * i.qty, 0))
+  const totalWeight = items.reduce((a, i) => a + (i.weight ?? 0) * i.qty, 0)
+  const cityRates = shippingRates[shippingAddress.city as keyof typeof shippingRates]
+  const shippingPrice = cityRates
+    ? round2(cityRates.baseRate + cityRates.perKg * totalWeight)
+    : 0
+  const taxPrice = round2(0.006 * itemsPrice)
+  const totalPrice = round2(itemsPrice + shippingPrice + taxPrice)
   return { itemsPrice, taxPrice, shippingPrice, totalPrice }
 }

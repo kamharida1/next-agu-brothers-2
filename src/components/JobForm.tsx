@@ -1,8 +1,9 @@
 'use client'
+
 import { Job } from '@/lib/models/JobModel'
 import { useState, useEffect } from 'react'
 
-const JobForm = ({job}: {job: Job | null}) => {
+const JobForm = ({ job }: { job: Job | null }) => {
   const [formData, setFormData] = useState({
     title: '',
     location: '',
@@ -20,39 +21,7 @@ const JobForm = ({job}: {job: Job | null}) => {
         requirements: job.requirements.join(', '),
         email: job.email,
       })
-    }
-  }, [job])
-
-  const handleChange = (e: any) => {
-    const { name, value } = e.target
-    setFormData({ ...formData, [name]: value })
-  }
-
-  const handleSubmit = async (e: any) => {
-    e.preventDefault()
-
-    const method = job ? 'PUT' : 'POST'
-    const url = job ? `/api/admin/jobs/${job._id}` : '/api/admin/jobs'
-
-    const response = await fetch(url, {
-      method,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        ...formData,
-        responsibilities: formData.responsibilities
-          .split(',')
-          .map((item) => item.trim()),
-        requirements: formData.requirements
-          .split(',')
-          .map((item) => item.trim()),
-      }),
-    })
-
-    const data = await response.json()
-    console.log(data)
-    if (data) {
+    } else {
       setFormData({
         title: '',
         location: '',
@@ -61,91 +30,60 @@ const JobForm = ({job}: {job: Job | null}) => {
         email: '',
       })
     }
+  }, [job])
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setFormData({ ...formData, [name]: value })
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    const method = job ? 'PUT' : 'POST'
+    const url = job ? `/api/admin/jobs/${job._id}` : '/api/admin/jobs'
+
+    await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ...formData,
+        responsibilities: formData.responsibilities.split(',').map((item) => item.trim()),
+        requirements: formData.requirements.split(',').map((item) => item.trim()),
+      }),
+    })
+
+    window.location.reload()
   }
 
   return (
-    <div className="container mx-auto p-6 prose">
-      <h2 className="text-2xl font-semibold mb-4">
-        {job ? 'Edit Job Listing' : 'Add New Job Listing'}
-      </h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="form-control">
-          <label className="label" htmlFor="title">
-            <span className="label-text">Job Title</span>
+    <form onSubmit={handleSubmit} className="space-y-4 max-w-xl">
+      {[
+        { id: 'title', label: 'Job title' },
+        { id: 'location', label: 'Location' },
+        { id: 'responsibilities', label: 'Responsibilities (comma separated)' },
+        { id: 'requirements', label: 'Requirements (comma separated)' },
+        { id: 'email', label: 'Contact email', type: 'email' },
+      ].map((field) => (
+        <div key={field.id}>
+          <label htmlFor={field.id} className="block text-sm font-medium text-[#0F1111] mb-1.5">
+            {field.label}
           </label>
           <input
-            type="text"
-            id="title"
-            name="title"
-            value={formData.title}
+            type={field.type || 'text'}
+            id={field.id}
+            name={field.id}
+            value={formData[field.id as keyof typeof formData]}
             onChange={handleChange}
-            className="input input-bordered w-full"
+            className="amazon-input"
             required
           />
         </div>
-        <div className="form-control">
-          <label className="label" htmlFor="location">
-            <span className="label-text">Location</span>
-          </label>
-          <input
-            type="text"
-            id="location"
-            name="location"
-            value={formData.location}
-            onChange={handleChange}
-            className="input input-bordered w-full"
-            required
-          />
-        </div>
-        <div className="form-control">
-          <label className="label" htmlFor="responsibilities">
-            <span className="label-text">
-              Responsibilities (comma separated)
-            </span>
-          </label>
-          <input
-            type="text"
-            id="responsibilities"
-            name="responsibilities"
-            value={formData.responsibilities}
-            onChange={handleChange}
-            className="input input-bordered w-full"
-            required
-          />
-        </div>
-        <div className="form-control">
-          <label className="label" htmlFor="requirements">
-            <span className="label-text">Requirements (comma separated)</span>
-          </label>
-          <input
-            type="text"
-            id="requirements"
-            name="requirements"
-            value={formData.requirements}
-            onChange={handleChange}
-            className="input input-bordered w-full"
-            required
-          />
-        </div>
-        <div className="form-control">
-          <label className="label" htmlFor="email">
-            <span className="label-text">Contact Email</span>
-          </label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            className="input input-bordered w-full"
-            required
-          />
-        </div>
-        <button type="submit" className="btn btn-primary">
-          {job ? 'Update Job' : 'Add Job'}
-        </button>
-      </form>
-    </div>
+      ))}
+      <button type="submit" className="btn-amazon px-6 py-2 rounded-md text-sm">
+        {job ? 'Update job' : 'Add job'}
+      </button>
+    </form>
   )
 }
 

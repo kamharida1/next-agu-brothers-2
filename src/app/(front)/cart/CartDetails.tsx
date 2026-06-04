@@ -4,7 +4,7 @@ import useCartService from '@/lib/hooks/useCartStore'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { formatPrice } from '@/lib/utils'
+import Price from '@/components/products/Price'
 import { OrderItem } from '@/lib/models/OrderModel'
 import { FiTrash2 } from 'react-icons/fi'
 
@@ -70,7 +70,7 @@ export default function CartDetails() {
                     </h3>
                   </Link>
                   <p className="text-[#007600] text-sm mt-1 font-medium">In Stock</p>
-                  <p className="text-sm text-[#565959] mt-0.5">{formatPrice(item.price)} each</p>
+                  <p className="text-sm text-[#565959] mt-0.5"><Price amount={item.price} size="sm" /> each</p>
 
                   {/* Qty + Delete */}
                   <div className="flex items-center gap-3 mt-3">
@@ -108,14 +108,14 @@ export default function CartDetails() {
 
                 {/* Price (right) */}
                 <div className="hidden md:block text-right flex-shrink-0">
-                  <span className="text-base font-bold text-[#0F1111]">{formatPrice(item.price * item.qty)}</span>
+                  <Price amount={item.price * item.qty} size="md" />
                 </div>
               </div>
             ))}
 
             <div className="text-right text-base font-medium text-[#0F1111] pt-3">
               Subtotal ({totalItems} item{totalItems !== 1 ? 's' : ''}):
-              <span className="font-bold"> {formatPrice(itemsPrice)}</span>
+              <span className="font-bold inline-flex"> <Price amount={itemsPrice} size="md" /></span>
             </div>
           </div>
 
@@ -131,7 +131,7 @@ export default function CartDetails() {
 
             <p className="text-xl font-medium text-[#0F1111] mb-1">
               Subtotal ({totalItems} item{totalItems !== 1 ? 's' : ''}):{' '}
-              <span className="font-bold">{formatPrice(itemsPrice)}</span>
+              <span className="font-bold inline-flex"><Price amount={itemsPrice} size="md" /></span>
             </p>
             <p className="text-sm text-[#565959] mb-4">Shipping and tax calculated at checkout.</p>
 

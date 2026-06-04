@@ -1,6 +1,7 @@
 "use client";
 import { OrderItem } from "@/lib/models/OrderModel";
-import { formatPrice } from "@/lib/utils";
+import Price from "@/components/products/Price";
+import { formatPriceAmount } from "@/lib/utils";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 import Image from "next/image";
@@ -261,7 +262,7 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
             <div className="mb-4">
               <p className="text-sm">
                 Please transfer the total amount of{" "}
-                <span className="font-bold">{formatPrice(totalPrice)}</span> to
+                <span className="font-bold">{formatPriceAmount(totalPrice)}</span> to
                 the following bank account:
               </p>
               <p className="text-md font-bold">
@@ -418,7 +419,7 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
                           </Link>
                         </td>
                         <td>{item.qty}</td>
-                        <td>{formatPrice(item.price)}</td>
+                        <td><Price amount={item.price} size="sm" /></td>
                       </tr>
                     ))}
                   </tbody>
@@ -432,24 +433,24 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
                 <h2 className="card-title">Order Summary</h2>
                 <div className="mb-2 flex justify-between">
                   <span>Items</span>
-                  <span>{formatPrice(itemsPrice)}</span>
+                  <Price amount={itemsPrice} size="sm" />
                 </div>
                 <div className="flex justify-between">
                   <span>Shipping</span>
-                  <span>{formatPrice(shippingPrice)}</span>
+                  <Price amount={shippingPrice} size="sm" />
                 </div>
                 <div className="flex justify-between">
                   <span>Tax</span>
-                  <span>{formatPrice(taxPrice)}</span>
+                  <Price amount={taxPrice} size="sm" />
                 </div>
                 <div className="flex justify-between">
                   <span>Total</span>
-                  <span>{formatPrice(totalPrice)}</span>
+                  <Price amount={totalPrice} size="sm" />
                 </div>
                 {paymentResult && (
                   <div className="flex justify-between">
                     <span>Debited Amount</span>
-                    <span>{formatPrice(paymentResult?.debitedAmount)}</span>
+                    <Price amount={paymentResult?.debitedAmount ?? 0} size="sm" />
                   </div>
                 )}
 

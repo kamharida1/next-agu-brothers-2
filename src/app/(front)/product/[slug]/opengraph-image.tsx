@@ -1,12 +1,18 @@
 import { ImageResponse } from 'next/og'
 import productServices from '@/lib/services/productService'
-import { formatPrice } from '@/lib/utils'
+import { formatPriceAmount } from '@/lib/utils'
+import { getSalePrice } from '@/lib/productPricing'
 
 export const contentType = 'image/png'
 export const size = { width: 1200, height: 630 }
 
-export default async function Og({ params }: { params: { slug: string } }) {
-  const product = await productServices.getBySlug(params.slug)
+export default async function Og({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}) {
+  const { slug } = await params
+  const product = await productServices.getBySlug(slug)
   if (!product) return new Response('Not found', { status: 404 })
 
   const imageUrl = product.images[0]
@@ -44,7 +50,7 @@ export default async function Og({ params }: { params: { slug: string } }) {
             <p style={{ color: '#AAAAAA', fontSize: 18, margin: 0 }}>{product.brand}</p>
           )}
           <p style={{ color: '#FF9900', fontSize: 40, fontWeight: 700, margin: 0 }}>
-            {formatPrice(product.price)}
+            {formatPriceAmount(getSalePrice(product))}
           </p>
           {product.countInStock > 0 && (
             <p style={{ color: '#00A650', fontSize: 18, fontWeight: 600, margin: 0 }}>✓ In Stock</p>

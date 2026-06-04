@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
 
   const products = await ProductModel.find(
     { name: { $regex: q, $options: 'i' } },
-    'name slug images price cat',
+    'name slug images price discountPercentage discountedPrice cat',
     { limit: 6, sort: { sold: -1 } }
   ).lean()
 

@@ -3,8 +3,8 @@ import dbConnect from '@/lib/dbConnect'
 import CategoryModel from '@/lib/models/CategoryModel'
 import ProductModel from '@/lib/models/ProductModel'
 
-export const GET = auth(async (...args: any) => {
-  const [req, { params }] = args
+export const GET = auth(async (req: any, context: any) => {
+  const params = await context.params
   if (!req.auth || !req.auth.user?.isAdmin) {
     return Response.json(
       { message: 'unauthorized' },
@@ -26,8 +26,8 @@ export const GET = auth(async (...args: any) => {
   return Response.json(product)
 }) as any
 
-export const PUT = auth(async (...p: any) => {
-  const [req, { params }] = p
+export const PUT = auth(async (req: any, context: any) => {
+  const params = await context.params
   if (!req.auth || !req.auth.user?.isAdmin) {
     return Response.json(
       { message: 'unauthorized' },
@@ -52,6 +52,7 @@ export const PUT = auth(async (...p: any) => {
     properties,
     isFeatured,
     discountPercentage,
+    notes,
   } = await req.json()
 
   try {
@@ -72,19 +73,20 @@ export const PUT = auth(async (...p: any) => {
     if (product) {
       product.name = name
       product.slug = slug
-      product.price = price
-      product.costPrice = costPrice
+      product.price = Number(price)
+      product.costPrice = Number(costPrice)
       product.category = category
       product.cat = categoryName
       product.image = image
       product.images = images
       product.brand = brand
-      product.weight = Number(weight)
-      product.countInStock = countInStock
+      product.weight = Number(weight) || 0
+      product.countInStock = Number(countInStock)
       product.description = description
       product.properties = properties
-      product.isFeatured = isFeatured
-      product.discountPercentage = discountPercentage
+      product.isFeatured = Boolean(isFeatured)
+      product.discountPercentage = Number(discountPercentage) || 0
+      if (notes !== undefined) product.notes = notes
       const updatedProduct = await product.save()
       return Response.json(updatedProduct)
     } else {
@@ -105,8 +107,8 @@ export const PUT = auth(async (...p: any) => {
   }
 }) as any
 
-export const DELETE = auth(async (...args: any) => {
-  const [req, { params }] = args
+export const DELETE = auth(async (req: any, context: any) => {
+  const params = await context.params
 
   if (!req.auth || !req.auth.user?.isAdmin) {
     return Response.json(

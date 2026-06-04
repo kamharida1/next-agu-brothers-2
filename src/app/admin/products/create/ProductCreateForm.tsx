@@ -11,6 +11,7 @@ import { Category } from '@/lib/models/CategoryModel'
 import CldImage from '@/components/CldImage'
 import { ReactSortable } from 'react-sortablejs'
 import { FiUpload, FiX, FiZap, FiCheck } from 'react-icons/fi'
+import CategoryPicker from '@/components/admin/CategoryPicker'
 
 interface ProductFormProps {
   name: string
@@ -184,12 +185,10 @@ export default function ProductCreateForm() {
     } as any)
   }
 
-  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const val = e.target.value
-    setCategory(val)
-    setValue('category', val)
-    const cat = categories.find((c: any) => c._id === val)
-    if (cat) setValue('cat', cat.name)
+  const handleCategoryPickerChange = (categoryId: string, categoryName: string) => {
+    setCategory(categoryId)
+    setValue('category', categoryId, { shouldValidate: true })
+    if (categoryName) setValue('cat', categoryName)
   }
 
   return (
@@ -377,18 +376,19 @@ export default function ProductCreateForm() {
             </div>
             <div>
               <label className="block text-sm font-medium text-[#0F1111] mb-1">Category</label>
-              <select
+              <CategoryPicker
                 value={category}
-                {...register('category', { required: 'Category is required' })}
-                onChange={handleCategoryChange}
-                className="amazon-input"
-              >
-                <option value="">Select category</option>
-                {categories.map((c: any) => (
-                  <option key={c._id} value={c._id}>{c.name}</option>
-                ))}
-              </select>
-              {errors.category && <p className="text-[#CC0C39] text-xs mt-1">{errors.category.message}</p>}
+                onChange={handleCategoryPickerChange}
+                onCategoryCreated={(created) =>
+                  setCategories((prev) => {
+                    const id = String(created._id)
+                    if (prev.some((c) => String(c._id) === id)) return prev
+                    return [...prev, created]
+                  })
+                }
+                error={errors.category?.message}
+              />
+              <input type="hidden" {...register('category', { required: 'Category is required' })} />
             </div>
           </div>
 

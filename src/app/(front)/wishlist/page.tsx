@@ -2,7 +2,7 @@
 import Link from 'next/link'
 import useWishListStore from '@/lib/hooks/useWishListStore'
 import CldImage from '@/components/CldImage'
-import { formatPrice } from '@/lib/utils'
+import Price from '@/components/products/Price'
 import { FiHeart, FiTrash2, FiShoppingCart } from 'react-icons/fi'
 import useCartService from '@/lib/hooks/useCartStore'
 import toast from 'react-hot-toast'
@@ -64,7 +64,7 @@ export default function Wishlist() {
                       <p className="text-sm text-[#0F1111] line-clamp-2 leading-snug group-hover:text-[#CC0C39]">
                         {item.name}
                       </p>
-                      <p className="font-bold text-base text-[#0F1111] mt-1.5">{formatPrice(item.price)}</p>
+                      <p className="mt-1.5"><Price amount={item.price} size="md" /></p>
                       <p className="text-[#007600] text-xs mt-0.5">In Stock</p>
                     </div>
                   </Link>

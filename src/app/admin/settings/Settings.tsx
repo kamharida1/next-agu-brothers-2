@@ -74,22 +74,19 @@ export default function Settings({ products }: SettingsProps) {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center">
-      <div className="card w-96 bg-white shadow-lg p-6 rounded-lg">
-        <h1 className="text-2xl font-bold text-center mb-4">Settings</h1>
+    <div className="max-w-lg">
+      <div className="admin-panel p-6 space-y-5">
+        <p className="text-sm text-[#565959]">Bulk pricing and featured product tools</p>
 
-        {/* Mode Toggle */}
-        <div className="form-control mb-4">
-          <label className="label">
-            <span className="label-text">Select Mode</span>
-          </label>
+        <div>
+          <label className="block text-sm font-medium text-[#0F1111] mb-1.5">Action</label>
           <select
-            className="select select-bordered w-full"
+            className="admin-select w-full"
             value={mode}
             onChange={(e) => setMode(e.target.value as 'factor' | 'featured')}
           >
-            <option value="factor">Update Price Factor</option>
-            <option value="featured">Set featured</option>
+            <option value="factor">Update price factor by brand</option>
+            <option value="featured">Set featured product</option>
           </select>
         </div>
 
@@ -97,12 +94,10 @@ export default function Settings({ products }: SettingsProps) {
         {mode === 'factor' ? (
           <>
             {/* Select Brand */}
-            <div className="form-control mb-4">
-              <label className="label">
-                <span className="label-text">Select Brand</span>
-              </label>
+            <div>
+              <label className="block text-sm font-medium text-[#0F1111] mb-1.5">Brand</label>
               <select
-                className="select select-bordered w-full"
+                className="admin-select w-full"
                 value={selectedBrand}
                 onChange={(e) => setSelectedBrand(e.target.value)}
               >
@@ -114,13 +109,11 @@ export default function Settings({ products }: SettingsProps) {
               </select>
             </div>
             {/* Factor Input */}
-            <div className="form-control mb-4">
-              <label className="label">
-                <span className="label-text">Factor</span>
-              </label>
+            <div>
+              <label className="block text-sm font-medium text-[#0F1111] mb-1.5">Factor</label>
               <input
                 type="number"
-                className="input input-bordered w-full"
+                className="amazon-input"
                 value={factor}
                 onChange={(e) => setFactor(e.target.value)}
               />
@@ -129,13 +122,11 @@ export default function Settings({ products }: SettingsProps) {
         ) : (
           <>
             {/* Search Box */}
-            <div className="form-control mb-4">
-              <label className="label">
-                <span className="label-text">Search Product</span>
-              </label>
+            <div>
+              <label className="block text-sm font-medium text-[#0F1111] mb-1.5">Search product</label>
               <input
                 type="text"
-                className="input input-bordered w-full"
+                className="amazon-input"
                 placeholder="Type to search product"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -143,12 +134,10 @@ export default function Settings({ products }: SettingsProps) {
             </div>
 
             {/* Product Dropdown */}
-            <div className="form-control mb-4">
-              <label className="label">
-                <span className="label-text">Select Product</span>
-              </label>
+            <div>
+              <label className="block text-sm font-medium text-[#0F1111] mb-1.5">Product</label>
               <select
-                className="select select-bordered w-full"
+                className="admin-select w-full"
                 value={selectedProduct}
                 onChange={(e) => setSelectedProduct(e.target.value)}
               >
@@ -164,29 +153,26 @@ export default function Settings({ products }: SettingsProps) {
             </div>
 
             {/* Featured Input */}
-            <div className="form-control mb-4">
-              <label className="label">
-                <span className="label-text">Featured</span>
-              </label>
+            <label className="flex items-center gap-3 cursor-pointer">
               <input
                 type="checkbox"
-                className="checkbox checkbox-primary"
+                className="checkbox checkbox-sm border-[#D5D9D9]"
                 checked={featured}
                 onChange={(e) => setFeatured(e.target.checked)}
               />
-            </div>
+              <span className="text-sm text-[#0F1111]">Mark as featured product</span>
+            </label>
           </>
         )}
 
-        <div className="form-control mt-6">
-          <button
-            className={`btn btn-primary ${loading ? 'loading' : ''}`}
-            onClick={saveSettings}
-            disabled={loading}
-          >
-            {loading ? 'Saving...' : 'Save'}
-          </button>
-        </div>
+        <button
+          type="button"
+          className={`btn-amazon w-full py-2.5 rounded-md text-sm ${loading ? 'opacity-60' : ''}`}
+          onClick={saveSettings}
+          disabled={loading}
+        >
+          {loading ? 'Saving…' : 'Save settings'}
+        </button>
       </div>
     </div>
   )

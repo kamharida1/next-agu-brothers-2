@@ -68,7 +68,9 @@ export default function useCartService() {
       if (exist) {
         if (exist.qty < item.countInStock) {
           const updatedCartItems = items.map((x) =>
-            x.slug === item.slug ? { ...exist, qty: exist.qty + 1 } : x
+            x.slug === item.slug
+              ? { ...exist, qty: exist.qty + 1, price: item.price ?? exist.price }
+              : x
           );
           const { itemsPrice, shippingPrice, taxPrice, totalPrice } = calcPrice(updatedCartItems, shippingAddress);
           cartStore.setState({

@@ -6,7 +6,15 @@ import { useEffect, useState } from "react";
 import { FiShoppingCart, FiMinus, FiPlus } from "react-icons/fi";
 import toast from 'react-hot-toast';
 
-export default function AddToCart({ item, compact }: { item: OrderItem; compact?: boolean }) {
+export default function AddToCart({
+  item,
+  compact,
+  variant = 'default',
+}: {
+  item: OrderItem
+  compact?: boolean
+  variant?: 'default' | 'amazon'
+}) {
   const { items, increase, decrease } = useCartService()
   const [existItem, setExistItem] = useState<OrderItem | undefined>()
 
@@ -47,11 +55,16 @@ export default function AddToCart({ item, compact }: { item: OrderItem; compact?
     )
   }
 
+  const btnClass =
+    variant === 'amazon'
+      ? `btn-amazon gap-2 flex items-center justify-center ${compact ? 'py-2 text-sm' : 'w-full py-2.5 text-sm'} disabled:opacity-50 disabled:cursor-not-allowed`
+      : `btn btn-primary gap-2 ${compact ? 'btn-sm' : 'w-full'}`
+
   return (
     <button
       onClick={addToCartHandler}
       type="button"
-      className={`btn btn-primary gap-2 ${compact ? 'btn-sm' : 'w-full'}`}
+      className={btnClass}
       disabled={item.countInStock === 0}
     >
       <FiShoppingCart className="w-4 h-4" />

@@ -5,15 +5,16 @@ import ProductCard from '@/components/products/ProductCard'
 import Link from 'next/link'
 import { FiArrowRight } from 'react-icons/fi'
 
-const BASE_URL = 'https://www.agubrothers.com'
+import { BASE_URL, ROBOTS_INDEX } from '@/lib/seo'
 
 export const metadata: Metadata = {
-  title: 'Agu Brothers — Electronics & Home Appliances Nigeria',
-  description: 'Shop premium home electronics and appliances in Nigeria: TVs, refrigerators, generators, air conditioners, gas cookers, freezers. Fast delivery nationwide.',
+  title: 'Agu Brothers — Brand New Electronics & Home Appliances Nigeria',
+  description: 'Shop 100% brand new electronics and home appliances in Nigeria: TVs, refrigerators, generators, air conditioners, gas cookers, freezers. All products are brand new — no tokunbo. Fast delivery nationwide.',
+  robots: ROBOTS_INDEX,
   alternates: { canonical: BASE_URL },
   openGraph: {
-    title: 'Agu Brothers — Electronics & Home Appliances Nigeria',
-    description: 'Shop premium home electronics and appliances in Nigeria. TVs, fridges, generators, ACs and more. Fast nationwide delivery.',
+    title: 'Agu Brothers — Brand New Electronics & Home Appliances Nigeria',
+    description: 'Shop 100% brand new electronics and home appliances in Nigeria. All products are brand new — no second-hand goods. TVs, fridges, generators, ACs and more. Fast nationwide delivery.',
     url: BASE_URL,
     siteName: 'Agu Brothers Electronics',
     type: 'website',
@@ -57,6 +58,7 @@ export default async function Home() {
     '@context': 'https://schema.org',
     '@type': 'ElectronicsStore',
     name: 'Agu Brothers Electronics',
+    description: 'Agu Brothers Electronics sells 100% brand new electronics and home appliances in Nigeria. All products are brand new — we do not sell second-hand or tokunbo goods. Products include televisions, refrigerators, air conditioners, generators, gas cookers, washing machines, and freezers.',
     image: `${BASE_URL}/og-home.jpg`,
     url: BASE_URL,
     telephone: '+234-909-923-4242',
@@ -125,15 +127,20 @@ export default async function Home() {
       <div className="relative overflow-hidden bg-gradient-to-r from-[#131921] via-[#232F3E] to-[#37475A] text-white">
         <div className="max-w-[1500px] mx-auto px-4 py-16 md:py-24 flex flex-col md:flex-row items-center gap-8">
           <div className="flex-1 space-y-5 text-center md:text-left">
-            <div className="inline-block bg-[#FF9900] text-[#131921] text-xs font-bold px-3 py-1 rounded-sm uppercase tracking-wider">
-              Nigeria&apos;s #1 Electronics Store
+            <div className="flex flex-wrap gap-2">
+              <div className="inline-block bg-[#FF9900] text-[#131921] text-xs font-bold px-3 py-1 rounded-sm uppercase tracking-wider">
+                Nigeria&apos;s Trusted Electronics Store
+              </div>
+              <div className="inline-block bg-[#007600] text-white text-xs font-bold px-3 py-1 rounded-sm uppercase tracking-wider">
+                100% Brand New Products
+              </div>
             </div>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
               Top Electronics &<br />
               <span className="text-[#FF9900]">Home Appliances</span>
             </h1>
             <p className="text-[#CCCCCC] text-lg max-w-xl">
-              TVs, fridges, ACs, generators and more — quality brands, genuine products, fast delivery across Nigeria.
+              TVs, fridges, ACs, generators and more — all <strong className="text-white">brand new</strong>, quality brands, fast delivery across Nigeria.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start">
               <Link href="/all-products" className="btn-amazon text-base px-8 py-3 rounded-md font-bold text-center">
@@ -144,6 +151,7 @@ export default async function Home() {
               </Link>
             </div>
             <div className="flex flex-wrap gap-6 text-sm text-[#CCCCCC] justify-center md:justify-start pt-2">
+              <span className="flex items-center gap-2">✓ 100% Brand New</span>
               <span className="flex items-center gap-2">✓ 1-Year Warranty</span>
               <span className="flex items-center gap-2">✓ Fast Delivery</span>
               <span className="flex items-center gap-2">✓ Secure Payments</span>
@@ -212,10 +220,10 @@ export default async function Home() {
         <section>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
-              { icon: '🚚', title: 'Fast Delivery', sub: 'Nationwide shipping' },
-              { icon: '✅', title: 'Genuine Products', sub: '100% authentic brands' },
+              { icon: '🆕', title: '100% Brand New', sub: 'No tokunbo — ever' },
+              { icon: '🚚', title: 'Fast Delivery',   sub: 'Nationwide shipping' },
               { icon: '🔒', title: 'Secure Checkout', sub: 'Paystack encrypted' },
-              { icon: '🔄', title: '7-Day Returns', sub: 'Easy hassle-free returns' },
+              { icon: '🔄', title: '7-Day Returns',   sub: 'Easy hassle-free returns' },
             ].map((f) => (
               <div key={f.title} className="bg-white rounded-sm shadow-sm p-4 flex items-center gap-3">
                 <span className="text-3xl">{f.icon}</span>

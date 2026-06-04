@@ -43,15 +43,15 @@ export default function Users() {
   }
 
   if (error) return (
-    <div className="alert alert-error">
-      <FiAlertCircle className="w-5 h-5" />
+    <div className="admin-panel p-4 text-sm text-[#B12704] bg-[#FFF4F4] flex gap-2">
+      <FiAlertCircle className="w-5 h-5 shrink-0" />
       <span>Failed to load users: {error.message}</span>
     </div>
   )
 
   if (!users) return (
     <div className="flex items-center justify-center py-16">
-      <span className="loading loading-spinner loading-lg text-primary"></span>
+      <span className="loading loading-spinner loading-lg text-[#FF9900]" />
     </div>
   )
 
@@ -68,63 +68,47 @@ export default function Users() {
     <div className="space-y-5">
       {/* Summary */}
       <div className="grid grid-cols-3 gap-3">
-        <div className="card bg-base-100 border border-base-200 shadow-sm">
-          <div className="card-body p-4">
-            <div className="flex items-center gap-2 text-base-content/60">
-              <FiUsers className="w-4 h-4" />
-              <span className="text-xs font-medium">Total Users</span>
+        {[
+          { label: 'Total users', value: users.length, icon: <FiUsers className="w-4 h-4" />, color: 'text-[#565959]' },
+          { label: 'Admins', value: admins, icon: <FiShield className="w-4 h-4" />, color: 'text-[#007185]' },
+          { label: 'Customers', value: users.length - admins, icon: <FiCheckCircle className="w-4 h-4" />, color: 'text-[#007600]' },
+        ].map((s) => (
+          <div key={s.label} className="admin-stat">
+            <div className={`flex items-center gap-2 text-xs font-medium ${s.color}`}>
+              {s.icon}
+              {s.label}
             </div>
-            <p className="text-2xl font-bold">{users.length}</p>
+            <p className="text-2xl font-bold text-[#0F1111] mt-2">{s.value}</p>
           </div>
-        </div>
-        <div className="card bg-base-100 border border-base-200 shadow-sm">
-          <div className="card-body p-4">
-            <div className="flex items-center gap-2 text-primary">
-              <FiShield className="w-4 h-4" />
-              <span className="text-xs font-medium">Admins</span>
-            </div>
-            <p className="text-2xl font-bold">{admins}</p>
-          </div>
-        </div>
-        <div className="card bg-base-100 border border-base-200 shadow-sm">
-          <div className="card-body p-4">
-            <div className="flex items-center gap-2 text-success">
-              <FiCheckCircle className="w-4 h-4" />
-              <span className="text-xs font-medium">Regular Users</span>
-            </div>
-            <p className="text-2xl font-bold">{users.length - admins}</p>
-          </div>
-        </div>
+        ))}
       </div>
 
-      {/* Search */}
-      <div className="relative">
-        <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-base-content/40" />
+      <div className="admin-panel p-4 flex items-center gap-2">
+        <FiSearch className="w-4 h-4 text-[#565959] shrink-0" />
         <input
-          type="text"
-          placeholder="Search by name or email..."
-          className="input input-bordered w-full pl-9 text-sm"
+          type="search"
+          placeholder="Search by name or email…"
+          className="amazon-input flex-1"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
 
-      {/* Table */}
-      <div className="card bg-base-100 shadow border border-base-200 overflow-hidden">
+      <div className="admin-panel overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="table table-zebra w-full">
-            <thead className="bg-base-200">
+          <table className="admin-table">
+            <thead>
               <tr>
-                <th className="text-xs uppercase tracking-wider">User</th>
-                <th className="text-xs uppercase tracking-wider">Email</th>
-                <th className="text-xs uppercase tracking-wider">Role</th>
-                <th className="text-xs uppercase tracking-wider">Actions</th>
+                <th>User</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="text-center py-12 text-base-content/50">
+                  <td colSpan={4} className="text-center py-12 text-[#565959]">
                     No users found
                   </td>
                 </tr>
@@ -133,41 +117,37 @@ export default function Users() {
                   <tr key={user._id} className="hover">
                     <td>
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-                          <span className="text-primary font-bold text-sm">
+                        <div className="w-9 h-9 rounded-sm bg-[#232F3E] flex items-center justify-center flex-shrink-0">
+                          <span className="text-[#FF9900] font-bold text-sm">
                             {user.name?.charAt(0).toUpperCase()}
                           </span>
                         </div>
                         <span className="font-medium text-sm">{user.name}</span>
                       </div>
                     </td>
-                    <td className="text-sm text-base-content/70">{user.email}</td>
+                    <td className="text-sm text-[#565959]">{user.email}</td>
                     <td>
                       {user.isAdmin ? (
-                        <div className="badge badge-primary badge-sm gap-1">
+                        <span className="admin-badge-neutral inline-flex items-center gap-1 font-bold">
                           <FiShield className="w-3 h-3" /> Admin
-                        </div>
+                        </span>
                       ) : (
-                        <div className="badge badge-ghost badge-sm gap-1">
+                        <span className="admin-badge-success inline-flex items-center gap-1">
                           <FiCheckCircle className="w-3 h-3" /> User
-                        </div>
+                        </span>
                       )}
                     </td>
                     <td>
-                      <div className="flex items-center gap-1">
-                        <Link
-                          href={`/admin/users/${user._id}`}
-                          className="btn btn-ghost btn-xs gap-1"
-                        >
-                          <FiEdit2 className="w-3 h-3" />
-                          Edit
+                      <div className="flex items-center gap-3">
+                        <Link href={`/admin/users/${user._id}`} className="admin-btn-link inline-flex items-center gap-1">
+                          <FiEdit2 className="w-3 h-3" /> Edit
                         </Link>
                         <button
+                          type="button"
                           onClick={() => handleDelete(user._id, user.name)}
-                          className="btn btn-ghost btn-xs text-error gap-1"
+                          className="admin-btn-link inline-flex items-center gap-1 !text-[#CC0C39]"
                         >
-                          <FiTrash2 className="w-3 h-3" />
-                          Delete
+                          <FiTrash2 className="w-3 h-3" /> Delete
                         </button>
                       </div>
                     </td>
@@ -178,7 +158,7 @@ export default function Users() {
           </table>
         </div>
         {filtered.length > 0 && (
-          <div className="px-4 py-3 border-t border-base-200 text-sm text-base-content/50">
+          <div className="px-4 py-3 border-t border-[#D5D9D9] text-xs text-[#565959] bg-[#F7F8F8]">
             Showing {filtered.length} of {users.length} users
           </div>
         )}

@@ -16,19 +16,16 @@ export function convertDocToObj(doc: any) {
   return doc;
 }
 
-export const formatPrice = (price: number | undefined) => {
-  // Ensure price is a valid number
+/** Plain-text NGN price (matches storefront Price component). */
+export const formatPriceAmount = (price: number | undefined) => {
   if (typeof price !== "number" || isNaN(price)) {
-    return "₦0"; // Fallback value for undefined or invalid price
+    return "₦0";
   }
-
-  // Format the price using toLocaleString
-  return price.toLocaleString("en-NG", {
-    style: "currency",
-    currency: "NGN",
-    minimumFractionDigits: 0,
-  });
+  return `₦${price.toLocaleString("en-NG", { maximumFractionDigits: 0 })}`;
 };
+
+/** @deprecated Prefer `<Price />` in React; use formatPriceAmount for strings (email, labels). */
+export const formatPrice = formatPriceAmount;
 
 export const formatNumber = (x: number) => {
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");

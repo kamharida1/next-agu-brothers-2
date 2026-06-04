@@ -1,4 +1,5 @@
 'use client'
+
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -17,6 +18,7 @@ import {
   FiChevronLeft,
   FiMenu,
   FiHome,
+  FiExternalLink,
 } from 'react-icons/fi'
 
 const NAV_ITEMS = [
@@ -42,62 +44,70 @@ const AdminLayout = ({
   title?: string
 }) => {
   const { data: session } = useSession()
+  const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(false)
+
+  const pageTitle =
+    title || activeItem.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
 
   if (!session || !session.user.isAdmin) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-        <div className="text-6xl">🔒</div>
-        <h1 className="text-2xl font-bold">Access Denied</h1>
-        <p className="text-base-content/60">You need admin privileges to view this page.</p>
-        <Link href="/" className="btn btn-primary">Go to Homepage</Link>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 px-4">
+        <div className="admin-panel p-8 max-w-md w-full text-center">
+          <p className="text-4xl mb-3">🔒</p>
+          <h1 className="text-xl font-bold text-[#0F1111]">Access denied</h1>
+          <p className="text-sm text-[#565959] mt-2 mb-5">
+            You need administrator privileges to view this area.
+          </p>
+          <Link href="/" className="btn-amazon px-6 py-2 rounded-md text-sm inline-block">
+            Return to store
+          </Link>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-64px)] bg-base-200/40">
-      {/* Sidebar */}
+    <div className="flex min-h-[calc(100vh-var(--header-height))] bg-[#EAEDED]">
+      {/* Sidebar — Amazon dark header tone */}
       <aside
-        className={`
-          hidden md:flex flex-col bg-base-100 border-r border-base-200 shadow-sm
-          transition-all duration-300 ease-in-out flex-shrink-0
-          ${collapsed ? 'w-16' : 'w-60'}
-        `}
+        className={`hidden md:flex flex-col bg-[#131921] text-white flex-shrink-0 transition-all duration-200 ${
+          collapsed ? 'w-[68px]' : 'w-56'
+        }`}
       >
-        {/* Sidebar Header */}
-        <div className={`flex items-center h-14 border-b border-base-200 px-3 ${collapsed ? 'justify-center' : 'justify-between'}`}>
+        <div
+          className={`flex items-center h-14 border-b border-[#3a4553] px-3 ${
+            collapsed ? 'justify-center' : 'justify-between'
+          }`}
+        >
           {!collapsed && (
-            <span className="font-semibold text-sm text-base-content/70 uppercase tracking-wider">
-              Admin
+            <span className="font-bold text-sm tracking-tight">
+              Agu <span className="text-[#FF9900]">Admin</span>
             </span>
           )}
           <button
+            type="button"
             onClick={() => setCollapsed(!collapsed)}
-            className="btn btn-ghost btn-xs btn-circle"
+            className="p-1.5 rounded hover:bg-[#232F3E] text-[#DDD]"
             aria-label="Toggle sidebar"
           >
             {collapsed ? <FiMenu className="w-4 h-4" /> : <FiChevronLeft className="w-4 h-4" />}
           </button>
         </div>
 
-        {/* Nav Items */}
-        <nav className="flex-1 py-3 overflow-y-auto">
-          <ul className="space-y-1 px-2">
+        <nav className="flex-1 py-2 overflow-y-auto">
+          <ul className="space-y-0.5 px-2">
             {NAV_ITEMS.map(({ key, label, icon: Icon, href }) => {
-              const isActive = key === activeItem
+              const isActive = key === activeItem || pathname.startsWith(href)
               return (
                 <li key={key}>
                   <Link
                     href={href}
-                    className={`
-                      flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all
-                      ${isActive
-                        ? 'bg-primary text-white shadow-sm'
-                        : 'text-base-content/70 hover:bg-base-200 hover:text-base-content'
-                      }
-                      ${collapsed ? 'justify-center' : ''}
-                    `}
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm transition-colors ${
+                      isActive
+                        ? 'bg-[#232F3E] text-white font-medium border-l-[3px] border-[#FF9900] pl-[9px]'
+                        : 'text-[#DDD] hover:bg-[#232F3E] hover:text-white'
+                    } ${collapsed ? 'justify-center px-2' : ''}`}
                     title={collapsed ? label : undefined}
                   >
                     <Icon className="w-4 h-4 flex-shrink-0" />
@@ -109,68 +119,75 @@ const AdminLayout = ({
           </ul>
         </nav>
 
-        {/* Bottom: Back to Store */}
-        <div className="p-2 border-t border-base-200">
+        <div className="p-2 border-t border-[#3a4553] space-y-1">
           <Link
             href="/"
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-base-content/60 hover:bg-base-200 hover:text-base-content transition-all ${collapsed ? 'justify-center' : ''}`}
-            title={collapsed ? 'Back to Store' : undefined}
+            className={`flex items-center gap-3 px-3 py-2 rounded-sm text-sm text-[#DDD] hover:bg-[#232F3E] hover:text-white ${
+              collapsed ? 'justify-center' : ''
+            }`}
+            title={collapsed ? 'View store' : undefined}
           >
-            <FiHome className="w-4 h-4 flex-shrink-0" />
-            {!collapsed && <span>Back to Store</span>}
+            <FiExternalLink className="w-4 h-4 shrink-0" />
+            {!collapsed && <span>View storefront</span>}
+          </Link>
+          <Link
+            href="/"
+            className={`flex items-center gap-3 px-3 py-2 rounded-sm text-sm text-[#DDD] hover:bg-[#232F3E] ${
+              collapsed ? 'justify-center' : ''
+            }`}
+            title={collapsed ? 'Home' : undefined}
+          >
+            <FiHome className="w-4 h-4 shrink-0" />
+            {!collapsed && <span>Customer site</span>}
           </Link>
         </div>
       </aside>
 
-      {/* Mobile Nav Bar */}
-      <div className="fixed bottom-0 left-0 right-0 md:hidden z-50 bg-base-100 border-t border-base-200 px-2 py-1">
-        <div className="flex items-center justify-around">
+      {/* Mobile bottom nav */}
+      <div className="fixed bottom-0 left-0 right-0 md:hidden z-50 bg-[#131921] border-t border-[#3a4553] px-1 py-1 safe-area-pb">
+        <div className="flex justify-around">
           {NAV_ITEMS.slice(0, 5).map(({ key, label, icon: Icon, href }) => (
             <Link
               key={key}
               href={href}
-              className={`flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg transition-colors ${
-                key === activeItem ? 'text-primary' : 'text-base-content/50'
+              className={`flex flex-col items-center gap-0.5 px-2 py-1.5 min-w-0 ${
+                key === activeItem ? 'text-[#FF9900]' : 'text-[#999]'
               }`}
             >
               <Icon className="w-5 h-5" />
-              <span className="text-xs">{label}</span>
+              <span className="text-[10px] truncate max-w-[56px]">{label}</span>
             </Link>
           ))}
         </div>
       </div>
 
-      {/* Main Content */}
+      {/* Main */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Page Header */}
-        <div className="bg-base-100 border-b border-base-200 px-6 py-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-bold capitalize">
-              {title || activeItem.replace(/-/g, ' ')}
-            </h1>
-            <nav className="text-xs text-base-content/50 mt-0.5">
-              <span>Admin</span>
-              <span className="mx-1">/</span>
-              <span className="capitalize">{activeItem}</span>
-            </nav>
+        <header className="bg-white border-b border-[#D5D9D9] px-4 sm:px-6 py-4 flex items-center justify-between gap-4">
+          <div className="min-w-0">
+            <h1 className="text-xl font-bold text-[#0F1111] truncate">{pageTitle}</h1>
+            <p className="text-xs text-[#565959] mt-0.5">
+              <Link href="/admin/dashboard" className="hover:text-[#CC0C39]">
+                Admin
+              </Link>
+              <span className="mx-1">›</span>
+              <span className="text-[#0F1111]">{pageTitle}</span>
+            </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3 shrink-0">
             <div className="text-right hidden sm:block">
-              <p className="text-sm font-medium">{session.user.name}</p>
-              <p className="text-xs text-base-content/50">Administrator</p>
+              <p className="text-sm font-medium text-[#0F1111]">{session.user.name}</p>
+              <p className="text-xs text-[#565959]">Administrator</p>
             </div>
-            <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center">
-              <span className="text-white font-bold text-sm">
+            <div className="w-9 h-9 rounded-sm bg-[#232F3E] flex items-center justify-center">
+              <span className="text-[#FF9900] font-bold text-sm">
                 {session.user.name?.charAt(0).toUpperCase()}
               </span>
             </div>
           </div>
-        </div>
+        </header>
 
-        {/* Content */}
-        <div className="flex-1 p-6 pb-20 md:pb-6 overflow-auto">
-          {children}
-        </div>
+        <div className="flex-1 p-4 sm:p-6 pb-24 md:pb-6 overflow-auto">{children}</div>
       </div>
     </div>
   )

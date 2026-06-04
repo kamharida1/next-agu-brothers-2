@@ -6,7 +6,8 @@ import { CheckoutSteps } from '@/components/CheckoutSteps'
 import Link from 'next/link'
 import Image from 'next/image'
 import toast from 'react-hot-toast'
-import { formatPrice } from '@/lib/utils'
+import Price from '@/components/products/Price'
+import { formatPriceAmount } from '@/lib/utils'
 import { PaystackButton } from 'react-paystack'
 import { useSession } from 'next-auth/react'
 
@@ -179,8 +180,8 @@ const Form = () => {
                       <p className="text-sm text-[#565959] mt-0.5">Qty: {item.qty}</p>
                     </div>
                     <div className="text-right flex-shrink-0">
-                      <p className="font-bold text-sm text-[#0F1111]">{formatPrice(item.price * item.qty)}</p>
-                      <p className="text-xs text-[#565959] mt-0.5">{formatPrice(item.price)} each</p>
+                      <p className="font-bold text-sm text-[#0F1111]"><Price amount={item.price * item.qty} size="sm" /></p>
+                      <p className="text-xs text-[#565959] mt-0.5"><Price amount={item.price} size="sm" /> each</p>
                     </div>
                   </div>
                 ))}
@@ -224,20 +225,22 @@ const Form = () => {
               {/* Order summary */}
               <div className="border-t border-[#D5D9D9] mt-4 pt-4 space-y-2">
                 <h3 className="font-bold text-[#0F1111] text-sm mb-3">Order Summary</h3>
-                {[
-                  ['Items', formatPrice(itemsPrice)],
-                  ['Shipping & handling', formatPrice(shippingPrice)],
-                  ['Tax (0.6%)', formatPrice(taxPrice)],
-                ].map(([label, val]) => (
-                  <div key={label as string} className="flex justify-between text-sm text-[#0F1111]">
+                {(
+                  [
+                    ['Items', itemsPrice],
+                    ['Shipping & handling', shippingPrice],
+                    ['Tax (0.6%)', taxPrice],
+                  ] as const
+                ).map(([label, amount]) => (
+                  <div key={label} className="flex justify-between items-center text-sm text-[#0F1111]">
                     <span className="text-[#565959]">{label}:</span>
-                    <span>{val}</span>
+                    <Price amount={amount} size="sm" />
                   </div>
                 ))}
                 <div className="border-t border-[#D5D9D9] pt-3 mt-2">
-                  <div className="flex justify-between font-bold text-lg text-[#CC0C39]">
+                  <div className="flex justify-between items-center font-bold text-lg text-[#CC0C39]">
                     <span>Order total:</span>
-                    <span>{formatPrice(totalPrice)}</span>
+                    <Price amount={totalPrice} size="md" className="text-[#CC0C39]" />
                   </div>
                 </div>
               </div>
@@ -292,7 +295,7 @@ function OrderCTA({
           onSuccess={onPaystackSuccess}
           onClose={onPaystackClose}
           className="btn-amazon w-full py-3 rounded-md text-sm font-medium cursor-pointer text-center block"
-          text={`Pay ${formatPrice(totalPrice)} with Paystack`}
+          text={`Pay ${formatPriceAmount(totalPrice)} with Paystack`}
         />
         <p className="text-xs text-center text-[#565959]">
           You&apos;ll be charged immediately. Order is confirmed after payment.
