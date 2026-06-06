@@ -2,6 +2,10 @@ import productServices from '@/lib/services/productService'
 import ProductDetails from './ProductDetails'
 import RelatedProducts from '@/components/products/RelatedProducts'
 import { getSalePrice, hasDiscount } from '@/lib/productPricing'
+import {
+  MERCHANT_RETURN_POLICY,
+  MERCHANT_SHIPPING_DETAILS,
+} from '@/lib/merchantListingSchema'
 import { BASE_URL, ROBOTS_INDEX, ROBOTS_NOINDEX, truncateForMeta } from '@/lib/seo'
 import { Product } from '@/lib/models/ProductModel'
 import { Metadata } from 'next'
@@ -107,6 +111,8 @@ export default async function ProductDetailsPage({
           : 'https://schema.org/OutOfStock',
       itemCondition: 'https://schema.org/NewCondition',
       seller: { '@type': 'Organization', name: 'Agu Brothers Electronics' },
+      shippingDetails: MERCHANT_SHIPPING_DETAILS,
+      hasMerchantReturnPolicy: MERCHANT_RETURN_POLICY,
     },
     ...(product.numReviews > 0 && {
       aggregateRating: {
