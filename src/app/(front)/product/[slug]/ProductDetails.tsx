@@ -7,6 +7,7 @@ import { convertDocToObj } from '@/lib/utils'
 import toast from 'react-hot-toast'
 import Link from 'next/link'
 import React from 'react'
+import { categoryHref } from '@/lib/categorySlugs'
 import { Rating } from '@/components/products/Rating'
 import ProductImages from './ProductImages'
 import { format } from 'date-fns'
@@ -255,7 +256,7 @@ export default function ProductDetails({ product }: { product: Product }) {
           </li>
           <li>
             <Link
-              href={`/search?category=${encodeURIComponent(product.cat)}`}
+              href={categoryHref(product.cat)}
               className="hover:text-[#CC0C39] hover:underline"
             >
               {product.cat}

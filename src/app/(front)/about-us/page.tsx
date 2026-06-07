@@ -1,26 +1,29 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
+import { BASE_URL, BUSINESS, staticPageMetadata } from '@/lib/seo'
+
+export const metadata: Metadata = staticPageMetadata({
+  title: 'About Us | Agu Brothers Electronics',
+  description:
+    'About Agu Brothers — Nigeria\'s trusted electronics store since 1979. We sell 100% brand new electronics and home appliances only. No tokunbo, no second-hand goods.',
+  path: '/about-us',
+})
 
 const aboutJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'ElectronicsStore',
-  name: 'Agu Brothers Electronics',
+  name: BUSINESS.name,
   description: 'Agu Brothers Electronics has been selling 100% brand new electronics and home appliances in Nigeria since 1979. We exclusively stock brand new products sourced from authorised distributors — no second-hand, no tokunbo, no refurbished goods.',
-  url: 'https://www.agubrothers.com',
-  telephone: '+234-909-923-4242',
+  url: BASE_URL,
+  telephone: BUSINESS.phone,
   foundingDate: '1979',
   address: {
     '@type': 'PostalAddress',
-    streetAddress: '33 Ogui Road',
-    addressLocality: 'Enugu',
-    addressRegion: 'Enugu State',
-    addressCountry: 'NG',
+    streetAddress: BUSINESS.address.street,
+    addressLocality: BUSINESS.address.locality,
+    addressRegion: BUSINESS.address.region,
+    addressCountry: BUSINESS.address.country,
   },
-}
-
-export const metadata: Metadata = {
-  title: 'About Us | Agu Brothers Electronics',
-  description: 'About Agu Brothers — Nigeria\'s trusted electronics store since 1979. We sell 100% brand new electronics and home appliances only. No tokunbo, no second-hand goods.',
 }
 
 const SECTIONS = [
@@ -92,8 +95,8 @@ export default function About() {
               <h3 className="font-bold text-[#0F1111] mb-3 pb-2 border-b border-[#D5D9D9]">Contact Information</h3>
               <div className="space-y-2 text-sm text-[#565959]">
                 <p>📍 33 Ogui Road, Enugu State, Nigeria</p>
-                <p>📞 09099234242</p>
-                <p>✉️ agubiggest@gmail.com</p>
+                <p>📞 {BUSINESS.phoneDisplay}</p>
+                <p>✉️ {BUSINESS.email}</p>
               </div>
               <Link href="/contact-us" className="btn-amazon w-full py-2 rounded-md text-sm text-center block mt-4">
                 Contact Us

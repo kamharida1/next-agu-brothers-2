@@ -6,9 +6,13 @@ import { useRouter } from 'next/navigation'
 
 type SettingsProps = {
   products: Product[]
+  autoCategoryBlogEnabled: boolean
 }
 
-export default function Settings({ products }: SettingsProps) {
+export default function Settings({
+  products,
+  autoCategoryBlogEnabled: initialAutoCategoryBlogEnabled,
+}: SettingsProps) {
   const brands = [...new Set(products.map((product) => product.brand))]
 
   const [factor, setFactor] = useState<string>('')
@@ -20,7 +24,40 @@ export default function Settings({ products }: SettingsProps) {
   const [mode, setMode] = useState<'factor' | 'featured'>('factor')
   const [loading, setLoading] = useState<boolean>(false)
   const [searchTerm, setSearchTerm] = useState<string>('')
+  const [autoCategoryBlogEnabled, setAutoCategoryBlogEnabled] = useState(
+    initialAutoCategoryBlogEnabled
+  )
+  const [blogToggleLoading, setBlogToggleLoading] = useState(false)
   const router = useRouter()
+
+  const toggleAutoCategoryBlog = async () => {
+    const nextValue = !autoCategoryBlogEnabled
+    setBlogToggleLoading(true)
+    try {
+      const response = await fetch('/api/admin/settings/site', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ autoCategoryBlogEnabled: nextValue }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update blog setting')
+      }
+
+      const data = await response.json()
+      setAutoCategoryBlogEnabled(data.autoCategoryBlogEnabled)
+      toast.success(
+        data.autoCategoryBlogEnabled
+          ? 'Auto blog posts enabled'
+          : 'Auto blog posts disabled'
+      )
+    } catch (error) {
+      console.error('Failed to update blog setting', error)
+      toast.error('Could not update auto blog setting')
+    } finally {
+      setBlogToggleLoading(false)
+    }
+  }
 
   // Update `featured` state based on the selected product's current status
   useEffect(() => {
@@ -74,7 +111,42 @@ export default function Settings({ products }: SettingsProps) {
   }
 
   return (
-    <div className="max-w-lg">
+    <div className="max-w-lg space-y-5">
+      <div className="admin-panel p-6 space-y-4">
+        <div>
+          <h2 className="text-base font-semibold text-[#0F1111]">
+            Auto category blog posts
+          </h2>
+          <p className="text-sm text-[#565959] mt-1">
+            When enabled, uploading a product in a supported category creates or
+            updates a buying-guide blog post linked to that product.
+          </p>
+        </div>
+
+        <div className="flex items-center justify-between gap-4">
+          <span className="text-sm text-[#0F1111]">
+            {autoCategoryBlogEnabled ? 'Enabled' : 'Disabled'}
+          </span>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={autoCategoryBlogEnabled}
+            aria-label="Toggle auto category blog posts"
+            className={`relative inline-flex h-8 w-14 shrink-0 items-center rounded-full transition-colors ${
+              autoCategoryBlogEnabled ? 'bg-[#FF9900]' : 'bg-[#D5D9D9]'
+            } ${blogToggleLoading ? 'opacity-60' : ''}`}
+            onClick={toggleAutoCategoryBlog}
+            disabled={blogToggleLoading}
+          >
+            <span
+              className={`inline-block h-6 w-6 transform rounded-full bg-white shadow transition-transform ${
+                autoCategoryBlogEnabled ? 'translate-x-7' : 'translate-x-1'
+              }`}
+            />
+          </button>
+        </div>
+      </div>
+
       <div className="admin-panel p-6 space-y-5">
         <p className="text-sm text-[#565959]">Bulk pricing and featured product tools</p>
 

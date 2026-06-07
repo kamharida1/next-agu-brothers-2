@@ -6,11 +6,14 @@ import { toPlainObject } from '../utils'
 
 export const revalidate = 60000 // revalidate the data at most every hour
 
+/** Even count for 2-column mobile grids (3 full rows). */
+export const HOME_SECTION_PRODUCT_LIMIT = 6
+
 const getLatest = cache(async () => {
   await dbConnect()
   const products = await ProductModel.find({})
     .sort({ _id: -1 })
-    .limit(5)
+    .limit(HOME_SECTION_PRODUCT_LIMIT)
     .lean()
   return products as Product[]
 })
@@ -26,7 +29,7 @@ const getFeatured = cache(async () => {
   await dbConnect()
   const products = await ProductModel.find({ isFeatured: true })
     .sort({ _id: -1 })
-    .limit(5)
+    .limit(HOME_SECTION_PRODUCT_LIMIT)
     .lean()
     return products as Product[];
 })
@@ -152,6 +155,12 @@ const getCategories = cache(async () => {
   return categories
 })
 
+const getAllBrands = cache(async () => {
+  await dbConnect()
+  const brands = await ProductModel.distinct('brand')
+  return (brands as string[]).filter(Boolean).sort()
+})
+
 const getRelated = cache(
   async (slug: string, cat: string, brand: string, limit = 5) => {
     await dbConnect()
@@ -169,6 +178,40 @@ const getRelated = cache(
   }
 )
 
+const getOneByCategory = cache(async (category: string) => {
+  await dbConnect()
+  const product = await ProductModel.findOne({
+    cat: category,
+    countInStock: { $gt: 0 },
+  })
+    .sort({ isFeatured: -1, sold: -1, _id: -1 })
+    .lean()
+
+  if (product) return product as Product
+
+  const fallback = await ProductModel.findOne({ cat: category })
+    .sort({ isFeatured: -1, sold: -1, _id: -1 })
+    .lean()
+
+  return (fallback as Product) ?? null
+})
+
+const getByCategory = cache(async (category: string) => {
+  await dbConnect()
+  const products = await ProductModel.find({ cat: category }, '-reviews')
+    .sort({ isFeatured: -1, sold: -1, _id: -1 })
+    .lean()
+  return products as Product[]
+})
+
+const getAllSlugs = cache(async () => {
+  await dbConnect()
+  const products = await ProductModel.find({}, 'slug')
+    .lean<{ slug: string }[]>()
+    .exec()
+  return products.map((p) => p.slug)
+})
+
 const productServices = {
   getBySlug,
   getFeatured,
@@ -176,8 +219,12 @@ const productServices = {
   getByQuery,
   getAllPaginated,
   getCategories,
+  getAllBrands,
   getByBrand,
   getRelated,
+  getOneByCategory,
+  getByCategory,
+  getAllSlugs,
 }
 
 export default productServices

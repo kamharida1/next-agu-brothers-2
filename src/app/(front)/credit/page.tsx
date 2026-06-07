@@ -1,10 +1,13 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
+import { staticPageMetadata } from '@/lib/seo'
 
-export const metadata: Metadata = {
+export const metadata: Metadata = staticPageMetadata({
   title: 'Agu Brothers Credit | Buy Now, Pay Later',
-  description: 'Shop premium electronics and appliances today and pay in convenient instalments with Agu Brothers Credit.',
-}
+  description:
+    'Shop premium electronics and appliances today and pay in convenient instalments with Agu Brothers Credit.',
+  path: '/credit',
+})
 
 const PLANS = [
   { title: '3-Month Plan', deposit: '30%', duration: '3 months', note: '0% interest for orders above ₦200,000', highlight: false },

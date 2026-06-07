@@ -1,6 +1,7 @@
 import { Product } from '@/lib/models/ProductModel'
 import ProductCard from './ProductCard'
 import Link from 'next/link'
+import { categoryHref } from '@/lib/categorySlugs'
 
 export default function RelatedProducts({
   products,
@@ -22,7 +23,7 @@ export default function RelatedProducts({
             Related Products
           </h2>
           <Link
-            href={`/search?category=${encodeURIComponent(category)}`}
+            href={categoryHref(category)}
             className="text-sm text-[#007185] hover:text-[#CC0C39] hover:underline"
           >
             More in {category} →

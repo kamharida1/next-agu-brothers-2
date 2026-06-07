@@ -1,10 +1,13 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
+import { staticPageMetadata } from '@/lib/seo'
 
-export const metadata: Metadata = {
+export const metadata: Metadata = staticPageMetadata({
   title: 'Privacy Notice | Agu Brothers Electronics',
-  description: 'Learn how Agu Brothers Electronics collects, uses, and protects your personal data in compliance with the Nigeria Data Protection Regulation (NDPR).',
-}
+  description:
+    'Learn how Agu Brothers Electronics collects, uses, and protects your personal data in compliance with the Nigeria Data Protection Regulation (NDPR).',
+  path: '/privacy-policy',
+})
 
 const SECTIONS = [
   {

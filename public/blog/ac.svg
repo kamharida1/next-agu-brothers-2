@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450" role="img" aria-label="Air conditioner guide">
+  <rect width="800" height="450" fill="#131921"/>
+  <rect x="250" y="100" width="300" height="120" rx="8" fill="#232F3E" stroke="#FF9900" stroke-width="4"/>
+  <circle cx="400" cy="160" r="30" fill="#37475A"/>
+  <path d="M370 160 L430 160 M400 130 L400 190" stroke="#FF9900" stroke-width="4"/>
+  <text x="400" y="400" text-anchor="middle" fill="#FF9900" font-family="Arial,sans-serif" font-size="28" font-weight="700">Cooling &amp; AC</text>
+</svg>

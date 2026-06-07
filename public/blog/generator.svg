@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450" role="img" aria-label="Generator guide">
+  <rect width="800" height="450" fill="#131921"/>
+  <rect x="270" y="120" width="260" height="180" rx="8" fill="#232F3E" stroke="#FF9900" stroke-width="4"/>
+  <path d="M320 200 L380 200 L400 170 L420 200 L480 200" stroke="#FF9900" stroke-width="6" fill="none"/>
+  <text x="400" y="400" text-anchor="middle" fill="#FF9900" font-family="Arial,sans-serif" font-size="28" font-weight="700">Power &amp; Generators</text>
+</svg>

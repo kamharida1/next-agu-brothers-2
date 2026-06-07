@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import type { Review } from './ReviewModel'
 const productSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
@@ -55,7 +56,7 @@ export type Product = {
   price: number
   brand: string
   description: string
-  reviews?: string[]
+  reviews?: Review[] | string[]
   costPrice: number
   category?: string
   rating: number

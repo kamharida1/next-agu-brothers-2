@@ -8,7 +8,10 @@
     "start": "next start",
     "lint": "next lint",
     "test:e2e": "playwright test",
-    "test:e2e:prod": "PLAYWRIGHT_BASE_URL=https://www.agubrothers.com playwright test"
+    "test:e2e:prod": "PLAYWRIGHT_BASE_URL=https://www.agubrothers.com playwright test",
+    "seed:blogs": "npx tsx scripts/seed-blogs.ts",
+    "upload:blog-images": "npx tsx scripts/upload-blog-images-cloudinary.ts",
+    "validate:product-jsonld": "npx tsx scripts/validate-product-jsonld.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.100.1",
@@ -54,6 +57,7 @@
     "zustand": "^4.5.2"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "@tailwindcss/typography": "^0.5.13",
     "@types/axios": "^0.9.36",
     "@types/bcryptjs": "^2.4.6",
@@ -67,11 +71,11 @@
     "@types/sortablejs": "^1.15.8",
     "daisyui": "^4.11.1",
     "eslint": "^8",
-    "@playwright/test": "^1.60.0",
     "eslint-config-next": "15.2.4",
     "playwright": "^1.60.0",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
+    "tsx": "^4.22.4",
     "typescript": "^5"
   }
 }

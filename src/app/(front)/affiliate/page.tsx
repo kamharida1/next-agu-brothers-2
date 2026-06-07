@@ -1,10 +1,13 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
+import { staticPageMetadata } from '@/lib/seo'
 
-export const metadata: Metadata = {
-  title: 'Affiliate Programme | Agu Brothers',
-  description: 'Earn commissions by promoting Agu Brothers products. Join our affiliate programme and get paid for every sale you refer.',
-}
+export const metadata: Metadata = staticPageMetadata({
+  title: 'Affiliate Programme | Agu Brothers Electronics',
+  description:
+    'Earn commissions by promoting Agu Brothers products. Join our affiliate programme and get paid for every sale you refer.',
+  path: '/affiliate',
+})
 
 const HOW_IT_WORKS = [
   { step: '1', title: 'Apply & Get Approved', desc: 'Fill out our affiliate application. Our team reviews your profile within 2–3 business days and sets up your unique referral link.' },

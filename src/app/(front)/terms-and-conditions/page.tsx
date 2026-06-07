@@ -1,10 +1,13 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
+import { staticPageMetadata } from '@/lib/seo'
 
-export const metadata: Metadata = {
+export const metadata: Metadata = staticPageMetadata({
   title: 'Terms of Use | Agu Brothers Electronics',
-  description: 'Read the Terms of Use for Agu Brothers Electronics — the conditions that govern your use of our website and services.',
-}
+  description:
+    'Read the Terms of Use for Agu Brothers Electronics — the conditions that govern your use of our website and services.',
+  path: '/terms-and-conditions',
+})
 
 const SECTIONS = [
   {

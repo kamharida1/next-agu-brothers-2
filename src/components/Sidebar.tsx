@@ -4,6 +4,7 @@ import { signIn, useSession } from 'next-auth/react'
 import Link from 'next/link'
 import useSWR from 'swr'
 import { FiX } from 'react-icons/fi'
+import { categoryHref } from '@/lib/categorySlugs'
 
 const Sidebar = () => {
   const { toggleDrawer } = useLayoutService()
@@ -56,7 +57,7 @@ const Sidebar = () => {
             All Products
           </Link>
           {categories?.map((cat: string) => (
-            <Link key={cat} href={`/search?category=${cat}`} onClick={toggleDrawer}
+            <Link key={cat} href={categoryHref(cat)} onClick={toggleDrawer}
               className="flex items-center justify-between px-4 py-2 text-sm hover:bg-[#EAEDED] transition-colors">
               <span>{cat}</span>
               <svg className="w-4 h-4 text-[#565959]" fill="none" viewBox="0 0 24 24" stroke="currentColor">

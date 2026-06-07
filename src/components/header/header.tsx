@@ -1,8 +1,8 @@
-import Link from 'next/link'
 import React from 'react'
 import Menu from './Menu'
 import { SearchBox } from './SearchBox'
 import NavBar from './NavBar'
+import SiteLogo from '@/components/SiteLogo'
 
 const Header = () => {
   return (
@@ -22,16 +22,7 @@ const Header = () => {
             </svg>
           </label>
 
-          {/* Logo */}
-          <Link
-            href="/"
-            className="flex-shrink-0 border border-transparent hover:border-white rounded px-1.5 py-1 transition-colors"
-          >
-            <div className="flex flex-col items-center leading-none">
-              <span className="text-white font-bold text-base tracking-tight">agu</span>
-              <span className="text-[#FF9900] text-[9px] font-bold tracking-widest uppercase">brothers</span>
-            </div>
-          </Link>
+          <SiteLogo priority />
 
           {/* Search — hidden on mobile, shown md+ */}
           <div className="hidden md:flex flex-1 min-w-0">

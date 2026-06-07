@@ -1,6 +1,7 @@
-import CldImage from '@/components/CldImage'
+import BlogImage from '@/components/blog/BlogImage'
 import blogServices from '@/lib/services/blogService'
 import Link from 'next/link'
+import { notFound } from 'next/navigation'
 
 export async function generateMetadata({
   params,
@@ -28,9 +29,7 @@ export default async function BlogDetail({
 }) {
   const { slug } = await params
   const blog = await blogServices.getBlogBySlug(slug)
-  if (!blog) {
-    return <div>Blog Not Found</div>
-  }
+  if (!blog) notFound()
   return (
     <div className="container mx-auto my-8 px-4">
       <Link href="/blog" className="text-blue-500 hover:underline mb-4 block">
@@ -43,7 +42,7 @@ export default async function BlogDetail({
             alt={blog.title}
             className="w-full h-64 object-cover"
           /> */}
-          <CldImage
+          <BlogImage
             src={blog.image}
             alt={blog.title}
             width={400}

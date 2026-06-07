@@ -33,3 +33,21 @@ export function cloudinaryImageUrl(
   if (!cloudName || !publicId) return src
   return `https://res.cloudinary.com/${cloudName}/image/upload/w_${w},h_${h},c_limit,q_auto,f_auto/${publicId}`
 }
+
+/** Absolute URL for blog OG/JSON-LD (public_id, secure_url, or local path). */
+export function resolveBlogImageUrl(
+  src: string,
+  { w = 1200, h = 675 }: { w?: number; h?: number } = {}
+): string {
+  if (!src) return src
+  if (src.startsWith('http://') || src.startsWith('https://')) return src
+  if (src.startsWith('/')) {
+    const base =
+      process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, '') || 'https://www.agubrothers.com'
+    return `${base}${src}`
+  }
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
+  const publicId = toCloudinaryPublicId(src)
+  if (!cloudName || !publicId) return src
+  return `https://res.cloudinary.com/${cloudName}/image/upload/w_${w},h_${h},c_fill,q_auto,f_auto/${publicId}`
+}

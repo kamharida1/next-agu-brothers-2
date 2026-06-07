@@ -6,7 +6,9 @@ import { Product } from '@/lib/models/ProductModel'
 import productServices, { PAGE_SIZE } from '@/lib/services/productService'
 import { PRICE_RANGES, priceFilterLabel } from '@/lib/searchFilters'
 import { BASE_URL, searchRobots, truncateForMeta } from '@/lib/seo'
+import { categoryHref, categoryToSlug } from '@/lib/categorySlugs'
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 
 const sortOrders = [
   { value: 'newest', label: 'Newest Arrivals' },
@@ -53,7 +55,10 @@ export async function generateMetadata({
   if (category) canonicalParams.set('category', category)
   if (price && !q) canonicalParams.set('price', price)
   const canonicalQuery = canonicalParams.toString()
-  const canonical = `${BASE_URL}/search${canonicalQuery ? `?${canonicalQuery}` : ''}`
+  const canonical =
+    category && !q && !price
+      ? `${BASE_URL}${categoryHref(category)}`
+      : `${BASE_URL}/search${canonicalQuery ? `?${canonicalQuery}` : ''}`
 
   return {
     title,
@@ -76,6 +81,17 @@ export default async function SearchPage({
   const sort = sp.sort ?? 'newest'
   const page = sp.page ?? '1'
   const price = sp.price ?? 'all'
+
+  if (
+    category !== 'all' &&
+    q === 'all' &&
+    rating === 'all' &&
+    sort === 'newest' &&
+    page === '1' &&
+    price === 'all'
+  ) {
+    redirect(`/categories/${categoryToSlug(category)}`)
+  }
 
   const getFilterUrl = ({
     c,

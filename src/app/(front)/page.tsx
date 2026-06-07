@@ -1,11 +1,23 @@
 import { Product } from '@/lib/models/ProductModel'
 import productServices from '@/lib/services/productService'
+import blogServices from '@/lib/services/blogService'
 import { Metadata } from 'next'
 import ProductCard from '@/components/products/ProductCard'
+import BlogPostCard from '@/components/blog/BlogPostCard'
+import HomeHero from '@/components/home/HomeHero'
 import Link from 'next/link'
 import { FiArrowRight } from 'react-icons/fi'
+import { categoryHref, CATEGORY_ICONS } from '@/lib/categorySlugs'
 
-import { BASE_URL, ROBOTS_INDEX } from '@/lib/seo'
+import {
+  BASE_URL,
+  BUSINESS,
+  LOGO_URL,
+  OG_IMAGE,
+  ROBOTS_INDEX,
+} from '@/lib/seo'
+
+export const revalidate = 3600
 
 export const metadata: Metadata = {
   title: 'Agu Brothers — Brand New Electronics & Home Appliances Nigeria',
@@ -19,7 +31,7 @@ export const metadata: Metadata = {
     siteName: 'Agu Brothers Electronics',
     type: 'website',
     images: [{
-      url: `${BASE_URL}/og-home.jpg`,
+      url: OG_IMAGE,
       width: 1200,
       height: 630,
       alt: 'Agu Brothers Electronics — Nigeria',
@@ -29,26 +41,16 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Agu Brothers — Electronics & Home Appliances Nigeria',
     description: 'Premium electronics and home appliances. Fast delivery across Nigeria.',
-    images: [`${BASE_URL}/og-home.jpg`],
+    images: [OG_IMAGE],
   },
 }
 
-const CATEGORY_ICONS: Record<string, string> = {
-  'Televisions':     '📺',
-  'Refrigerators':   '🧊',
-  'Air Conditioners':'❄️',
-  'Generators':      '⚡',
-  'Freezers':        '🥶',
-  'Gas Cookers':     '🍳',
-  'Washing Machines':'🫧',
-  'Electronics':     '🔌',
-}
-
 export default async function Home() {
-  const [featuredProducts, latestProducts, categories] = await Promise.all([
+  const [featuredProducts, latestProducts, categories, latestPosts] = await Promise.all([
     productServices.getFeatured(),
     productServices.getLatest(),
     productServices.getCategories(),
+    blogServices.getLatestBlogs(4),
   ])
 
   const featured = JSON.parse(JSON.stringify(featuredProducts))
@@ -57,18 +59,18 @@ export default async function Home() {
   const localBusinessJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'ElectronicsStore',
-    name: 'Agu Brothers Electronics',
+    name: BUSINESS.name,
     description: 'Agu Brothers Electronics sells 100% brand new electronics and home appliances in Nigeria. All products are brand new — we do not sell second-hand or tokunbo goods. Products include televisions, refrigerators, air conditioners, generators, gas cookers, washing machines, and freezers.',
-    image: `${BASE_URL}/og-home.jpg`,
+    image: OG_IMAGE,
     url: BASE_URL,
-    telephone: '+234-909-923-4242',
+    telephone: BUSINESS.phone,
     priceRange: '₦₦',
     address: {
       '@type': 'PostalAddress',
-      streetAddress: '33 Ogui Road',
-      addressLocality: 'Enugu',
-      addressRegion: 'Enugu State',
-      addressCountry: 'NG',
+      streetAddress: BUSINESS.address.street,
+      addressLocality: BUSINESS.address.locality,
+      addressRegion: BUSINESS.address.region,
+      addressCountry: BUSINESS.address.country,
     },
     geo: {
       '@type': 'GeoCoordinates',
@@ -79,36 +81,35 @@ export default async function Home() {
       { '@type': 'OpeningHoursSpecification', dayOfWeek: ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'], opens: '08:00', closes: '18:00' },
       { '@type': 'OpeningHoursSpecification', dayOfWeek: ['Sunday'], opens: '12:00', closes: '16:00' },
     ],
-    servesCuisine: undefined,
-    hasMap: 'https://maps.google.com/?q=33+Ogui+Road+Enugu+Nigeria',
+    hasMap: BUSINESS.mapsUrl,
   }
 
   const organizationJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
-    name: 'Agu Brothers Electronics',
+    name: BUSINESS.name,
     url: BASE_URL,
-    logo: `${BASE_URL}/logo.png`,
+    logo: LOGO_URL,
     contactPoint: {
       '@type': 'ContactPoint',
-      telephone: '+234-909-923-4242',
+      telephone: BUSINESS.phone,
       contactType: 'Customer Service',
       areaServed: 'NG',
       availableLanguage: 'English',
     },
     address: {
       '@type': 'PostalAddress',
-      streetAddress: '33 Ogui Road',
-      addressLocality: 'Enugu',
-      addressCountry: 'NG',
+      streetAddress: BUSINESS.address.street,
+      addressLocality: BUSINESS.address.locality,
+      addressCountry: BUSINESS.address.country,
     },
-    sameAs: [],
+    sameAs: BUSINESS.sameAs,
   }
 
   const websiteJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: 'Agu Brothers Electronics',
+    name: BUSINESS.name,
     url: BASE_URL,
     potentialAction: {
       '@type': 'SearchAction',
@@ -123,64 +124,24 @@ export default async function Home() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }} />
     <div className="bg-[#EAEDED] min-h-screen">
-      {/* ── Hero Banner ── */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-[#131921] via-[#232F3E] to-[#37475A] text-white">
-        <div className="max-w-[1500px] mx-auto px-4 py-16 md:py-24 flex flex-col md:flex-row items-center gap-8">
-          <div className="flex-1 space-y-5 text-center md:text-left">
-            <div className="flex flex-wrap gap-2">
-              <div className="inline-block bg-[#FF9900] text-[#131921] text-xs font-bold px-3 py-1 rounded-sm uppercase tracking-wider">
-                Nigeria&apos;s Trusted Electronics Store
-              </div>
-              <div className="inline-block bg-[#007600] text-white text-xs font-bold px-3 py-1 rounded-sm uppercase tracking-wider">
-                100% Brand New Products
-              </div>
-            </div>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
-              Top Electronics &<br />
-              <span className="text-[#FF9900]">Home Appliances</span>
-            </h1>
-            <p className="text-[#CCCCCC] text-lg max-w-xl">
-              TVs, fridges, ACs, generators and more — all <strong className="text-white">brand new</strong>, quality brands, fast delivery across Nigeria.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start">
-              <Link href="/all-products" className="btn-amazon text-base px-8 py-3 rounded-md font-bold text-center">
-                Shop Now
-              </Link>
-              <Link href="/search" className="text-base px-8 py-3 rounded-md text-center text-white border border-white/70 hover:bg-white/10 transition-colors duration-100 font-normal">
-                Browse All
-              </Link>
-            </div>
-            <div className="flex flex-wrap gap-6 text-sm text-[#CCCCCC] justify-center md:justify-start pt-2">
-              <span className="flex items-center gap-2">✓ 100% Brand New</span>
-              <span className="flex items-center gap-2">✓ 1-Year Warranty</span>
-              <span className="flex items-center gap-2">✓ Fast Delivery</span>
-              <span className="flex items-center gap-2">✓ Secure Payments</span>
-            </div>
-          </div>
-          <div className="hidden md:flex flex-col items-center">
-            <div className="text-9xl">🏠</div>
-          </div>
-        </div>
-        {/* wave bottom */}
-        <div className="absolute bottom-0 left-0 right-0 h-6 bg-[#EAEDED]" style={{ clipPath: 'ellipse(55% 100% at 50% 100%)' }} />
-      </div>
+      <HomeHero />
 
-      <div className="max-w-[1500px] mx-auto px-4 py-6 space-y-8">
+      <div className="max-w-[1500px] mx-auto px-4 py-4 space-y-8">
 
-        {/* ── Shop by Category ── */}
+        {/* ── Shop by Department ── */}
         <section>
           <div className="bg-white rounded-sm shadow-sm p-4 md:p-6">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-xl font-bold text-[#0F1111]">Shop by Category</h2>
-              <Link href="/search" className="text-sm text-[#007185] hover:text-[#CC0C39] hover:underline flex items-center gap-1">
-                See all departments <FiArrowRight className="w-3 h-3" />
+              <h2 className="text-xl font-bold text-[#0F1111]">Shop by Department</h2>
+              <Link href="/categories" className="text-sm text-[#007185] hover:text-[#CC0C39] hover:underline flex items-center gap-1">
+                View all departments <FiArrowRight className="w-3 h-3" />
               </Link>
             </div>
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
               {categories.map((cat: string) => (
                 <Link
                   key={cat}
-                  href={`/search?category=${encodeURIComponent(cat)}`}
+                  href={categoryHref(cat)}
                   className="group flex flex-col items-center gap-2 p-3 rounded-sm border border-[#D5D9D9]
                              hover:border-[#FF9900] hover:shadow-sm transition-all text-center"
                 >
@@ -252,6 +213,33 @@ export default async function Home() {
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-1">
                 {featured.map((product: Product) => (
                   <ProductCard key={product.slug} product={product} />
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* ── Buying Guides & Tips ── */}
+        {latestPosts.length > 0 && (
+          <section>
+            <div className="bg-white rounded-sm shadow-sm p-4 md:p-6">
+              <div className="flex items-center justify-between mb-5">
+                <div>
+                  <h2 className="text-xl font-bold text-[#0F1111]">Buying Guides &amp; Tips</h2>
+                  <p className="text-sm text-[#565959] mt-0.5">
+                    Expert advice on choosing and using your appliances
+                  </p>
+                </div>
+                <Link
+                  href="/blog"
+                  className="text-sm text-[#007185] hover:text-[#CC0C39] hover:underline flex items-center gap-1"
+                >
+                  See all articles <FiArrowRight className="w-3 h-3" />
+                </Link>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                {latestPosts.map((post, i) => (
+                  <BlogPostCard key={post.slug} blog={post} priority={i < 2} />
                 ))}
               </div>
             </div>

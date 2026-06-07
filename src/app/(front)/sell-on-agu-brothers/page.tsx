@@ -1,10 +1,13 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
+import { staticPageMetadata } from '@/lib/seo'
 
-export const metadata: Metadata = {
+export const metadata: Metadata = staticPageMetadata({
   title: 'Sell on Agu Brothers | Partner With Us',
-  description: 'Grow your business by selling your electronics and home appliances on Agu Brothers. Reach thousands of customers across Nigeria.',
-}
+  description:
+    'Grow your business by selling your electronics and home appliances on Agu Brothers. Reach thousands of customers across Nigeria.',
+  path: '/sell-on-agu-brothers',
+})
 
 const STEPS = [
   { step: '1', title: 'Register as a Seller', desc: 'Create a seller account on Agu Brothers. Provide your business name, CAC registration number, contact details, and bank account information for payouts.' },

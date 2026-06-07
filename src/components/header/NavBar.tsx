@@ -1,10 +1,13 @@
 'use client'
 import Link from 'next/link'
 import useSWR from 'swr'
+import { categoryHref } from '@/lib/categorySlugs'
 
 const STATIC_LINKS = [
   { label: '☰ All', href: '/all-products' },
+  { label: 'Departments', href: '/categories' },
   { label: "Today's Deals", href: '/search?sort=lowest' },
+  { label: 'Blog', href: '/blog' },
 ]
 
 export default function NavBar() {
@@ -23,7 +26,7 @@ export default function NavBar() {
           {categories?.map((cat: string) => (
             <Link
               key={cat}
-              href={`/search?category=${encodeURIComponent(cat)}`}
+              href={categoryHref(cat)}
               className="btn-amazon-nav whitespace-nowrap text-sm py-1.5 px-2.5"
             >
               {cat}

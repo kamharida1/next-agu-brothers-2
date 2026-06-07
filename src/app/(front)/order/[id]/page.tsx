@@ -1,4 +1,4 @@
-import OrderDet from "./OrderDet"
+import OrderDetails from './OrderDetails'
 import { ROBOTS_NOINDEX } from '@/lib/seo'
 
 export async function generateMetadata({
@@ -19,5 +19,5 @@ export default async function OrderDetailsPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  return <OrderDet orderId={id} />
+  return <OrderDetails orderId={id} />
 }

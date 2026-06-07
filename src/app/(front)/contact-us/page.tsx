@@ -1,8 +1,14 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import ContactForm from './ContactForm'
+import { BASE_URL, BUSINESS, staticPageMetadata } from '@/lib/seo'
 
-export const metadata: Metadata = { title: 'Contact Us | Agu Brothers' }
+export const metadata: Metadata = staticPageMetadata({
+  title: 'Contact Us | Agu Brothers Electronics',
+  description:
+    'Contact Agu Brothers customer service — phone, email, store address in Enugu, and online help form. We respond within 24 hours.',
+  path: '/contact-us',
+})
 
 const FAQS = [
   { q: 'What is your return policy?', a: 'We accept returns within 7 days of purchase. The product must be in its original condition and packaging.' },
@@ -13,10 +19,42 @@ const FAQS = [
 ]
 
 export default function Contact() {
+  const faqJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: FAQS.map((faq) => ({
+      '@type': 'Question',
+      name: faq.q,
+      acceptedAnswer: { '@type': 'Answer', text: faq.a },
+    })),
+  }
+
+  const contactJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'ContactPage',
+    name: 'Contact Agu Brothers Electronics',
+    url: `${BASE_URL}/contact-us`,
+    mainEntity: {
+      '@type': 'Organization',
+      name: BUSINESS.name,
+      email: BUSINESS.email,
+      telephone: BUSINESS.phone,
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: BUSINESS.address.street,
+        addressLocality: BUSINESS.address.locality,
+        addressRegion: BUSINESS.address.region,
+        addressCountry: BUSINESS.address.country,
+      },
+    },
+  }
+
   return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(contactJsonLd) }} />
     <div className="bg-[#EAEDED] min-h-screen">
       <div className="max-w-[1200px] mx-auto px-4 py-6">
-        {/* Breadcrumb */}
         <div className="text-sm text-[#565959] mb-4">
           <Link href="/" className="text-[#007185] hover:underline hover:text-[#CC0C39]">Home</Link>
           <span className="mx-1">›</span>
@@ -24,9 +62,7 @@ export default function Contact() {
         </div>
 
         <div className="grid lg:grid-cols-3 gap-4">
-          {/* Left: Form + FAQs */}
           <div className="lg:col-span-2 space-y-4">
-            {/* Contact Form */}
             <div className="bg-white rounded-sm shadow-sm p-6">
               <h1 className="text-2xl font-bold text-[#0F1111] mb-1 pb-3 border-b border-[#D5D9D9]">
                 Contact Customer Service
@@ -37,7 +73,6 @@ export default function Contact() {
               <ContactForm />
             </div>
 
-            {/* FAQ */}
             <div className="bg-white rounded-sm shadow-sm p-6">
               <h2 className="text-xl font-bold text-[#0F1111] mb-4 pb-2 border-b border-[#D5D9D9]">
                 Frequently Asked Questions
@@ -60,7 +95,6 @@ export default function Contact() {
             </div>
           </div>
 
-          {/* Right: Contact info */}
           <div className="space-y-3">
             <div className="bg-white rounded-sm shadow-sm p-5">
               <h3 className="font-bold text-[#0F1111] mb-3 pb-2 border-b border-[#D5D9D9]">Contact Information</h3>
@@ -69,22 +103,22 @@ export default function Contact() {
                   <span className="text-xl flex-shrink-0">📍</span>
                   <div>
                     <p className="font-semibold text-[#0F1111]">Store Address</p>
-                    <p className="text-[#565959]">33 Ogui Road<br />Enugu State, Nigeria</p>
+                    <p className="text-[#565959]">{BUSINESS.address.street}<br />{BUSINESS.address.region}, Nigeria</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <span className="text-xl flex-shrink-0">📞</span>
                   <div>
                     <p className="font-semibold text-[#0F1111]">Phone</p>
-                    <p className="text-[#007185]">+234 909 923 4242</p>
-                    <p className="text-[#007185]">+234 906 087 7648</p>
+                    <p className="text-[#007185]">{BUSINESS.phoneDisplay}</p>
+                    <p className="text-[#007185]">{BUSINESS.phoneSecondary.replace('+234-', '+234 ')}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <span className="text-xl flex-shrink-0">✉️</span>
                   <div>
                     <p className="font-semibold text-[#0F1111]">Email</p>
-                    <p className="text-[#007185]">info@agubrothers.com</p>
+                    <p className="text-[#007185]">{BUSINESS.email}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
@@ -109,9 +143,9 @@ export default function Contact() {
               <ul className="space-y-2">
                 {[
                   { href: '/order-history', label: '📦 Track your order' },
-                  { href: '/profile',       label: '👤 Manage your account' },
-                  { href: '/all-products',  label: '🛒 Browse products' },
-                ].map(l => (
+                  { href: '/profile', label: '👤 Manage your account' },
+                  { href: '/all-products', label: '🛒 Browse products' },
+                ].map((l) => (
                   <li key={l.href}>
                     <Link href={l.href} className="text-sm text-[#007185] hover:underline hover:text-[#CC0C39]">
                       {l.label}
@@ -124,5 +158,6 @@ export default function Contact() {
         </div>
       </div>
     </div>
+    </>
   )
 }

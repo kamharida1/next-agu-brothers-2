@@ -1,10 +1,13 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
+import { staticPageMetadata } from '@/lib/seo'
 
-export const metadata: Metadata = {
+export const metadata: Metadata = staticPageMetadata({
   title: 'Shipping Rates & Delivery | Agu Brothers Electronics',
-  description: 'View Agu Brothers shipping rates, estimated delivery times, and delivery policies across Nigeria.',
-}
+  description:
+    'View Agu Brothers shipping rates, estimated delivery times, and delivery policies across Nigeria.',
+  path: '/shipping-rates',
+})
 
 const ZONES = [
   { zone: 'Enugu State', time: '1–2 business days', fee: 'FREE on orders ₦50,000+  |  ₦1,500 below' },

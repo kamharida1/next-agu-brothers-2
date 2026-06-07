@@ -1,7 +1,7 @@
-import BlogItem from '@/components/blog/BlogItem'
+import BlogPostCard from '@/components/blog/BlogPostCard'
+import BlogAdminActions from '@/components/blog/BlogAdminActions'
 import type { Blog } from '@/lib/models/BlogModel'
 import blogServices from '@/lib/services/blogService'
-import { convertDocToObj } from '@/lib/utils'
 import Link from 'next/link'
 import { FiPlus } from 'react-icons/fi'
 
@@ -21,8 +21,9 @@ export default async function Blog() {
       </div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {posts.map((post: Blog) => (
-          <div key={post.slug} className="amazon-card">
-            <BlogItem blog={convertDocToObj(post)} />
+          <div key={post.slug} className="h-full flex flex-col">
+            <BlogPostCard blog={post} />
+            <BlogAdminActions slug={post.slug} />
           </div>
         ))}
       </div>

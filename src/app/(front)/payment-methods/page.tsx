@@ -1,10 +1,13 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
+import { staticPageMetadata } from '@/lib/seo'
 
-export const metadata: Metadata = {
-  title: 'Payment Methods | Agu Brothers',
-  description: 'Learn about the secure payment options available at Agu Brothers — card, bank transfer, USSD, and instalment plans.',
-}
+export const metadata: Metadata = staticPageMetadata({
+  title: 'Payment Methods | Agu Brothers Electronics',
+  description:
+    'Learn about the secure payment options available at Agu Brothers — card, bank transfer, USSD, and instalment plans.',
+  path: '/payment-methods',
+})
 
 const METHODS = [
   {

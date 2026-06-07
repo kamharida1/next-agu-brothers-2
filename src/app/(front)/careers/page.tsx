@@ -2,16 +2,14 @@ import { Job } from '@/lib/models/JobModel'
 import jobServices from '@/lib/services/jobService'
 import { Metadata } from 'next'
 import Link from 'next/link'
+import { staticPageMetadata } from '@/lib/seo'
 
-export const metadata: Metadata = {
+export const metadata: Metadata = staticPageMetadata({
   title: 'Careers | Agu Brothers Electronics',
-  description: 'Join the Agu Brothers team. Explore current job openings and help us deliver quality electronics across Nigeria.',
-  openGraph: {
-    title: 'Careers | Agu Brothers Electronics',
-    description: 'Join the Agu Brothers team. Explore current job openings.',
-    type: 'website',
-  },
-}
+  description:
+    'Join the Agu Brothers team. Explore current job openings and help us deliver quality electronics across Nigeria.',
+  path: '/careers',
+})
 
 const PERKS = [
   { icon: '🌱', title: 'Growth & Learning', desc: 'Ongoing training and career development in a fast-growing company.' },
