@@ -118,7 +118,7 @@ export default async function ProductDetailsPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
-      <ProductDetails product={plainProduct} />
+      <ProductDetails product={plainProduct} initialReviews={reviews} />
       <RelatedProducts products={related} category={product.cat} />
     </>
   )

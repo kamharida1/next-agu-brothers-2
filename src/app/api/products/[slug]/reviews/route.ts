@@ -2,25 +2,19 @@ import { auth } from "@/lib/auth"
 import dbConnect from "@/lib/dbConnect"
 import ProductModel, { Product } from "@/lib/models/ProductModel"
 import ReviewModel from "@/lib/models/ReviewModel"
-export const GET = auth(async (req: any, context: any) => {
+
+export async function GET(_req: Request, context: { params: Promise<{ slug: string }> }) {
   const params = await context.params
 
   await dbConnect()
-  //Get all reviews for the product
-  // find product by slug
   const product = await ProductModel.findOne({ slug: params.slug }) as Product
   if (!product) {
-    return Response.json(
-      { message: 'Product not found' },
-      {
-        status: 404,
-      }
-    )
+    return Response.json({ message: 'Product not found' }, { status: 404 })
   }
+
   const reviews = await ReviewModel.find({ product: product._id })
-  
   return Response.json(reviews)
-}) as any
+}
 
 //Post a review
 export const POST = auth(async (req: any, context: any) => {

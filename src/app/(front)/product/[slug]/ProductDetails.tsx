@@ -163,10 +163,18 @@ function BuyBox({
   )
 }
 
-export default function ProductDetails({ product }: { product: Product }) {
+export default function ProductDetails({
+  product,
+  initialReviews = [],
+}: {
+  product: Product
+  initialReviews?: Review[]
+}) {
   const { data: session } = useSession()
   const { data: reviews, error: reviewsError } = useSWR(
-    `/api/products/${product?.slug}/reviews`
+    `/api/products/${product?.slug}/reviews`,
+    null,
+    { fallbackData: initialReviews.length > 0 ? initialReviews : undefined }
   )
 
   const { trigger: deleteReview, isMutating: isDeleting } = useSWRMutation(
@@ -239,7 +247,8 @@ export default function ProductDetails({ product }: { product: Product }) {
 
   const inStock = product.countInStock > 0
   const isLowStock = product.countInStock > 0 && product.countInStock <= 3
-  const reviewCount = product.numReviews ?? 0
+  const reviewCount = reviews?.length ?? product.numReviews ?? 0
+  const hasReviews = reviewCount > 0
 
   return (
     <main className="max-w-[1200px] mx-auto px-3 sm:px-4 py-4 sm:py-6">
@@ -299,15 +308,17 @@ export default function ProductDetails({ product }: { product: Product }) {
               {product.name}
             </h1>
 
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-              <Rating value={product.rating} caption="" />
-              <Link
-                href="#customer-reviews"
-                className="text-sm text-[#007185] hover:text-[#CC0C39] hover:underline"
-              >
-                {reviewCount} {reviewCount === 1 ? 'rating' : 'ratings'}
-              </Link>
-            </div>
+            {hasReviews && (
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                <Rating value={product.rating} caption="" />
+                <Link
+                  href="#customer-reviews"
+                  className="text-sm text-[#007185] hover:text-[#CC0C39] hover:underline"
+                >
+                  {reviewCount} {reviewCount === 1 ? 'rating' : 'ratings'}
+                </Link>
+              </div>
+            )}
 
             <div className="hidden sm:flex flex-wrap items-baseline gap-3 pt-1">
               <ProductPrice product={product} size="xl" />

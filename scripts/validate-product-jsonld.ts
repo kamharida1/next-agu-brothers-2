@@ -51,13 +51,19 @@ function parseArgs() {
   const args = process.argv.slice(2)
   let slug: string | undefined
   let url: string | undefined
+  const urls: string[] = []
 
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--slug' && args[i + 1]) slug = args[++i]
     if (args[i] === '--url' && args[i + 1]) url = args[++i]
+    if (args[i] === '--urls') {
+      while (args[i + 1] && !args[i + 1].startsWith('--')) {
+        urls.push(args[++i])
+      }
+    }
   }
 
-  return { slug, url }
+  return { slug, url, urls }
 }
 
 function productImageUrl(product: Product): string | null {
@@ -191,7 +197,34 @@ async function validateFromUrl(url: string) {
 
 async function main() {
   loadEnvFiles()
-  const { slug, url } = parseArgs()
+  const { slug, url, urls } = parseArgs()
+
+  if (urls.length > 0) {
+    let allOk = true
+    for (const pageUrl of urls) {
+      const response = await fetch(pageUrl, {
+        headers: { 'User-Agent': 'agu-brothers-jsonld-validator/1.0' },
+      })
+      if (!response.ok) {
+        console.error(`Failed to fetch ${pageUrl} (${response.status})`)
+        allOk = false
+        continue
+      }
+      const html = await response.text()
+      const productBlocks = extractProductJsonLdFromHtml(html)
+      if (productBlocks.length === 0) {
+        console.error(`No Product JSON-LD on ${pageUrl}`)
+        allOk = false
+        continue
+      }
+      for (const block of productBlocks) {
+        const ok = printResult(pageUrl, block)
+        allOk = allOk && ok
+      }
+    }
+    process.exit(allOk ? 0 : 1)
+    return
+  }
 
   if (url) {
     await validateFromUrl(url)

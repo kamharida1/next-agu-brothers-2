@@ -11,7 +11,8 @@
     "test:e2e:prod": "PLAYWRIGHT_BASE_URL=https://www.agubrothers.com playwright test",
     "seed:blogs": "npx tsx scripts/seed-blogs.ts",
     "upload:blog-images": "npx tsx scripts/upload-blog-images-cloudinary.ts",
-    "validate:product-jsonld": "npx tsx scripts/validate-product-jsonld.ts"
+    "validate:product-jsonld": "npx tsx scripts/validate-product-jsonld.ts",
+    "sync:product-ratings": "npx tsx scripts/sync-product-ratings.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.100.1",

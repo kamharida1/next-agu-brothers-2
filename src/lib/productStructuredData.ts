@@ -38,18 +38,24 @@ function toReviewJsonLd(review: Review) {
   }
 }
 
+function averageReviewRating(reviews: Review[]): number {
+  if (reviews.length === 0) return 0
+  return reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length
+}
+
 export function buildProductReviewFields(product: Product, reviewsOverride?: Review[]) {
   const reviews = (reviewsOverride ?? product.reviews ?? []).filter(isPopulatedReview)
   if (reviews.length === 0) {
     return {}
   }
 
-  const reviewCount = Math.max(product.numReviews, reviews.length)
+  const ratingValue = averageReviewRating(reviews)
+  const reviewCount = reviews.length
 
   return {
     aggregateRating: {
       '@type': 'AggregateRating',
-      ratingValue: product.rating,
+      ratingValue: Math.round(ratingValue * 10) / 10,
       reviewCount,
       bestRating: 5,
       worstRating: 1,
@@ -58,16 +64,24 @@ export function buildProductReviewFields(product: Product, reviewsOverride?: Rev
   }
 }
 
+function offerPriceValidUntil(): string {
+  const date = new Date()
+  date.setFullYear(date.getFullYear() + 1)
+  return date.toISOString().split('T')[0]
+}
+
 export function buildProductJsonLd(
   product: Product,
   imageUrl: string | null,
   reviewsOverride?: Review[]
 ) {
   const salePrice = getSalePrice(product)
+  const productUrl = `${BASE_URL}/product/${product.slug}`
 
   return {
     '@context': 'https://schema.org',
     '@type': 'Product',
+    '@id': `${productUrl}#product`,
     name: product.name,
     description: truncateForMeta(product.description, 500),
     image: imageUrl ? [imageUrl] : [],
@@ -76,9 +90,10 @@ export function buildProductJsonLd(
     category: product.cat,
     offers: {
       '@type': 'Offer',
-      url: `${BASE_URL}/product/${product.slug}`,
+      url: productUrl,
       priceCurrency: 'NGN',
       price: salePrice,
+      priceValidUntil: offerPriceValidUntil(),
       ...(hasDiscount(product) && {
         priceSpecification: {
           '@type': 'UnitPriceSpecification',
@@ -187,9 +202,13 @@ export function validateProductJsonLd(jsonLd: unknown): ProductJsonLdValidation 
   }
 
   if (!hasAggregateRating && !hasReview) {
-    warnings.push(
-      'Missing review and aggregateRating (expected for products without customer reviews; Google may show non-critical Search Console suggestions)'
-    )
+    if (!isRecord(jsonLd.offers)) {
+      errors.push('Product must include offers, review, or aggregateRating')
+    } else {
+      warnings.push(
+        'No customer reviews yet — review and aggregateRating omitted (valid for merchant listings; add real reviews to enable star snippets)'
+      )
+    }
   }
 
   return { ok: errors.length === 0, errors, warnings }
