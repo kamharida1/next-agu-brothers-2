@@ -10,7 +10,7 @@ import CldImage from '@/components/CldImage'
 import CategoryPicker from '@/components/admin/CategoryPicker'
 import { Category } from '@/lib/models/CategoryModel'
 
-const MIN_PRODUCT_IMAGES = 2
+const MIN_PRODUCT_IMAGES = 1
 
 type ProductDraft = {
   name: string
@@ -143,7 +143,7 @@ export default function QuickAddForm() {
         <h1 className="text-2xl font-medium text-[#0F1111]">Quick Add Product</h1>
         <p className="text-sm text-[#565959] mt-1">
           Enter the product name and your prices — AI fills category, description, brand, and
-          finds at least 2 clear product images online. Fewer than 2? The listing is discarded.
+          finds a product image online. No image found? The listing is discarded.
         </p>
       </div>
 
@@ -228,8 +228,6 @@ export default function QuickAddForm() {
 
           <p className="text-xs text-[#565959]">
             {draft.images.length} image{draft.images.length !== 1 ? 's' : ''} selected
-            {draft.images.length < MIN_PRODUCT_IMAGES &&
-              ` — need at least ${MIN_PRODUCT_IMAGES} to create`}
           </p>
 
           <div className="flex flex-wrap gap-2">

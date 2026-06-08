@@ -124,7 +124,7 @@ export const POST = auth(async (req: any) => {
     if (imageUrls.length < MIN_PRODUCT_IMAGES) {
       return Response.json({
         status: 'rejected',
-        reason: `Fewer than ${MIN_PRODUCT_IMAGES} clear product images found online. This listing was discarded.`,
+        reason: 'No clear product image found online. This listing was discarded.',
         productName: name.trim(),
         imagesFound: imageUrls.length,
       })
@@ -134,7 +134,7 @@ export const POST = auth(async (req: any) => {
     if (cloudinaryIds.length < MIN_PRODUCT_IMAGES) {
       return Response.json({
         status: 'rejected',
-        reason: `Could not upload at least ${MIN_PRODUCT_IMAGES} clear product images. This listing was discarded.`,
+        reason: 'Found an image online but could not upload it. This listing was discarded.',
         productName: name.trim(),
         imagesUploaded: cloudinaryIds.length,
       })
