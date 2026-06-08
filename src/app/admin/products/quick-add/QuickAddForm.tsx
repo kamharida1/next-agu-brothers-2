@@ -149,7 +149,7 @@ export default function QuickAddForm() {
         <h1 className="text-2xl font-medium text-[#0F1111]">Quick Add Product</h1>
         <p className="text-sm text-[#565959] mt-1">
           Enter the product name and your prices — AI fills category, description, brand, and
-          finds up to 2 product images when possible (1 minimum). No image found? Discarded.
+          finds up to 2 product images via Google (Serper). No image found? Discarded.
         </p>
       </div>
 

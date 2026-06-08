@@ -114,6 +114,10 @@ export const POST = auth(async (req: any) => {
     return Response.json({ message: 'ANTHROPIC_API_KEY is not configured' }, { status: 500 })
   }
 
+  if (!process.env.SERPER_API_KEY) {
+    console.warn('SERPER_API_KEY is not configured — falling back to free image search providers')
+  }
+
   await dbConnect()
   const categories = await CategoryModel.find().lean()
   const categoryNames = categories.map((c) => c.name)

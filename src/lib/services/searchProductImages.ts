@@ -1,4 +1,5 @@
 import { searchProductImagesWithAi } from '@/lib/services/searchProductImagesWithAi'
+import { searchProductImagesWithSerper } from '@/lib/services/searchProductImagesWithSerper'
 
 const USER_AGENT =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
@@ -140,7 +141,10 @@ async function searchWikimediaImages(query: string, limit: number): Promise<stri
   }
 }
 
-async function collectFromProviders(productName: string, poolSize: number): Promise<string[]> {
+async function collectFromFallbackProviders(
+  productName: string,
+  poolSize: number
+): Promise<string[]> {
   const queries = [
     `${productName} product image`,
     `${productName} product photo`,
@@ -174,12 +178,19 @@ export async function searchProductImages(
   poolSize = PREFERRED_PRODUCT_IMAGES * 4
 ): Promise<string[]> {
   const minPool = Math.max(poolSize, PREFERRED_PRODUCT_IMAGES * 4)
+  const seen = new Set<string>()
+  const urls: string[] = []
 
-  let urls = await collectFromProviders(productName, minPool)
+  const serperUrls = await searchProductImagesWithSerper(productName, minPool)
+  mergeUniqueUrls(urls, serperUrls, seen, minPool)
+
+  if (urls.length < MIN_PRODUCT_IMAGES) {
+    const fallbackUrls = await collectFromFallbackProviders(productName, minPool)
+    mergeUniqueUrls(urls, fallbackUrls, seen, minPool)
+  }
 
   if (urls.length < MIN_PRODUCT_IMAGES) {
     const aiUrls = await searchProductImagesWithAi(productName, PREFERRED_PRODUCT_IMAGES)
-    const seen = new Set(urls)
     mergeUniqueUrls(urls, aiUrls, seen, minPool)
   }
 
