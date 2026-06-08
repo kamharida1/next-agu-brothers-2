@@ -9,6 +9,7 @@ import {
   PREFERRED_PRODUCT_IMAGES,
   searchProductImages,
 } from '@/lib/services/searchProductImages'
+import { isCloudinaryConfigured } from '@/lib/cloudinaryServer'
 import { uploadProductImagesFromUrls } from '@/lib/services/uploadProductImagesFromUrls'
 import { isAutoCategoryBlogEnabled } from '@/lib/services/siteSettingsService'
 import { syncCategoryBlogFromProduct } from '@/lib/services/syncCategoryBlogFromProduct'
@@ -129,6 +130,16 @@ export const POST = auth(async (req: any) => {
       costPrice,
       price
     )
+
+    if (!isCloudinaryConfigured()) {
+      return Response.json(
+        {
+          message:
+            'Cloudinary is not configured. Add NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME, NEXT_PUBLIC_CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET to your environment.',
+        },
+        { status: 500 }
+      )
+    }
 
     const imageUrls = await searchProductImages(
       name.trim(),
