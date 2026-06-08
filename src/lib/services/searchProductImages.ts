@@ -3,10 +3,7 @@ const USER_AGENT =
 
 export const MIN_PRODUCT_IMAGES = 1
 
-const MIN_IMAGE_BYTES = 8_000
-const MAX_IMAGE_BYTES = 8_000_000
-const PREFERRED_MIN_DIMENSION = 300
-const FALLBACK_MIN_DIMENSION = 180
+const MAX_IMAGE_BYTES = 10_000_000
 
 function extractVqdToken(html: string): string | null {
   const patterns = [
@@ -21,11 +18,19 @@ function extractVqdToken(html: string): string | null {
   return null
 }
 
+function isHttpImageUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url)
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:'
+  } catch {
+    return false
+  }
+}
+
 async function fetchDuckDuckGoImageUrls(
   query: string,
   limit: number,
-  page = 1,
-  minDimension = PREFERRED_MIN_DIMENSION
+  page = 1
 ): Promise<string[]> {
   const searchRes = await fetch(
     `https://duckduckgo.com/?q=${encodeURIComponent(query)}&iax=images&ia=images`,
@@ -50,21 +55,16 @@ async function fetchDuckDuckGoImageUrls(
   if (!imageRes.ok) return []
 
   const data = (await imageRes.json()) as {
-    results?: Array<{ image?: string; width?: number; height?: number }>
+    results?: Array<{ image?: string; thumbnail?: string }>
   }
 
-  const filtered = (data.results ?? []).filter(
-    (r) =>
-      r.image &&
-      (r.width ?? 0) >= minDimension &&
-      (r.height ?? 0) >= minDimension
-  )
+  const urls: string[] = []
+  for (const result of data.results ?? []) {
+    if (result.image && isHttpImageUrl(result.image)) urls.push(result.image)
+    if (result.thumbnail && isHttpImageUrl(result.thumbnail)) urls.push(result.thumbnail)
+  }
 
-  const pool = filtered.length > 0 ? filtered : (data.results ?? []).filter((r) => r.image)
-
-  return pool
-    .map((r) => r.image!)
-    .slice(0, limit * 5)
+  return urls.slice(0, limit * 6)
 }
 
 async function searchWikimediaImages(query: string, limit: number): Promise<string[]> {
@@ -81,27 +81,38 @@ async function searchWikimediaImages(query: string, limit: number): Promise<stri
       query?: {
         pages?: Record<
           string,
-          { imageinfo?: Array<{ url?: string; thumburl?: string; width?: number; height?: number }> }
+          { imageinfo?: Array<{ url?: string; thumburl?: string }> }
         >
       }
     }
 
     return Object.values(data.query?.pages ?? {})
       .flatMap((page) => page.imageinfo ?? [])
-      .filter(
-        (info) =>
-          (info.thumburl || info.url) &&
-          (info.width ?? 0) >= FALLBACK_MIN_DIMENSION &&
-          (info.height ?? 0) >= FALLBACK_MIN_DIMENSION
-      )
-      .map((info) => info.thumburl || info.url!)
+      .flatMap((info) => [info.thumburl, info.url].filter(Boolean) as string[])
+      .filter(isHttpImageUrl)
       .slice(0, limit)
   } catch {
     return []
   }
 }
 
-async function isValidProductImage(url: string): Promise<boolean> {
+async function isReachableImage(url: string): Promise<boolean> {
+  try {
+    const headRes = await fetch(url, {
+      method: 'HEAD',
+      headers: { 'User-Agent': USER_AGENT },
+      signal: AbortSignal.timeout(10_000),
+      redirect: 'follow',
+    })
+
+    if (headRes.ok) {
+      const contentType = headRes.headers.get('content-type') ?? ''
+      if (contentType.startsWith('image/')) return true
+    }
+  } catch {
+    // fall through to GET
+  }
+
   try {
     const res = await fetch(url, {
       method: 'GET',
@@ -115,14 +126,7 @@ async function isValidProductImage(url: string): Promise<boolean> {
     if (!contentType.startsWith('image/')) return false
 
     const length = Number(res.headers.get('content-length') ?? 0)
-    if (length > 0 && (length < MIN_IMAGE_BYTES || length > MAX_IMAGE_BYTES)) {
-      return false
-    }
-
-    const buffer = Buffer.from(await res.arrayBuffer())
-    if (buffer.byteLength < MIN_IMAGE_BYTES || buffer.byteLength > MAX_IMAGE_BYTES) {
-      return false
-    }
+    if (length > MAX_IMAGE_BYTES) return false
 
     return true
   } catch {
@@ -130,56 +134,59 @@ async function isValidProductImage(url: string): Promise<boolean> {
   }
 }
 
-async function collectFromQueries(
-  queries: string[],
-  target: number,
-  seen: Set<string>,
-  valid: string[]
-) {
-  for (const query of queries) {
-    if (valid.length >= target) break
+async function collectCandidateUrls(productName: string, target: number): Promise<string[]> {
+  const queries = [
+    `${productName} product image`,
+    `${productName} product photo`,
+    `${productName}`,
+    productName,
+  ]
 
-    for (const page of [1, 2]) {
-      if (valid.length >= target) break
+  const seen = new Set<string>()
+  const candidates: string[] = []
 
-      for (const minDim of [PREFERRED_MIN_DIMENSION, FALLBACK_MIN_DIMENSION]) {
-        const candidates = await fetchDuckDuckGoImageUrls(query, target, page, minDim)
-        for (const url of candidates) {
-          if (seen.has(url) || valid.length >= target) continue
-          seen.add(url)
-          if (await isValidProductImage(url)) valid.push(url)
-        }
-        if (valid.length >= target) break
-      }
+  const addUrls = (urls: string[]) => {
+    for (const url of urls) {
+      if (seen.has(url)) continue
+      seen.add(url)
+      candidates.push(url)
     }
   }
+
+  for (const query of queries) {
+    if (candidates.length >= target * 8) break
+    for (const page of [1, 2, 3]) {
+      addUrls(await fetchDuckDuckGoImageUrls(query, target, page))
+    }
+  }
+
+  if (candidates.length < target) {
+    addUrls(await searchWikimediaImages(productName, target * 4))
+  }
+
+  return candidates
 }
 
 export async function searchProductImages(
   productName: string,
   limit = 4
 ): Promise<string[]> {
-  const seen = new Set<string>()
-  const valid: string[] = []
   const target = Math.max(limit, MIN_PRODUCT_IMAGES)
+  const candidates = await collectCandidateUrls(productName, target)
+  const found: string[] = []
 
-  const queries = [
-    `${productName} product image`,
-    `${productName} official product photo`,
-    `${productName} product photo`,
-    productName,
-  ]
-
-  await collectFromQueries(queries, target, seen, valid)
-
-  if (valid.length < MIN_PRODUCT_IMAGES) {
-    const wikiUrls = await searchWikimediaImages(productName, target * 3)
-    for (const url of wikiUrls) {
-      if (seen.has(url) || valid.length >= target) continue
-      seen.add(url)
-      if (await isValidProductImage(url)) valid.push(url)
-    }
+  for (const url of candidates) {
+    if (found.length >= target) break
+    if (await isReachableImage(url)) found.push(url)
   }
 
-  return valid
+  if (found.length >= MIN_PRODUCT_IMAGES) return found
+
+  // Accept any discovered image URL — clear or not — and let Cloudinary try uploading it.
+  for (const url of candidates) {
+    if (found.length >= target) break
+    if (!found.includes(url)) found.push(url)
+  }
+
+  return found.slice(0, target)
 }

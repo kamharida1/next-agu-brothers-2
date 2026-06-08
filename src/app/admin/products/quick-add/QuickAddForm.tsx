@@ -107,7 +107,7 @@ export default function QuickAddForm() {
       return
     }
     if (draft.images.length < MIN_PRODUCT_IMAGES) {
-      toast.error(`At least ${MIN_PRODUCT_IMAGES} clear product images are required`)
+      toast.error(`At least ${MIN_PRODUCT_IMAGES} product image is required`)
       return
     }
 

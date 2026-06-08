@@ -33,7 +33,7 @@ export const POST = auth(async (req: any) => {
     ) {
       return Response.json(
         {
-          message: `At least ${MIN_PRODUCT_IMAGES} clear product images are required`,
+          message: `At least ${MIN_PRODUCT_IMAGES} product image is required`,
         },
         { status: 400 }
       )
@@ -124,7 +124,7 @@ export const POST = auth(async (req: any) => {
     if (imageUrls.length < MIN_PRODUCT_IMAGES) {
       return Response.json({
         status: 'rejected',
-        reason: 'No clear product image found online. This listing was discarded.',
+        reason: 'No product image found online. This listing was discarded.',
         productName: name.trim(),
         imagesFound: imageUrls.length,
       })
