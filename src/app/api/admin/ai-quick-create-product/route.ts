@@ -13,6 +13,8 @@ import { uploadProductImagesFromUrls } from '@/lib/services/uploadProductImagesF
 import { isAutoCategoryBlogEnabled } from '@/lib/services/siteSettingsService'
 import { syncCategoryBlogFromProduct } from '@/lib/services/syncCategoryBlogFromProduct'
 
+export const maxDuration = 60
+
 function slugify(name: string) {
   return name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
 }
@@ -117,10 +119,17 @@ export const POST = auth(async (req: any) => {
   const categoryNames = categories.map((c) => c.name)
 
   try {
-    const [generated, imageUrls] = await Promise.all([
-      generateProductDetails(name.trim(), categoryNames, costPrice, price),
-      searchProductImages(name.trim(), PREFERRED_PRODUCT_IMAGES),
-    ])
+    const generated = await generateProductDetails(
+      name.trim(),
+      categoryNames,
+      costPrice,
+      price
+    )
+
+    const imageUrls = await searchProductImages(
+      name.trim(),
+      PREFERRED_PRODUCT_IMAGES * 4
+    )
 
     if (imageUrls.length < MIN_PRODUCT_IMAGES) {
       return Response.json({
@@ -131,12 +140,16 @@ export const POST = auth(async (req: any) => {
       })
     }
 
-    const cloudinaryIds = await uploadProductImagesFromUrls(imageUrls)
+    const cloudinaryIds = await uploadProductImagesFromUrls(
+      imageUrls,
+      PREFERRED_PRODUCT_IMAGES
+    )
     if (cloudinaryIds.length < MIN_PRODUCT_IMAGES) {
       return Response.json({
         status: 'rejected',
-        reason: 'Found an image online but could not upload it. This listing was discarded.',
+        reason: `Found ${imageUrls.length} image(s) online but could not upload any. Check Cloudinary credentials.`,
         productName: name.trim(),
+        imagesFound: imageUrls.length,
         imagesUploaded: cloudinaryIds.length,
       })
     }

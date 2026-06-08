@@ -1,10 +1,28 @@
+import { searchProductImagesWithAi } from '@/lib/services/searchProductImagesWithAi'
+
 const USER_AGENT =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
 
 export const MIN_PRODUCT_IMAGES = 1
 export const PREFERRED_PRODUCT_IMAGES = 2
 
-const MAX_IMAGE_BYTES = 10_000_000
+function isHttpImageUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url)
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:'
+  } catch {
+    return false
+  }
+}
+
+function mergeUniqueUrls(target: string[], incoming: string[], seen: Set<string>, max: number) {
+  for (const url of incoming) {
+    if (seen.has(url) || target.length >= max) continue
+    if (!isHttpImageUrl(url)) continue
+    seen.add(url)
+    target.push(url)
+  }
+}
 
 function extractVqdToken(html: string): string | null {
   const patterns = [
@@ -19,53 +37,78 @@ function extractVqdToken(html: string): string | null {
   return null
 }
 
-function isHttpImageUrl(url: string): boolean {
+async function searchBingImages(query: string, limit: number): Promise<string[]> {
   try {
-    const parsed = new URL(url)
-    return parsed.protocol === 'http:' || parsed.protocol === 'https:'
+    const res = await fetch(
+      `https://www.bing.com/images/async?q=${encodeURIComponent(query)}&first=0&count=35&mmasync=1`,
+      {
+        headers: {
+          'User-Agent': USER_AGENT,
+          Accept: 'text/html,application/xhtml+xml',
+          'Accept-Language': 'en-US,en;q=0.9',
+        },
+        signal: AbortSignal.timeout(12_000),
+      }
+    )
+    if (!res.ok) return []
+
+    const html = await res.text()
+    const urls: string[] = []
+
+    const encodedPattern = /murl&quot;:&quot;(https?:\\\/\\\/[^&]+?)&quot;/g
+    for (const match of html.matchAll(encodedPattern)) {
+      urls.push(match[1].replace(/\\u0026/g, '&').replace(/\\\//g, '/'))
+    }
+
+    const jsonPattern = /"murl":"(https?:\/\/[^"]+)"/g
+    for (const match of html.matchAll(jsonPattern)) {
+      urls.push(match[1])
+    }
+
+    return urls.filter(isHttpImageUrl).slice(0, limit * 4)
   } catch {
-    return false
+    return []
   }
 }
 
-async function fetchDuckDuckGoImageUrls(
-  query: string,
-  limit: number,
-  page = 1
-): Promise<string[]> {
-  const searchRes = await fetch(
-    `https://duckduckgo.com/?q=${encodeURIComponent(query)}&iax=images&ia=images`,
-    { headers: { 'User-Agent': USER_AGENT }, signal: AbortSignal.timeout(15_000) }
-  )
-  if (!searchRes.ok) return []
+async function searchDuckDuckGoImages(query: string, limit: number): Promise<string[]> {
+  try {
+    const searchRes = await fetch(
+      `https://duckduckgo.com/?q=${encodeURIComponent(query)}&iax=images&ia=images`,
+      { headers: { 'User-Agent': USER_AGENT }, signal: AbortSignal.timeout(10_000) }
+    )
+    if (!searchRes.ok) return []
 
-  const html = await searchRes.text()
-  const vqd = extractVqdToken(html)
-  if (!vqd) return []
+    const html = await searchRes.text()
+    const vqd = extractVqdToken(html)
+    if (!vqd) return []
 
-  const imageRes = await fetch(
-    `https://duckduckgo.com/i.js?l=us-en&o=json&q=${encodeURIComponent(query)}&vqd=${encodeURIComponent(vqd)}&f=,,,,,&p=${page}`,
-    {
-      headers: {
-        'User-Agent': USER_AGENT,
-        Referer: 'https://duckduckgo.com/',
-      },
-      signal: AbortSignal.timeout(15_000),
+    const imageRes = await fetch(
+      `https://duckduckgo.com/i.js?l=us-en&o=json&q=${encodeURIComponent(query)}&vqd=${encodeURIComponent(vqd)}&f=,,,,,&p=1`,
+      {
+        headers: {
+          'User-Agent': USER_AGENT,
+          Referer: 'https://duckduckgo.com/',
+        },
+        signal: AbortSignal.timeout(10_000),
+      }
+    )
+    if (!imageRes.ok) return []
+
+    const data = (await imageRes.json()) as {
+      results?: Array<{ image?: string; thumbnail?: string }>
     }
-  )
-  if (!imageRes.ok) return []
 
-  const data = (await imageRes.json()) as {
-    results?: Array<{ image?: string; thumbnail?: string }>
+    const urls: string[] = []
+    for (const result of data.results ?? []) {
+      if (result.image) urls.push(result.image)
+      if (result.thumbnail) urls.push(result.thumbnail)
+    }
+
+    return urls.filter(isHttpImageUrl).slice(0, limit * 4)
+  } catch {
+    return []
   }
-
-  const urls: string[] = []
-  for (const result of data.results ?? []) {
-    if (result.image && isHttpImageUrl(result.image)) urls.push(result.image)
-    if (result.thumbnail && isHttpImageUrl(result.thumbnail)) urls.push(result.thumbnail)
-  }
-
-  return urls.slice(0, limit * 6)
 }
 
 async function searchWikimediaImages(query: string, limit: number): Promise<string[]> {
@@ -75,7 +118,7 @@ async function searchWikimediaImages(query: string, limit: number): Promise<stri
     `&iiprop=url|size&iiurlwidth=800&format=json&origin=*`
 
   try {
-    const res = await fetch(apiUrl, { signal: AbortSignal.timeout(12_000) })
+    const res = await fetch(apiUrl, { signal: AbortSignal.timeout(10_000) })
     if (!res.ok) return []
 
     const data = (await res.json()) as {
@@ -91,103 +134,54 @@ async function searchWikimediaImages(query: string, limit: number): Promise<stri
       .flatMap((page) => page.imageinfo ?? [])
       .flatMap((info) => [info.thumburl, info.url].filter(Boolean) as string[])
       .filter(isHttpImageUrl)
-      .slice(0, limit)
+      .slice(0, limit * 4)
   } catch {
     return []
   }
 }
 
-async function isReachableImage(url: string): Promise<boolean> {
-  try {
-    const headRes = await fetch(url, {
-      method: 'HEAD',
-      headers: { 'User-Agent': USER_AGENT },
-      signal: AbortSignal.timeout(10_000),
-      redirect: 'follow',
-    })
-
-    if (headRes.ok) {
-      const contentType = headRes.headers.get('content-type') ?? ''
-      if (contentType.startsWith('image/')) return true
-    }
-  } catch {
-    // fall through to GET
-  }
-
-  try {
-    const res = await fetch(url, {
-      method: 'GET',
-      headers: { 'User-Agent': USER_AGENT },
-      signal: AbortSignal.timeout(12_000),
-      redirect: 'follow',
-    })
-    if (!res.ok) return false
-
-    const contentType = res.headers.get('content-type') ?? ''
-    if (!contentType.startsWith('image/')) return false
-
-    const length = Number(res.headers.get('content-length') ?? 0)
-    if (length > MAX_IMAGE_BYTES) return false
-
-    return true
-  } catch {
-    return false
-  }
-}
-
-async function collectCandidateUrls(productName: string, target: number): Promise<string[]> {
+async function collectFromProviders(productName: string, poolSize: number): Promise<string[]> {
   const queries = [
     `${productName} product image`,
     `${productName} product photo`,
-    `${productName}`,
     productName,
   ]
 
   const seen = new Set<string>()
-  const candidates: string[] = []
-
-  const addUrls = (urls: string[]) => {
-    for (const url of urls) {
-      if (seen.has(url)) continue
-      seen.add(url)
-      candidates.push(url)
-    }
-  }
+  const merged: string[] = []
 
   for (const query of queries) {
-    if (candidates.length >= target * 8) break
-    for (const page of [1, 2, 3]) {
-      addUrls(await fetchDuckDuckGoImageUrls(query, target, page))
+    if (merged.length >= poolSize) break
+
+    const [bing, ddg, wiki] = await Promise.allSettled([
+      searchBingImages(query, poolSize),
+      searchDuckDuckGoImages(query, poolSize),
+      searchWikimediaImages(query, poolSize),
+    ])
+
+    for (const result of [bing, ddg, wiki]) {
+      if (result.status === 'fulfilled') {
+        mergeUniqueUrls(merged, result.value, seen, poolSize)
+      }
     }
   }
 
-  if (candidates.length < target) {
-    addUrls(await searchWikimediaImages(productName, target * 4))
-  }
-
-  return candidates
+  return merged
 }
 
 export async function searchProductImages(
   productName: string,
-  limit = PREFERRED_PRODUCT_IMAGES
+  poolSize = PREFERRED_PRODUCT_IMAGES * 4
 ): Promise<string[]> {
-  const target = Math.max(limit, PREFERRED_PRODUCT_IMAGES, MIN_PRODUCT_IMAGES)
-  const candidates = await collectCandidateUrls(productName, target)
-  const found: string[] = []
+  const minPool = Math.max(poolSize, PREFERRED_PRODUCT_IMAGES * 4)
 
-  for (const url of candidates) {
-    if (found.length >= target) break
-    if (await isReachableImage(url)) found.push(url)
+  let urls = await collectFromProviders(productName, minPool)
+
+  if (urls.length < MIN_PRODUCT_IMAGES) {
+    const aiUrls = await searchProductImagesWithAi(productName, PREFERRED_PRODUCT_IMAGES)
+    const seen = new Set(urls)
+    mergeUniqueUrls(urls, aiUrls, seen, minPool)
   }
 
-  if (found.length >= MIN_PRODUCT_IMAGES) return found
-
-  // Accept any discovered image URL — clear or not — and let Cloudinary try uploading it.
-  for (const url of candidates) {
-    if (found.length >= target) break
-    if (!found.includes(url)) found.push(url)
-  }
-
-  return found.slice(0, target)
+  return urls.slice(0, minPool)
 }
