@@ -6,6 +6,7 @@ import { toPlainObject } from '@/lib/utils'
 import { generateProductDetails } from '@/lib/services/generateProductDetails'
 import {
   MIN_PRODUCT_IMAGES,
+  PREFERRED_PRODUCT_IMAGES,
   searchProductImages,
 } from '@/lib/services/searchProductImages'
 import { uploadProductImagesFromUrls } from '@/lib/services/uploadProductImagesFromUrls'
@@ -118,7 +119,7 @@ export const POST = auth(async (req: any) => {
   try {
     const [generated, imageUrls] = await Promise.all([
       generateProductDetails(name.trim(), categoryNames, costPrice, price),
-      searchProductImages(name.trim(), 4),
+      searchProductImages(name.trim(), PREFERRED_PRODUCT_IMAGES),
     ])
 
     if (imageUrls.length < MIN_PRODUCT_IMAGES) {
@@ -163,6 +164,8 @@ export const POST = auth(async (req: any) => {
     return Response.json({
       status: 'ready',
       draft: draftPayload,
+      imagesFound: cloudinaryIds.length,
+      preferredImages: PREFERRED_PRODUCT_IMAGES,
     })
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Quick create failed'

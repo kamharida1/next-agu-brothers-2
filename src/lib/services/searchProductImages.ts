@@ -2,6 +2,7 @@ const USER_AGENT =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
 
 export const MIN_PRODUCT_IMAGES = 1
+export const PREFERRED_PRODUCT_IMAGES = 2
 
 const MAX_IMAGE_BYTES = 10_000_000
 
@@ -169,9 +170,9 @@ async function collectCandidateUrls(productName: string, target: number): Promis
 
 export async function searchProductImages(
   productName: string,
-  limit = 4
+  limit = PREFERRED_PRODUCT_IMAGES
 ): Promise<string[]> {
-  const target = Math.max(limit, MIN_PRODUCT_IMAGES)
+  const target = Math.max(limit, PREFERRED_PRODUCT_IMAGES, MIN_PRODUCT_IMAGES)
   const candidates = await collectCandidateUrls(productName, target)
   const found: string[] = []
 

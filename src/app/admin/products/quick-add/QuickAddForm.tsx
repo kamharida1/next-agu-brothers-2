@@ -11,6 +11,7 @@ import CategoryPicker from '@/components/admin/CategoryPicker'
 import { Category } from '@/lib/models/CategoryModel'
 
 const MIN_PRODUCT_IMAGES = 1
+const PREFERRED_PRODUCT_IMAGES = 2
 
 type ProductDraft = {
   name: string
@@ -86,7 +87,12 @@ export default function QuickAddForm() {
       if (!res.ok) throw new Error(data.message)
 
       setDraft(data.draft)
-      toast.success('Product draft ready — review and create or discard.', { id: toastId })
+      const count = data.draft.images?.length ?? 0
+      const message =
+        count >= PREFERRED_PRODUCT_IMAGES
+          ? `${count} images found — draft ready!`
+          : `Only ${count} image found (aims for ${PREFERRED_PRODUCT_IMAGES}). Review and create or discard.`
+      toast.success(message, { id: toastId })
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Generation failed'
       toast.error(message, { id: toastId })
@@ -143,7 +149,7 @@ export default function QuickAddForm() {
         <h1 className="text-2xl font-medium text-[#0F1111]">Quick Add Product</h1>
         <p className="text-sm text-[#565959] mt-1">
           Enter the product name and your prices — AI fills category, description, brand, and
-          finds a product image online. No image found? The listing is discarded.
+          finds up to 2 product images when possible (1 minimum). No image found? Discarded.
         </p>
       </div>
 
@@ -228,6 +234,8 @@ export default function QuickAddForm() {
 
           <p className="text-xs text-[#565959]">
             {draft.images.length} image{draft.images.length !== 1 ? 's' : ''} selected
+            {draft.images.length < PREFERRED_PRODUCT_IMAGES &&
+              ` — only ${draft.images.length} found (prefers ${PREFERRED_PRODUCT_IMAGES})`}
           </p>
 
           <div className="flex flex-wrap gap-2">
