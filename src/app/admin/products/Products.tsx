@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import Price from '@/components/products/Price'
 import toast from 'react-hot-toast'
@@ -16,6 +17,7 @@ import {
   FiPackage,
   FiCheckCircle,
   FiXCircle,
+  FiZap,
 } from 'react-icons/fi'
 import {
   AdminAlert,
@@ -106,6 +108,13 @@ export default function Products() {
             placeholder="Search by name or category…"
           />
         </div>
+        <Link
+          href="/admin/products/quick-add"
+          className="btn-amazon-outline inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm"
+        >
+          <FiZap className="w-4 h-4" />
+          Quick add
+        </Link>
         <AdminBtnPrimary href="/admin/products/create">
           <FiPlus className="w-4 h-4" />
           Add product
