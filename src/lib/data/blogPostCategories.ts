@@ -10,6 +10,16 @@ export const BLOG_POST_PRODUCT_CATEGORY: Record<string, string> = {
   'washing-machine-front-load-vs-top-load': 'Washing Machines',
   'surge-protectors-protect-electronics-nigeria': 'Electronics',
   'home-electronics-setup-budget-nigeria': 'Electronics',
+  'smart-tv-buying-guide-nigeria': 'Televisions',
+  'ac-tonnage-room-size-guide-nigeria': 'Air Conditioners',
+  'diesel-vs-petrol-generator-nigeria': 'Generators',
+  'standing-vs-tabletop-gas-cooker-nigeria': 'Gas Cookers',
+  'single-vs-double-door-refrigerator-nigeria': 'Refrigerators',
+  'inverter-ac-energy-savings-nigeria': 'Air Conditioners',
+  'chest-freezer-maintenance-tips-nigeria': 'Freezers',
+  'washing-machine-capacity-kg-guide': 'Washing Machines',
+  'avr-voltage-regulator-buying-guide-nigeria': 'Electronics',
+  '4k-vs-full-hd-tv-worth-it-nigeria': 'Televisions',
 }
 
 /** One stable image key per product type — posts about the same appliance share one image. */
@@ -24,6 +34,16 @@ export const BLOG_POST_PRODUCT_IMAGE_KEY: Record<string, string> = {
   'washing-machine-front-load-vs-top-load': 'washing-machines',
   'surge-protectors-protect-electronics-nigeria': 'surge-protector',
   'home-electronics-setup-budget-nigeria': 'home-electronics',
+  'smart-tv-buying-guide-nigeria': 'televisions',
+  'ac-tonnage-room-size-guide-nigeria': 'air-conditioners',
+  'diesel-vs-petrol-generator-nigeria': 'generators',
+  'standing-vs-tabletop-gas-cooker-nigeria': 'gas-cookers',
+  'single-vs-double-door-refrigerator-nigeria': 'refrigerators',
+  'inverter-ac-energy-savings-nigeria': 'air-conditioners',
+  'chest-freezer-maintenance-tips-nigeria': 'freezers',
+  'washing-machine-capacity-kg-guide': 'washing-machines',
+  'avr-voltage-regulator-buying-guide-nigeria': 'surge-protector',
+  '4k-vs-full-hd-tv-worth-it-nigeria': 'televisions',
 }
 
 /** Verified Pexels photo ID — one per product image key. */

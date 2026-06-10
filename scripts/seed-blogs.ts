@@ -13,6 +13,7 @@ import { resolve } from 'path'
 import mongoose from 'mongoose'
 import dbConnect from '../src/lib/dbConnect'
 import BlogModel from '../src/lib/models/BlogModel'
+import { BLOG_POST_PRODUCT_CATEGORY } from '../src/lib/data/blogPostCategories'
 import { BLOG_POSTS_SEED } from '../src/lib/data/blogPostsSeed'
 
 function loadEnvFiles() {
@@ -73,7 +74,10 @@ async function main() {
       }
       continue
     }
-    await BlogModel.create(post)
+    await BlogModel.create({
+      ...post,
+      category: BLOG_POST_PRODUCT_CATEGORY[post.slug],
+    })
     created++
     console.log(`Created: ${post.slug}`)
   }
