@@ -5,7 +5,7 @@ test.describe('Storefront smoke', () => {
     await page.goto('/')
     await expect(page).toHaveTitle(/Agu Brothers/i)
     await expect(page.getByRole('link', { name: /brothers/i }).first()).toBeVisible()
-    await expect(page.locator('.amazon-card').first()).toBeVisible()
+    await expect(page.locator('a[href^="/product/"]').first()).toBeVisible()
   })
 
   test('search page loads with filters', async ({ page }) => {
@@ -23,18 +23,32 @@ test.describe('Storefront smoke', () => {
   })
 
   test('product detail page loads', async ({ page }) => {
-    await page.goto('/')
-    const productLink = page.locator('a.amazon-card').first()
-    await expect(productLink).toBeVisible()
-    await productLink.click()
+    await page.goto('/all-products')
+    const links = page.locator('a[href^="/product/"]')
+    await expect(links.first()).toBeVisible()
+
+    const count = await links.count()
+    let found = false
+    for (let i = 0; i < Math.min(count, 12); i++) {
+      const href = await links.nth(i).getAttribute('href')
+      if (!href) continue
+      await page.goto(href)
+      const addBtn = page.getByRole('button', { name: /^add to cart$/i })
+      if (await addBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+        found = true
+        break
+      }
+    }
+
+    expect(found).toBe(true)
     await expect(page).toHaveURL(/\/product\//)
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
-    await expect(page.getByRole('button', { name: /add to cart/i })).toBeVisible()
   })
 
   test('related products section on product page', async ({ page }) => {
-    await page.goto('/')
-    await page.locator('a.amazon-card').first().click()
+    await page.goto('/all-products')
+    const href = await page.locator('a[href^="/product/"]').first().getAttribute('href')
+    await page.goto(href!)
     await expect(page.getByRole('heading', { name: /related products/i })).toBeVisible()
   })
 

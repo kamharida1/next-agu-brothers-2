@@ -8,6 +8,7 @@ import Link from 'next/link'
 import Header from '@/components/header/header'
 import BackToTop from '@/components/BackToTop'
 import WhatsAppButton from '@/components/WhatsAppButton'
+import GoogleAnalytics from '@/components/GoogleAnalytics'
 import { BASE_URL, BUSINESS } from '@/lib/seo'
 
 const openSans = Open_Sans({
@@ -79,6 +80,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preconnect" href="https://api.paystack.co" />
       </head>
       <body className={`${openSans.variable} font-sans antialiased`}>
+        <GoogleAnalytics />
         <Providers>
           <div className="drawer z-50">
             <DrawerButton />

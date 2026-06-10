@@ -1,6 +1,7 @@
 'use client'
 
 import useCartService from "@/lib/hooks/useCartStore";
+import { trackAddToCart } from "@/lib/analytics";
 import { OrderItem } from "@/lib/models/OrderModel";
 import { useEffect, useState } from "react";
 import { FiShoppingCart, FiMinus, FiPlus } from "react-icons/fi";
@@ -24,6 +25,7 @@ export default function AddToCart({
 
   const addToCartHandler = () => {
     increase(item)
+    trackAddToCart({ ...item, qty: 1 })
     toast.success(`${item.name} added to cart!`, {
       icon: '🛒',
       duration: 2000,

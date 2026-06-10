@@ -1,20 +1,19 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { signIn, useSession } from 'next-auth/react'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { FiEye, FiEyeOff } from 'react-icons/fi'
+import { authPathWithCallback } from '@/lib/authCallbackUrl'
 
 type Inputs = { name: string; email: string; password: string; confirmPassword: string }
 
-const Form = () => {
+const Form = ({ callbackUrl }: { callbackUrl: string }) => {
   const { data: session } = useSession()
-  const params = useSearchParams()
   const router = useRouter()
   const [showPassword, setShowPassword] = useState(false)
-  const callbackUrl = params.get('callbackUrl') || '/'
 
   const { register, handleSubmit, getValues, formState: { errors, isSubmitting } } =
     useForm<Inputs>({ defaultValues: { name: '', email: '', password: '', confirmPassword: '' } })
@@ -31,7 +30,11 @@ const Form = () => {
         body: JSON.stringify({ name, email, password }),
       })
       if (res.ok) {
-        router.push(`/signin?callbackUrl=${callbackUrl}&success=Account created! Please sign in.`)
+        router.push(
+          authPathWithCallback('/signin', callbackUrl, {
+            success: 'Account created! Please sign in.',
+          })
+        )
       } else {
         const data = await res.json()
         throw new Error(data.message)
@@ -52,7 +55,7 @@ const Form = () => {
         <h1 className="text-2xl font-medium text-[#0F1111] mb-1">Create account</h1>
         <p className="text-sm text-[#565959] mb-4">
           Already have an account?{' '}
-          <Link href={`/signin?callbackUrl=${callbackUrl}`} className="text-[#007185] hover:underline hover:text-[#CC0C39]">
+          <Link href={authPathWithCallback('/signin', callbackUrl)} className="text-[#007185] hover:underline hover:text-[#CC0C39]">
             Sign in
           </Link>
         </p>

@@ -7,7 +7,7 @@ import BlogPostCard from '@/components/blog/BlogPostCard'
 import HomeHero from '@/components/home/HomeHero'
 import Link from 'next/link'
 import { FiArrowRight } from 'react-icons/fi'
-import { categoryHref, CATEGORY_ICONS } from '@/lib/categorySlugs'
+import CategoryDepartmentCard from '@/components/categories/CategoryDepartmentCard'
 
 import {
   BASE_URL,
@@ -46,12 +46,14 @@ export const metadata: Metadata = {
 }
 
 export default async function Home() {
-  const [featuredProducts, latestProducts, categories, latestPosts] = await Promise.all([
-    productServices.getFeatured(),
-    productServices.getLatest(),
-    productServices.getCategories(),
-    blogServices.getLatestBlogs(4),
-  ])
+  const [featuredProducts, latestProducts, categories, categoryThumbnails, latestPosts] =
+    await Promise.all([
+      productServices.getFeatured(),
+      productServices.getLatest(),
+      productServices.getCategories(),
+      productServices.getCategoryThumbnails(),
+      blogServices.getLatestBlogs(4),
+    ])
 
   const featured = JSON.parse(JSON.stringify(featuredProducts))
   const latest   = JSON.parse(JSON.stringify(latestProducts))
@@ -131,25 +133,22 @@ export default async function Home() {
         {/* ── Shop by Department ── */}
         <section>
           <div className="bg-white rounded-sm shadow-sm p-4 md:p-6">
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="text-xl font-bold text-[#0F1111]">Shop by Department</h2>
-              <Link href="/categories" className="text-sm text-[#007185] hover:text-[#CC0C39] hover:underline flex items-center gap-1">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-5">
+              <h2 className="text-lg sm:text-xl font-bold text-[#0F1111]">Shop by Department</h2>
+              <Link
+                href="/categories"
+                className="text-sm text-[#007185] hover:text-[#CC0C39] hover:underline flex items-center gap-1 self-start sm:self-auto py-1 touch-manipulation"
+              >
                 View all departments <FiArrowRight className="w-3 h-3" />
               </Link>
             </div>
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5 sm:gap-3">
               {categories.map((cat: string) => (
-                <Link
+                <CategoryDepartmentCard
                   key={cat}
-                  href={categoryHref(cat)}
-                  className="group flex flex-col items-center gap-2 p-3 rounded-sm border border-[#D5D9D9]
-                             hover:border-[#FF9900] hover:shadow-sm transition-all text-center"
-                >
-                  <span className="text-3xl group-hover:scale-110 transition-transform">
-                    {CATEGORY_ICONS[cat] ?? '🛍️'}
-                  </span>
-                  <span className="text-xs text-[#0F1111] leading-tight">{cat}</span>
-                </Link>
+                  category={cat}
+                  imageSrc={categoryThumbnails[cat]}
+                />
               ))}
             </div>
           </div>

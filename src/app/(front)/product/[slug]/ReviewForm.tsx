@@ -8,6 +8,7 @@ import toast from 'react-hot-toast'
 import { FiStar } from 'react-icons/fi'
 import useSWRMutation from 'swr/mutation'
 import { mutate } from 'swr'
+import { authPathWithCallback } from '@/lib/authCallbackUrl'
 
 type Inputs = {
   username: string
@@ -135,7 +136,10 @@ const ReviewForm = forwardRef<HTMLFormElement, { slug: string }>((props, ref) =>
     return (
       <div className="border border-[#D5D9D9] rounded-lg bg-[#F7F8F8] p-5 text-center">
         <p className="text-sm text-[#0F1111] mb-3">Sign in to share your experience with this product.</p>
-        <Link href="/signin" className="btn-amazon inline-block px-6 py-2 rounded-md text-sm">
+        <Link
+          href={authPathWithCallback('/signin', `/product/${slug}`)}
+          className="btn-amazon inline-block px-6 py-2 rounded-md text-sm"
+        >
           Sign in to write a review
         </Link>
       </div>

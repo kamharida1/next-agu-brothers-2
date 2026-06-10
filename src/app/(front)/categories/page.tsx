@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import productServices from '@/lib/services/productService'
-import { categoryHref, CATEGORY_ICONS } from '@/lib/categorySlugs'
+import CategoryDepartmentCard from '@/components/categories/CategoryDepartmentCard'
 import { staticPageMetadata } from '@/lib/seo'
 
 export const revalidate = 3600
@@ -13,7 +13,10 @@ export const metadata = staticPageMetadata({
 })
 
 export default async function CategoriesIndexPage() {
-  const categories = await productServices.getCategories()
+  const [categories, categoryThumbnails] = await Promise.all([
+    productServices.getCategories(),
+    productServices.getCategoryThumbnails(),
+  ])
 
   return (
     <div className="bg-[#EAEDED] min-h-screen">
@@ -36,14 +39,13 @@ export default async function CategoriesIndexPage() {
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
           {categories.map((cat) => (
-            <Link
+            <CategoryDepartmentCard
               key={cat}
-              href={categoryHref(cat)}
-              className="bg-white rounded-sm shadow-sm p-4 flex flex-col items-center gap-2 text-center border border-transparent hover:border-[#FF9900] transition-colors"
-            >
-              <span className="text-3xl">{CATEGORY_ICONS[cat] ?? '🛍️'}</span>
-              <span className="text-sm font-medium text-[#0F1111]">{cat}</span>
-            </Link>
+              category={cat}
+              imageSrc={categoryThumbnails[cat]}
+              imageSize="md"
+              labelClassName="text-sm"
+            />
           ))}
         </div>
       </div>

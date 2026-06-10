@@ -5,7 +5,7 @@ import Price from '@/components/products/Price'
 import { formatPriceAmount } from '@/lib/utils'
 import { BUSINESS } from '@/lib/seo'
 import { useSession } from 'next-auth/react'
-import Image from 'next/image'
+import CldImage from '@/components/CldImage'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
@@ -399,8 +399,8 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
                         href={`/product/${item.slug}`}
                         className="flex-shrink-0 w-24 h-24 sm:w-28 sm:h-28 bg-white flex items-center justify-center"
                       >
-                        <Image
-                          src={item.image}
+                        <CldImage
+                          src={item.images?.[0] ?? item.image}
                           alt={item.name}
                           width={112}
                           height={112}

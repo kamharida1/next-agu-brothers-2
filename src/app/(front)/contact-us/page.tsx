@@ -97,6 +97,27 @@ export default function Contact() {
 
           <div className="space-y-3">
             <div className="bg-white rounded-sm shadow-sm p-5">
+              <h3 className="font-bold text-[#0F1111] mb-3 pb-2 border-b border-[#D5D9D9]">Find Us</h3>
+              <div className="rounded-sm overflow-hidden border border-[#D5D9D9] mb-3">
+                <iframe
+                  title="Agu Brothers store location on Google Maps"
+                  src="https://maps.google.com/maps?q=33+Ogui+Road+Enugu+Nigeria&output=embed"
+                  className="w-full h-48"
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
+              </div>
+              <a
+                href={BUSINESS.mapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-[#007185] hover:underline hover:text-[#CC0C39]"
+              >
+                View on Google Maps →
+              </a>
+            </div>
+
+            <div className="bg-white rounded-sm shadow-sm p-5">
               <h3 className="font-bold text-[#0F1111] mb-3 pb-2 border-b border-[#D5D9D9]">Contact Information</h3>
               <div className="space-y-4 text-sm">
                 <div className="flex items-start gap-3">

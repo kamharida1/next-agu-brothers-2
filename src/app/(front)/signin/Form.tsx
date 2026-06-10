@@ -5,15 +5,17 @@ import Link from 'next/link'
 import { signIn, useSession } from 'next-auth/react'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { FiEye, FiEyeOff } from 'react-icons/fi'
+import { authPathWithCallback } from '@/lib/authCallbackUrl'
+import { authErrorMessage } from '@/lib/authErrors'
 
 type Inputs = { email: string; password: string }
 
-const Form = () => {
+const Form = ({ callbackUrl }: { callbackUrl: string }) => {
   const { data: session } = useSession()
   const params = useSearchParams()
-  const callbackUrl = params.get('callbackUrl') || '/'
   const router = useRouter()
   const [showPassword, setShowPassword] = useState(false)
+  const errorMessage = authErrorMessage(params.get('error'))
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } =
     useForm<Inputs>({ defaultValues: { email: '', password: '' } })
@@ -23,26 +25,29 @@ const Form = () => {
   }, [callbackUrl, router, session])
 
   const formSubmit: SubmitHandler<Inputs> = async ({ email, password }) => {
-    signIn('credentials', { email, password })
+    const result = await signIn('credentials', { email, password, redirect: false, callbackUrl })
+    if (result?.error) {
+      router.replace(
+        authPathWithCallback('/signin', callbackUrl, { error: 'CredentialsSignin' })
+      )
+      return
+    }
+    router.push(callbackUrl)
+    router.refresh()
   }
 
   return (
     <div className="bg-[#EAEDED] min-h-screen flex flex-col items-center py-8 px-4">
-      {/* Logo */}
       <Link href="/" className="mb-6 flex flex-col items-center">
         <span className="text-[#131921] font-bold text-3xl tracking-tight">agu<span className="text-[#FF9900]">brothers</span></span>
       </Link>
 
-      {/* Main box */}
       <div className="w-full max-w-sm bg-white border border-[#D5D9D9] rounded-md p-6 shadow-sm">
         <h1 className="text-2xl font-medium text-[#0F1111] mb-4">Sign in</h1>
 
-        {/* Error */}
-        {params.get('error') && (
+        {errorMessage && (
           <div className="border border-[#CC0C39] bg-[#FFF0F0] text-[#CC0C39] text-sm rounded-md p-3 mb-4">
-            {params.get('error') === 'CredentialsSignin'
-              ? 'Your email or password is incorrect.'
-              : params.get('error')}
+            {errorMessage}
           </div>
         )}
         {params.get('success') && (
@@ -118,7 +123,6 @@ const Form = () => {
           </div>
         </div>
 
-        {/* Google */}
         <button
           type="button"
           onClick={() => signIn('google', { callbackUrl })}
@@ -134,24 +138,21 @@ const Form = () => {
         </button>
       </div>
 
-      {/* Divider */}
       <div className="w-full max-w-sm flex items-center gap-3 my-4">
         <div className="flex-1 h-px bg-[#D5D9D9]"></div>
         <span className="text-xs text-[#565959]">New to Agu Brothers?</span>
         <div className="flex-1 h-px bg-[#D5D9D9]"></div>
       </div>
 
-      {/* Create account */}
       <div className="w-full max-w-sm">
         <Link
-          href={`/register?callbackUrl=${callbackUrl}`}
+          href={authPathWithCallback('/register', callbackUrl)}
           className="btn-amazon-outline w-full py-2.5 rounded-md text-sm flex items-center justify-center"
         >
           Create your Agu Brothers account
         </Link>
       </div>
 
-      {/* Footer links */}
       <div className="mt-8 text-center text-xs text-[#565959] space-x-3">
         <Link href="/about-us" className="text-[#007185] hover:underline">Conditions of Use</Link>
         <Link href="/privacy-policy" className="text-[#007185] hover:underline">Privacy Notice</Link>

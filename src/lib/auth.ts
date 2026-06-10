@@ -43,6 +43,18 @@ export const { handlers: { GET, POST }, auth, signIn, signOut } = NextAuth({
   },
 
   callbacks: {
+    async redirect({ url, baseUrl }) {
+      if (url.startsWith('/')) return `${baseUrl}${url}`
+      try {
+        const target = new URL(url)
+        const base = new URL(baseUrl)
+        if (target.origin === base.origin) return url
+      } catch {
+        // fall through to baseUrl
+      }
+      return baseUrl
+    },
+
     // Called on every sign-in AND every session read.
     // `user` is only present on the first sign-in — that's when we hit the DB.
     async jwt({ user, trigger, session, token }: any) {

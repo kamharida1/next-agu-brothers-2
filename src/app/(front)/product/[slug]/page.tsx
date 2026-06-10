@@ -4,7 +4,7 @@ import RelatedProducts from '@/components/products/RelatedProducts'
 import { buildProductJsonLd } from '@/lib/productStructuredData'
 import ReviewModel from '@/lib/models/ReviewModel'
 import { Review } from '@/lib/models/ReviewModel'
-import { BASE_URL, ROBOTS_INDEX, ROBOTS_NOINDEX, truncateForMeta } from '@/lib/seo'
+import { BASE_URL, ROBOTS_INDEX, ROBOTS_NOINDEX, productMetaDescription } from '@/lib/seo'
 import { categoryHref } from '@/lib/categorySlugs'
 import { Product } from '@/lib/models/ProductModel'
 import { Metadata } from 'next'
@@ -29,9 +29,7 @@ export async function generateMetadata({
     ? `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/w_1200,h_630,c_fill/${product.images[0]}`
     : undefined
 
-  const description = truncateForMeta(
-    `${product.name} — ${product.brand} ${product.cat}. ${product.description}`
-  )
+  const description = productMetaDescription(product)
 
   return {
     title: `${product.name} | Agu Brothers`,

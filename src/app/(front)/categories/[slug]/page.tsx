@@ -4,16 +4,16 @@ import { notFound } from 'next/navigation'
 import ProductCard from '@/components/products/ProductCard'
 import { Product } from '@/lib/models/ProductModel'
 import productServices from '@/lib/services/productService'
+import CldImage from '@/components/CldImage'
 import {
   categoryToSlug,
-  CATEGORY_ICONS,
   resolveCategoryFromSlug,
 } from '@/lib/categorySlugs'
 import {
   getCategoryGuidePath,
   getCategoryLandingCopy,
 } from '@/lib/data/categoryLandingCopy'
-import { BASE_URL, ROBOTS_INDEX, truncateForMeta } from '@/lib/seo'
+import { BASE_URL, BUSINESS, OG_IMAGE, ROBOTS_INDEX, truncateForMeta } from '@/lib/seo'
 
 export const revalidate = 3600
 
@@ -47,11 +47,14 @@ export async function generateMetadata({
       description: truncateForMeta(copy.description),
       url,
       type: 'website',
+      siteName: BUSINESS.name,
+      images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: `${category} at Agu Brothers` }],
     },
     twitter: {
       card: 'summary_large_image',
       title: `${category} | Agu Brothers`,
       description: truncateForMeta(copy.description),
+      images: [OG_IMAGE],
     },
   }
 }
@@ -66,9 +69,13 @@ export default async function CategoryPage({
   const category = resolveCategoryFromSlug(slug, categories)
   if (!category) notFound()
 
-  const products: Product[] = JSON.parse(
-    JSON.stringify(await productServices.getByCategory(category))
-  )
+  const [productsRaw, categoryThumbnails] = await Promise.all([
+    productServices.getByCategory(category),
+    productServices.getCategoryThumbnails(),
+  ])
+  const products: Product[] = JSON.parse(JSON.stringify(productsRaw))
+  const categoryImage =
+    categoryThumbnails[category] ?? products[0]?.images?.[0] ?? products[0]?.image
   const copy = getCategoryLandingCopy(category)
   const guidePath = getCategoryGuidePath(category)
   const url = `${BASE_URL}/categories/${slug}`
@@ -128,9 +135,17 @@ export default async function CategoryPage({
 
           <div className="bg-white rounded-sm shadow-sm p-4 md:p-6 mb-4">
             <div className="flex items-start gap-4 mb-4">
-              <span className="text-4xl" aria-hidden="true">
-                {CATEGORY_ICONS[category] ?? '🛍️'}
-              </span>
+              {categoryImage ? (
+                <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 rounded-sm border border-[#D5D9D9] bg-white overflow-hidden">
+                  <CldImage
+                    src={categoryImage}
+                    alt={category}
+                    fill
+                    sizes="96px"
+                    className="object-contain p-2"
+                  />
+                </div>
+              ) : null}
               <div>
                 <h1 className="text-2xl md:text-3xl font-bold text-[#0F1111]">{category}</h1>
                 <p className="text-sm text-[#565959] mt-1">

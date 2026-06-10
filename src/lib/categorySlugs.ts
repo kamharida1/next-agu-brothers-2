@@ -28,6 +28,7 @@ export function resolveCategoryFromSlug(
   return categories.find((cat) => categoryToSlug(cat) === slug) ?? null
 }
 
+/** @deprecated Use getCategoryImageSrc — kept for OG/fallbacks */
 export const CATEGORY_ICONS: Record<string, string> = {
   Televisions: '📺',
   Refrigerators: '🧊',
@@ -38,3 +39,4 @@ export const CATEGORY_ICONS: Record<string, string> = {
   'Washing Machines': '🫧',
   Electronics: '🔌',
 }
+

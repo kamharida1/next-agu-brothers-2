@@ -74,6 +74,25 @@ export function stripHtml(html: string): string {
   return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
 }
 
+/** Product meta description with Nigeria/local fallback when DB copy is thin. */
+export function productMetaDescription(product: {
+  name: string
+  brand: string
+  cat: string
+  description: string
+  countInStock: number
+}): string {
+  const stockHint =
+    product.countInStock > 0 ? 'In stock now.' : 'Check availability online.'
+  const base = truncateForMeta(
+    `${product.name} — ${product.brand} ${product.cat}. ${product.description}`
+  )
+  if (base.length >= 120) return base
+  return truncateForMeta(
+    `${base} Buy brand new ${product.brand} ${product.cat} in Nigeria. ${stockHint} Fast delivery from Agu Brothers Enugu.`
+  )
+}
+
 /** Shared metadata for indexable static/marketing pages */
 export function staticPageMetadata(opts: {
   title: string

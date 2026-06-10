@@ -58,6 +58,13 @@ export async function generateMetadata({
   }
 }
 
+export const revalidate = 3600
+
+export async function generateStaticParams() {
+  const slugs = await blogServices.getAllBlogSlugs()
+  return slugs.map(({ slug }) => ({ slug }))
+}
+
 export default async function BlogDetail({
   params,
 }: {

@@ -3,6 +3,7 @@
 import AddToCart from '@/components/products/AddToCart'
 import { ProductPrice } from '@/components/products/Price'
 import { getSalePrice } from '@/lib/productPricing'
+import { trackViewItem } from '@/lib/analytics'
 import { convertDocToObj } from '@/lib/utils'
 import toast from 'react-hot-toast'
 import Link from 'next/link'
@@ -171,6 +172,18 @@ export default function ProductDetails({
   initialReviews?: Review[]
 }) {
   const { data: session } = useSession()
+
+  React.useEffect(() => {
+    trackViewItem({
+      slug: product.slug,
+      name: product.name,
+      price: getSalePrice(product),
+      brand: product.brand,
+      cat: product.cat,
+    })
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- fire once per product page
+  }, [product.slug])
+
   const { data: reviews, error: reviewsError } = useSWR(
     `/api/products/${product?.slug}/reviews`,
     null,

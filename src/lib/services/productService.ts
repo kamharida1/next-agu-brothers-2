@@ -178,6 +178,30 @@ const getRelated = cache(
   }
 )
 
+/** One representative product image per department (featured / best-selling first). */
+const getCategoryThumbnails = cache(async (): Promise<Record<string, string>> => {
+  await dbConnect()
+  const rows = await ProductModel.aggregate<{ _id: string; image: string }>([
+    { $sort: { isFeatured: -1, sold: -1, _id: -1 } },
+    {
+      $group: {
+        _id: '$cat',
+        image: {
+          $first: {
+            $ifNull: [{ $arrayElemAt: ['$images', 0] }, '$image'],
+          },
+        },
+      },
+    },
+  ])
+
+  return Object.fromEntries(
+    rows
+      .filter((row) => row._id && row.image)
+      .map((row) => [row._id, row.image])
+  )
+})
+
 const getOneByCategory = cache(async (category: string) => {
   await dbConnect()
   const product = await ProductModel.findOne({
@@ -223,6 +247,7 @@ const productServices = {
   getByBrand,
   getRelated,
   getOneByCategory,
+  getCategoryThumbnails,
   getByCategory,
   getAllSlugs,
 }

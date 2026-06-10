@@ -1,10 +1,11 @@
 'use client'
 import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import { trackPurchase } from '@/lib/analytics'
 import useCartService from '@/lib/hooks/useCartStore'
 import { CheckoutSteps } from '@/components/CheckoutSteps'
 import Link from 'next/link'
-import Image from 'next/image'
+import CldImage from '@/components/CldImage'
 import toast from 'react-hot-toast'
 import Price from '@/components/products/Price'
 import { formatPriceAmount } from '@/lib/utils'
@@ -21,15 +22,15 @@ const Form = () => {
 
   const [mounted, setMounted] = useState(false)
   const [isPlacing, setIsPlacing] = useState(false)
+  const [orderComplete, setOrderComplete] = useState(false)
 
   useEffect(() => { setMounted(true) }, [])
 
   useEffect(() => {
-    if (mounted) {
-      if (!paymentMethod) router.push('/payment')
-      else if (items.length === 0) router.push('/')
-    }
-  }, [mounted, paymentMethod, items.length, router])
+    if (!mounted || isPlacing || orderComplete) return
+    if (!paymentMethod) router.push('/payment')
+    else if (items.length === 0) router.push('/')
+  }, [mounted, paymentMethod, items.length, router, isPlacing, orderComplete])
 
   // ── Cash on Delivery ──────────────────────────────────────────
   const placeCODOrder = async () => {
@@ -45,9 +46,11 @@ const Form = () => {
       })
       const data = await res.json()
       if (res.ok) {
-        clear()
+        setOrderComplete(true)
+        trackPurchase(data.order._id, items, totalPrice)
         toast.success('Order placed! We\'ll collect payment on delivery.')
         router.push(`/order/${data.order._id}`)
+        clear()
       } else {
         toast.error(data.message)
       }
@@ -77,16 +80,18 @@ const Form = () => {
       })
       const data = await res.json()
       if (res.ok) {
-        clear()
+        setOrderComplete(true)
+        trackPurchase(data.order._id, items, totalPrice)
         toast.success('Payment confirmed! Your order is placed.')
         router.push(`/order/${data.order._id}`)
+        clear()
       } else {
         toast.error(data.message || 'Order creation failed. Contact support.')
       }
     } finally {
       setIsPlacing(false)
     }
-  }, [items, shippingAddress, paymentMethod, clear, router])
+  }, [items, shippingAddress, paymentMethod, clear, router, totalPrice])
 
   const handlePaystackClose = () => {
     toast('Payment cancelled. Your order has not been placed.', { icon: 'ℹ️' })
@@ -162,8 +167,8 @@ const Form = () => {
                 {items.map((item) => (
                   <div key={item.slug} className="flex gap-4 pt-4 first:pt-0">
                     <Link href={`/product/${item.slug}`} className="flex-shrink-0">
-                      <Image
-                        src={item.image}
+                      <CldImage
+                        src={item.images?.[0] ?? item.image}
                         alt={item.name}
                         width={72}
                         height={72}
@@ -288,6 +293,13 @@ function OrderCTA({
   }
 
   if (isPaystack) {
+    if (!paystackConfig.publicKey) {
+      return (
+        <p className="text-sm text-[#CC0C39] text-center">
+          Online payment is temporarily unavailable. Please choose Cash on Delivery or contact support.
+        </p>
+      )
+    }
     return (
       <div className="space-y-2">
         <PaystackButton
