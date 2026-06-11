@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import ContactForm from './ContactForm'
+import SocialLinks from '@/components/SocialLinks'
 import { BASE_URL, BUSINESS, staticPageMetadata } from '@/lib/seo'
 
 export const metadata: Metadata = staticPageMetadata({
@@ -154,34 +155,7 @@ export default function Contact() {
                   <span className="text-xl flex-shrink-0">🔗</span>
                   <div>
                     <p className="font-semibold text-[#0F1111]">Follow Us</p>
-                    <p>
-                      <a
-                        href={BUSINESS.facebook}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-[#007185] hover:underline hover:text-[#CC0C39]"
-                      >
-                        Facebook
-                      </a>
-                      {' · '}
-                      <a
-                        href={BUSINESS.instagram}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-[#007185] hover:underline hover:text-[#CC0C39]"
-                      >
-                        Instagram
-                      </a>
-                      {' · '}
-                      <a
-                        href={BUSINESS.whatsapp}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-[#007185] hover:underline hover:text-[#CC0C39]"
-                      >
-                        WhatsApp
-                      </a>
-                    </p>
+                    <SocialLinks />
                   </div>
                 </div>
               </div>

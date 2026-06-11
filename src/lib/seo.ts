@@ -21,8 +21,12 @@ export const BUSINESS = {
   },
   mapsUrl: 'https://maps.google.com/?q=33+Ogui+Road+Enugu+Nigeria',
   instagram: 'https://www.instagram.com/agubrothers/',
+  /** Canonical URL for SEO schema and desktop browsers */
   facebook:
     'https://www.facebook.com/people/Agu-Brothers-Electronics/61568047303229/',
+  /** Mobile web URL — opens reliably in phone browsers and the Facebook app */
+  facebookMobile:
+    'https://web.facebook.com/people/Agu-Brothers-Electronics/61568047303229/',
   facebookPageId: '61568047303229',
   whatsapp: 'https://wa.me/2349099234242',
   sameAs: [

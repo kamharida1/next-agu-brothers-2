@@ -5,6 +5,7 @@ import Link from 'next/link'
 import useSWR from 'swr'
 import { FiX } from 'react-icons/fi'
 import { categoryHref } from '@/lib/categorySlugs'
+import SocialLinks from '@/components/SocialLinks'
 
 const Sidebar = () => {
   const { toggleDrawer } = useLayoutService()
@@ -101,6 +102,8 @@ const Sidebar = () => {
             </Link>
           ))}
         </div>
+
+        <SocialLinks variant="sidebar" />
       </div>
     </div>
   )

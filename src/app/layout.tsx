@@ -9,7 +9,8 @@ import Header from '@/components/header/header'
 import BackToTop from '@/components/BackToTop'
 import WhatsAppButton from '@/components/WhatsAppButton'
 import GoogleAnalytics from '@/components/GoogleAnalytics'
-import { BASE_URL, BUSINESS } from '@/lib/seo'
+import SocialLinks from '@/components/SocialLinks'
+import { BASE_URL } from '@/lib/seo'
 
 const openSans = Open_Sans({
   subsets: ['latin'],
@@ -123,27 +124,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                       </span>
                       <span className="text-[#CCCCCC] text-xs mt-0.5">Electronics & Home Appliances</span>
                     </div>
-                    <div className="flex flex-wrap justify-center gap-4 text-xs">
-                      <a
-                        href={BUSINESS.facebook}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="hover:underline hover:text-white"
-                      >
-                        Facebook
-                      </a>
-                      <a
-                        href={BUSINESS.instagram}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="hover:underline hover:text-white"
-                      >
-                        Instagram
-                      </a>
-                      <Link href="/terms-and-conditions" className="hover:underline hover:text-white">Conditions of Use</Link>
-                      <Link href="/privacy-policy" className="hover:underline hover:text-white">Privacy Notice</Link>
-                      <Link href="/contact-us" className="hover:underline hover:text-white">Help</Link>
-                    </div>
+                    <SocialLinks variant="footer" />
                     <p className="text-xs text-center">
                       © {new Date().getFullYear()} Agu Brothers Electronics. All rights reserved. Enugu, Nigeria.
                     </p>
