@@ -21,12 +21,14 @@ export const BUSINESS = {
   },
   mapsUrl: 'https://maps.google.com/?q=33+Ogui+Road+Enugu+Nigeria',
   instagram: 'https://www.instagram.com/agubrothers/',
-  facebook: 'https://www.facebook.com/agubrothers/',
+  facebook:
+    'https://www.facebook.com/people/Agu-Brothers-Electronics/61568047303229/',
+  facebookPageId: '61568047303229',
   whatsapp: 'https://wa.me/2349099234242',
   sameAs: [
-    'https://wa.me/2349099234242',
     'https://www.instagram.com/agubrothers/',
-    'https://www.facebook.com/agubrothers/',
+    'https://www.facebook.com/people/Agu-Brothers-Electronics/61568047303229/',
+    'https://wa.me/2349099234242',
     'https://maps.google.com/?q=33+Ogui+Road+Enugu+Nigeria',
   ],
 } as const

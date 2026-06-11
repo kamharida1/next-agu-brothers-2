@@ -84,6 +84,7 @@ export default async function Home() {
       { '@type': 'OpeningHoursSpecification', dayOfWeek: ['Sunday'], opens: '12:00', closes: '16:00' },
     ],
     hasMap: BUSINESS.mapsUrl,
+    sameAs: BUSINESS.sameAs,
   }
 
   const organizationJsonLd = {

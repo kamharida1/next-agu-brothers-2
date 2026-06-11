@@ -46,6 +46,7 @@ export default function Contact() {
         addressRegion: BUSINESS.address.region,
         addressCountry: BUSINESS.address.country,
       },
+      sameAs: BUSINESS.sameAs,
     },
   }
 
@@ -147,6 +148,40 @@ export default function Contact() {
                   <div>
                     <p className="font-semibold text-[#0F1111]">Business Hours</p>
                     <p className="text-[#565959]">Mon–Sat: 8am – 6pm<br />Sunday: 12pm – 4pm</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="text-xl flex-shrink-0">🔗</span>
+                  <div>
+                    <p className="font-semibold text-[#0F1111]">Follow Us</p>
+                    <p>
+                      <a
+                        href={BUSINESS.facebook}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[#007185] hover:underline hover:text-[#CC0C39]"
+                      >
+                        Facebook
+                      </a>
+                      {' · '}
+                      <a
+                        href={BUSINESS.instagram}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[#007185] hover:underline hover:text-[#CC0C39]"
+                      >
+                        Instagram
+                      </a>
+                      {' · '}
+                      <a
+                        href={BUSINESS.whatsapp}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[#007185] hover:underline hover:text-[#CC0C39]"
+                      >
+                        WhatsApp
+                      </a>
+                    </p>
                   </div>
                 </div>
               </div>

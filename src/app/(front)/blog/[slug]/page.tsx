@@ -110,10 +110,13 @@ export default async function BlogDetail({
       '@type': 'Organization',
       name: BUSINESS.name,
       url: BASE_URL,
+      sameAs: BUSINESS.sameAs,
     },
     publisher: {
       '@type': 'Organization',
       name: BUSINESS.name,
+      url: BASE_URL,
+      sameAs: BUSINESS.sameAs,
       logo: { '@type': 'ImageObject', url: `${BASE_URL}/logo.png` },
     },
     mainEntityOfPage: { '@type': 'WebPage', '@id': url },

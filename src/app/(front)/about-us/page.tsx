@@ -24,6 +24,7 @@ const aboutJsonLd = {
     addressRegion: BUSINESS.address.region,
     addressCountry: BUSINESS.address.country,
   },
+  sameAs: BUSINESS.sameAs,
 }
 
 const SECTIONS = [
@@ -97,6 +98,25 @@ export default function About() {
                 <p>📍 33 Ogui Road, Enugu State, Nigeria</p>
                 <p>📞 {BUSINESS.phoneDisplay}</p>
                 <p>✉️ {BUSINESS.email}</p>
+                <p>
+                  <a
+                    href={BUSINESS.facebook}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[#007185] hover:underline hover:text-[#CC0C39]"
+                  >
+                    Facebook
+                  </a>
+                  {' · '}
+                  <a
+                    href={BUSINESS.instagram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[#007185] hover:underline hover:text-[#CC0C39]"
+                  >
+                    Instagram
+                  </a>
+                </p>
               </div>
               <Link href="/contact-us" className="btn-amazon w-full py-2 rounded-md text-sm text-center block mt-4">
                 Contact Us

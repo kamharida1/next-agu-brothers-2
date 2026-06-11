@@ -3,7 +3,7 @@ import {
   MERCHANT_RETURN_POLICY,
   MERCHANT_SHIPPING_DETAILS,
 } from '@/lib/merchantListingSchema'
-import { BASE_URL, truncateForMeta } from '@/lib/seo'
+import { BASE_URL, BUSINESS, truncateForMeta } from '@/lib/seo'
 import { Product } from '@/lib/models/ProductModel'
 import { Review } from '@/lib/models/ReviewModel'
 
@@ -106,7 +106,12 @@ export function buildProductJsonLd(
           ? 'https://schema.org/InStock'
           : 'https://schema.org/OutOfStock',
       itemCondition: 'https://schema.org/NewCondition',
-      seller: { '@type': 'Organization', name: 'Agu Brothers Electronics' },
+      seller: {
+        '@type': 'Organization',
+        name: BUSINESS.name,
+        url: BASE_URL,
+        sameAs: BUSINESS.sameAs,
+      },
       shippingDetails: MERCHANT_SHIPPING_DETAILS,
       hasMerchantReturnPolicy: MERCHANT_RETURN_POLICY,
     },
