@@ -1,5 +1,6 @@
 import dbConnect from '@/lib/dbConnect'
 import ProductModel, { Product } from '@/lib/models/ProductModel'
+import { brandMatchRegex, dedupeBrands } from '@/lib/brandUtils'
 import { cache } from 'react'
 import ReviewModel from '../models/ReviewModel'
 import { toPlainObject } from '../utils'
@@ -19,10 +20,12 @@ const getLatest = cache(async () => {
 })
 
 // get products by brand
-const getByBrand = cache(async (brand: string ) => {
+const getByBrand = cache(async (brand: string) => {
   await dbConnect()
-  const products = await ProductModel.find({ brand }).lean()
-  return products as Product[];
+  const products = await ProductModel.find({
+    brand: brandMatchRegex(decodeURIComponent(brand)),
+  }).lean()
+  return products as Product[]
 })
 
 const getFeatured = cache(async () => {
@@ -158,7 +161,7 @@ const getCategories = cache(async () => {
 const getAllBrands = cache(async () => {
   await dbConnect()
   const brands = await ProductModel.distinct('brand')
-  return (brands as string[]).filter(Boolean).sort()
+  return dedupeBrands(brands as string[])
 })
 
 const getRelated = cache(

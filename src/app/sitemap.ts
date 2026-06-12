@@ -2,6 +2,7 @@ import { MetadataRoute } from 'next'
 import dbConnect from '@/lib/dbConnect'
 import ProductModel from '@/lib/models/ProductModel'
 import BlogModel from '@/lib/models/BlogModel'
+import { dedupeBrands } from '@/lib/brandUtils'
 import { categoryToSlug } from '@/lib/categorySlugs'
 import { BASE_URL } from '@/lib/seo'
 
@@ -27,10 +28,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }))
 
-  const brands = (await ProductModel.distinct('brand')) as string[]
-  const brandUrls: MetadataRoute.Sitemap = brands
-    .filter(Boolean)
-    .map((brand) => ({
+  const brands = dedupeBrands((await ProductModel.distinct('brand')) as string[])
+  const brandUrls: MetadataRoute.Sitemap = brands.map((brand) => ({
       url: `${BASE_URL}/${encodeURIComponent(brand)}`,
       lastModified: new Date(),
       changeFrequency: 'weekly' as const,
