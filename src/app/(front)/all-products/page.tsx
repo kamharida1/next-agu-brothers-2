@@ -2,7 +2,7 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import ProductCard from '@/components/products/ProductCard'
 import ProductPagination from '@/components/products/ProductPagination'
-import productServices, { CATALOG_PAGE_SIZE } from '@/lib/services/productService'
+import productServices from '@/lib/services/productService'
 import { Product } from '@/lib/models/ProductModel'
 
 import { BASE_URL, ROBOTS_INDEX, ROBOTS_NOINDEX_FOLLOW } from '@/lib/seo'
@@ -39,12 +39,10 @@ export default async function AllProductsPage({
 }) {
   const { page: pageParam } = await searchParams
   const page = pageParam ?? '1'
-  const { products, countProducts, pages } = JSON.parse(
+  const { products, pages } = JSON.parse(
     JSON.stringify(await productServices.getAllPaginated({ page }))
   )
   const pageNum = Number(page)
-  const from = countProducts === 0 ? 0 : (pageNum - 1) * CATALOG_PAGE_SIZE + 1
-  const to = Math.min(pageNum * CATALOG_PAGE_SIZE, countProducts)
 
   return (
     <div className="bg-[#EAEDED] min-h-screen">
@@ -58,13 +56,8 @@ export default async function AllProductsPage({
         </div>
 
         <div className="bg-white rounded-sm shadow-sm p-4">
-          <div className="flex items-center justify-between mb-4 pb-3 border-b border-[#D5D9D9]">
+          <div className="mb-4 pb-3 border-b border-[#D5D9D9]">
             <h1 className="text-2xl font-medium text-[#0F1111]">All Products</h1>
-            <span className="text-sm text-[#565959]">
-              {countProducts === 0
-                ? '0 results'
-                : `${from}-${to} of ${countProducts}`}
-            </span>
           </div>
 
           {products.length === 0 ? (
