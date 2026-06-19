@@ -23,8 +23,38 @@ const Form = () => {
   const [mounted, setMounted] = useState(false)
   const [isPlacing, setIsPlacing] = useState(false)
   const [orderComplete, setOrderComplete] = useState(false)
+  const [pendingOrderId, setPendingOrderId] = useState<string | null>(null)
+  const [pendingOrderError, setPendingOrderError] = useState<string | null>(null)
 
   useEffect(() => { setMounted(true) }, [])
+
+  useEffect(() => {
+    if (!mounted || paymentMethod !== 'Paystack' || pendingOrderId || orderComplete) return
+
+    let cancelled = false
+    ;(async () => {
+      try {
+        const res = await fetch('/api/orders/create-pending', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ items, shippingAddress, paymentMethod }),
+        })
+        const data = await res.json()
+        if (cancelled) return
+        if (res.ok) {
+          setPendingOrderId(data.order._id)
+        } else {
+          setPendingOrderError(data.message || 'Could not prepare your order for payment.')
+        }
+      } catch {
+        if (!cancelled) {
+          setPendingOrderError('Could not prepare your order for payment. Please try again.')
+        }
+      }
+    })()
+
+    return () => { cancelled = true }
+  }, [mounted, paymentMethod, pendingOrderId, orderComplete, items, shippingAddress])
 
   useEffect(() => {
     if (!mounted || isPlacing || orderComplete) return
@@ -60,38 +90,40 @@ const Form = () => {
   }
 
   // ── Paystack handlers ─────────────────────────────────────────
-  const paystackConfig = {
+  const paystackConfig = pendingOrderId ? {
     email: shippingAddress.email || session?.user?.email || '',
-    amount: Math.round(totalPrice * 100), // kobo
+    amount: Math.round(totalPrice * 100),
     publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || '',
-    reference: `agubros_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-  }
+    reference: `order_${pendingOrderId}_${Date.now()}`,
+    metadata: {
+      orderId: pendingOrderId,
+      custom_fields: [{ display_name: 'Order ID', variable_name: 'order_id', value: pendingOrderId }],
+    },
+  } : null
 
   const handlePaystackSuccess = useCallback(async (response: any) => {
+    if (!pendingOrderId) return
     setIsPlacing(true)
     try {
-      const res = await fetch('/api/orders/create-paid', {
+      const res = await fetch(`/api/orders/${pendingOrderId}/capture-paystack-order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          items, shippingAddress, paymentMethod,
-          paystackReference: response.reference,
-        }),
+        body: JSON.stringify({ reference: response.reference }),
       })
       const data = await res.json()
       if (res.ok) {
         setOrderComplete(true)
-        trackPurchase(data.order._id, items, totalPrice)
+        trackPurchase(data._id, items, totalPrice)
         toast.success('Payment confirmed! Your order is placed.')
-        router.push(`/order/${data.order._id}`)
+        router.push(`/order/${data._id}`)
         clear()
       } else {
-        toast.error(data.message || 'Order creation failed. Contact support.')
+        toast.error(data.message || 'Payment capture failed. Contact support.')
       }
     } finally {
       setIsPlacing(false)
     }
-  }, [items, shippingAddress, paymentMethod, clear, router, totalPrice])
+  }, [pendingOrderId, items, clear, router, totalPrice])
 
   const handlePaystackClose = () => {
     toast('Payment cancelled. Your order has not been placed.', { icon: 'ℹ️' })
@@ -199,6 +231,7 @@ const Form = () => {
                   isPlacing={isPlacing}
                   totalPrice={totalPrice}
                   paystackConfig={paystackConfig}
+                  pendingOrderError={pendingOrderError}
                   onPaystackSuccess={handlePaystackSuccess}
                   onPaystackClose={handlePaystackClose}
                   onCOD={placeCODOrder}
@@ -215,6 +248,7 @@ const Form = () => {
                 isPlacing={isPlacing}
                 totalPrice={totalPrice}
                 paystackConfig={paystackConfig}
+                pendingOrderError={pendingOrderError}
                 onPaystackSuccess={handlePaystackSuccess}
                 onPaystackClose={handlePaystackClose}
                 onCOD={placeCODOrder}
@@ -272,13 +306,20 @@ const Form = () => {
 
 // ── Extracted CTA so it can render in both mobile and desktop positions ──
 function OrderCTA({
-  isPaystack, isPlacing, totalPrice, paystackConfig,
+  isPaystack, isPlacing, totalPrice, paystackConfig, pendingOrderError,
   onPaystackSuccess, onPaystackClose, onCOD,
 }: {
   isPaystack: boolean
   isPlacing: boolean
   totalPrice: number
-  paystackConfig: any
+  paystackConfig: {
+    email: string
+    amount: number
+    publicKey: string
+    reference: string
+    metadata: { orderId: string; custom_fields: { display_name: string; variable_name: string; value: string }[] }
+  } | null
+  pendingOrderError: string | null
   onPaystackSuccess: (res: any) => void
   onPaystackClose: () => void
   onCOD: () => void
@@ -293,11 +334,26 @@ function OrderCTA({
   }
 
   if (isPaystack) {
-    if (!paystackConfig.publicKey) {
+    if (pendingOrderError) {
+      return (
+        <p className="text-sm text-[#CC0C39] text-center">
+          {pendingOrderError}
+        </p>
+      )
+    }
+    if (!paystackConfig?.publicKey) {
       return (
         <p className="text-sm text-[#CC0C39] text-center">
           Online payment is temporarily unavailable. Please choose Cash on Delivery or contact support.
         </p>
+      )
+    }
+    if (!paystackConfig) {
+      return (
+        <button disabled className="btn-amazon w-full py-3 rounded-md text-sm flex items-center justify-center gap-2">
+          <span className="loading loading-spinner loading-xs"></span>
+          Preparing payment…
+        </button>
       )
     }
     return (
