@@ -1,13 +1,15 @@
-import CldImage from '@/components/CldImage'
+import BlogImage from '@/components/blog/BlogImage'
 import blogServices from '@/lib/services/blogService'
 import Link from 'next/link'
+import { notFound } from 'next/navigation'
 
 export async function generateMetadata({
   params,
 }: {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }) {
-  const blog = await blogServices.getBlogBySlug(params.slug)
+  const { slug } = await params
+  const blog = await blogServices.getBlogBySlug(slug)
   if (!blog) {
     return { title: 'Blog not found' }
   }
@@ -23,27 +25,24 @@ export async function generateMetadata({
 export default async function BlogDetail({
   params,
 }: {
-  params: {
-    slug: string
-  }
+  params: Promise<{ slug: string }>
 }) {
-  const blog = await blogServices.getBlogBySlug(params.slug)
-  if (!blog) {
-    return <div>Blog Not Found</div>
-  }
+  const { slug } = await params
+  const blog = await blogServices.getBlogBySlug(slug)
+  if (!blog) notFound()
   return (
     <div className="container mx-auto my-8 px-4">
       <Link href="/blog" className="text-blue-500 hover:underline mb-4 block">
         Back to blogs
       </Link>
-      <div className="card bg-base-100 shadow-xl mb-8">
+      <div className="admin-panel mb-8">
         <figure>
           {/* <img
             src={blog.image}
             alt={blog.title}
             className="w-full h-64 object-cover"
           /> */}
-          <CldImage
+          <BlogImage
             src={blog.image}
             alt={blog.title}
             width={400}

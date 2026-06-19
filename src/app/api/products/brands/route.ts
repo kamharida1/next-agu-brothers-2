@@ -1,8 +1,6 @@
-import dbConnect from '@/lib/dbConnect'
-import ProductModel from '@/lib/models/ProductModel'
+import productServices from '@/lib/services/productService'
 
-export const GET = async (req: any) => {
-  await dbConnect()
-  const brands = await ProductModel.find().distinct('brand')
+export const GET = async () => {
+  const brands = await productServices.getAllBrands()
   return Response.json(brands)
 }

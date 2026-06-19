@@ -1,51 +1,66 @@
 import { ImageResponse } from 'next/og'
-import CldImage from '@/components/CldImage'
 import productServices from '@/lib/services/productService'
-import { formatPrice } from '@/lib/utils'
+import { formatPriceAmount } from '@/lib/utils'
+import { getSalePrice } from '@/lib/productPricing'
 
-export const contentType = 'image/jpg'
+export const contentType = 'image/png'
+export const size = { width: 1200, height: 630 }
 
-export default async function Og({ params }: { params: { slug: string } }) {
-  const product = await productServices.getBySlug(params.slug)
-  if (!product) {
-    return <div>Product not found</div>
-  }
+export default async function Og({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}) {
+  const { slug } = await params
+  const product = await productServices.getBySlug(slug)
+  if (!product) return new Response('Not found', { status: 404 })
 
-  // Get product images
-  const images = product.images
-  const imageUrl = images[0] + '?w=1200&h=630&auto=format&q=75'
-  console.log('Image URL:', imageUrl) // Log the image URL for debugging
+  const imageUrl = product.images[0]
+    ? `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/w_600,h_630,c_fill/${product.images[0]}`
+    : null
 
-  // Generate Open Graph image response
   return new ImageResponse(
     (
-      <div tw="relative flex w-full h-full items-center justify-center">
-        {/* Background */}
-        <div tw="absolute inset-0 bg-gray-200"></div>
-        {/* Product image */}
-        <CldImage
-          src={imageUrl}
-          width={1200}
-          height={630}
-          alt={`${product?.name}`}
-        />
-        {/* Overlay */}
-        <div tw="absolute inset-0 bg-black bg-opacity-50"></div>
-        <h1 tw="text-white text-4xl font-bold">{product.name}</h1>
-        <p tw="text-white text-2xl font-bold">{formatPrice(product.price)}</p>
-        <p tw="text-white text-lg">{product.description}</p>
-        <div tw="flex gap-2">
-          {Array.from({ length: product.rating }).map((_, index) => (
-            <span key={index} className="text-white text-2xl">
-              ⭐
-            </span>
-          ))}
+      <div
+        style={{
+          display: 'flex',
+          width: '100%',
+          height: '100%',
+          backgroundColor: '#131921',
+          fontFamily: 'Arial, sans-serif',
+        }}
+      >
+        {/* Left: product image */}
+        {imageUrl && (
+          <div style={{ display: 'flex', width: 600, height: 630, backgroundColor: '#fff' }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={imageUrl} alt={product.name} width={600} height={630} style={{ objectFit: 'contain' }} />
+          </div>
+        )}
+
+        {/* Right: product info */}
+        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '48px', flex: 1, gap: 16 }}>
+          <p style={{ color: '#FF9900', fontSize: 18, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2, margin: 0 }}>
+            Agu Brothers Electronics
+          </p>
+          <h1 style={{ color: '#FFFFFF', fontSize: 32, fontWeight: 700, margin: 0, lineHeight: 1.3 }}>
+            {product.name}
+          </h1>
+          {product.brand && (
+            <p style={{ color: '#AAAAAA', fontSize: 18, margin: 0 }}>{product.brand}</p>
+          )}
+          <p style={{ color: '#FF9900', fontSize: 40, fontWeight: 700, margin: 0 }}>
+            {formatPriceAmount(getSalePrice(product))}
+          </p>
+          {product.countInStock > 0 && (
+            <p style={{ color: '#00A650', fontSize: 18, fontWeight: 600, margin: 0 }}>✓ In Stock</p>
+          )}
+          <p style={{ color: '#CCCCCC', fontSize: 16, margin: 0, marginTop: 8 }}>
+            agubrothers.com
+          </p>
         </div>
       </div>
     ),
-    {
-      width: 1200,
-      height: 630,
-    }
+    { ...size }
   )
 }

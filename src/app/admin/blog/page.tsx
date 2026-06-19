@@ -3,13 +3,7 @@ import Blog from './Blog'
 import { cache } from 'react'
 
 export const metadata = {
-  title: 'Admin Blog',
-  robots: {
-    index: false,
-    follow: true,
-    nocache: true,
-  }
-}
+  robots: { index: false, follow: false },  title: 'Admin Blog',}
 const AdminBlogPage = () => {
   return (
     <AdminLayout activeItem="blog">

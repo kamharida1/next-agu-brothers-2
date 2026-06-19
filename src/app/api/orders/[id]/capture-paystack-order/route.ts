@@ -1,83 +1,32 @@
-import { auth } from "@/lib/auth";
-import dbConnect from "@/lib/dbConnect";
-import OrderModel from "@/lib/models/OrderModel";
-import ProductModel from "@/lib/models/ProductModel";
+import { auth } from '@/lib/auth'
+import { verifyPaystackTransaction } from '@/lib/paystack'
+import { capturePaystackOrderPayment } from '@/lib/paystackOrderCapture'
 
-export const POST = auth(async (...request: any) => {
-  const [req, { params }] = request;
+export const POST = auth(async (req: any, context: any) => {
+  const params = await context.params
   if (!req.auth) {
-    return Response.json(
-      { message: "Unauthorized" },
-      {
-        status: 401,
-      }
-    );
+    return Response.json({ message: 'Unauthorized' }, { status: 401 })
   }
 
-  await dbConnect();
-
-  const order = await OrderModel.findById(params.id);
-  if (order) {
-    try {
-      const {
-        message,
-        reference,
-        status,
-        trans,
-        trxref,
-      }  = await req.json();
-
-      if (
-        message === "Approved"
-      ) {
-        // Process the order as paid
-        order.isPaid = true;
-        order.totalPrice = order.totalPrice;
-        order.paidAt = Date.now();
-        order.paymentResult = {
-          id: trxref,
-          status,
-          update_time: Date.now(),
-          email_address: order.shippingAddress.email,
-        };
-      } else {
-        return Response.json(
-          { message: "Payment not successful" },
-          {
-            status: 400,
-          }
-        );
-      }
-      for (let item of order.items) {
-        const product = await ProductModel.findById(item.product);
-
-        if (product) {
-          product.countInStock -= item.qty; // Decrease stock based on ordered quantity
-
-          // Check to prevent negative stock count
-          if (product.countInStock < 0) {
-            product.countInStock = 0;
-          }
-
-          await product.save(); // Save the updated product
-        }
-      }
-      const updatedOrder = await order.save();
-      return Response.json(updatedOrder);
-    } catch (err: any) {
-      return Response.json(
-        { message: err.message },
-        {
-          status: 500,
-        }
-      );
+  try {
+    const { reference } = await req.json()
+    if (!reference) {
+      return Response.json({ message: 'Payment reference is required' }, { status: 400 })
     }
-  } else {
-    return Response.json(
-      { message: "Order not found" },
-      {
-        status: 404,
-      }
-    );
+
+    const verifyResult = await verifyPaystackTransaction(reference)
+    if (!verifyResult.status || !verifyResult.data) {
+      return Response.json({ message: 'Payment verification failed' }, { status: 400 })
+    }
+
+    const result = await capturePaystackOrderPayment(params.id, verifyResult.data)
+
+    if (!result.ok) {
+      return Response.json({ message: result.message }, { status: result.status })
+    }
+
+    return Response.json(result.order)
+  } catch (err: any) {
+    return Response.json({ message: err.message }, { status: 500 })
   }
-}) as any;
+}) as any

@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import type { Review } from './ReviewModel'
 const productSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
@@ -22,6 +23,7 @@ const productSchema = new mongoose.Schema(
     banner: { type: String },
     discountPercentage: { type: Number, default: 0 }, // e.g., 20% discount
     discountedPrice: { type: Number },
+    notes: { type: String },
   },
   {
     timestamps: true,
@@ -54,9 +56,9 @@ export type Product = {
   price: number
   brand: string
   description: string
-  reviews: any
+  reviews?: Review[] | string[]
   costPrice: number
-  category: string
+  category?: string
   rating: number
   isFeatured: boolean
   numReviews: number
@@ -65,7 +67,7 @@ export type Product = {
   sold: number
   discountPercentage: number
   discountedPrice: number
-  properties: { name: string, value: string }
-  createdAt: string
-  updatedAt: string
+  properties?: Record<string, string>
+  createdAt?: string
+  updatedAt?: string
 }

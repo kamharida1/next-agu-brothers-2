@@ -1,149 +1,193 @@
-// File: pages/contact.js
-
-import Head from 'next/head'
+import { Metadata } from 'next'
 import Link from 'next/link'
-import { IoIosInformation } from 'react-icons/io'
 import ContactForm from './ContactForm'
+import SocialLinks from '@/components/SocialLinks'
+import { BASE_URL, BUSINESS, staticPageMetadata } from '@/lib/seo'
 
-const Contact = () => {
+export const metadata: Metadata = staticPageMetadata({
+  title: 'Contact Us | Agu Brothers Electronics',
+  description:
+    'Contact Agu Brothers customer service — phone, email, store address in Enugu, and online help form. We respond within 24 hours.',
+  path: '/contact-us',
+})
+
+const FAQS = [
+  { q: 'What is your return policy?', a: 'We accept returns within 7 days of purchase. The product must be in its original condition and packaging.' },
+  { q: 'How can I track my order?', a: 'Visit "Your Orders" in your account to see real-time status updates on your order.' },
+  { q: 'Do you offer nationwide shipping?', a: 'Yes! We ship to major cities and states across Nigeria. Shipping fees are calculated at checkout.' },
+  { q: 'What payment methods do you accept?', a: 'We accept debit cards, credit cards, bank transfer, and USSD via Paystack. Cash on delivery is also available.' },
+  { q: 'Can I change my order after placing it?', a: 'You can cancel an unpaid order from your order history page. For other changes, contact us within 24 hours.' },
+]
+
+export default function Contact() {
+  const faqJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: FAQS.map((faq) => ({
+      '@type': 'Question',
+      name: faq.q,
+      acceptedAnswer: { '@type': 'Answer', text: faq.a },
+    })),
+  }
+
+  const contactJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'ContactPage',
+    name: 'Contact Agu Brothers Electronics',
+    url: `${BASE_URL}/contact-us`,
+    mainEntity: {
+      '@type': 'Organization',
+      name: BUSINESS.name,
+      email: BUSINESS.email,
+      telephone: BUSINESS.phone,
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: BUSINESS.address.street,
+        addressLocality: BUSINESS.address.locality,
+        addressRegion: BUSINESS.address.region,
+        addressCountry: BUSINESS.address.country,
+      },
+      sameAs: BUSINESS.sameAs,
+    },
+  }
+
   return (
     <>
-      <div className="text-sm breadcrumbs  border-b-2 border-b-orange-600">
-        <ul className="dark:text-black">
-          <li>
-            <Link href={'/'}>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                className="w-4 h-4 mr-2 stroke-current"
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(contactJsonLd) }} />
+    <div className="bg-[#EAEDED] min-h-screen">
+      <div className="max-w-[1200px] mx-auto px-4 py-6">
+        <div className="text-sm text-[#565959] mb-4">
+          <Link href="/" className="text-[#007185] hover:underline hover:text-[#CC0C39]">Home</Link>
+          <span className="mx-1">›</span>
+          <span>Help &amp; Customer Service</span>
+        </div>
+
+        <div className="grid lg:grid-cols-3 gap-4">
+          <div className="lg:col-span-2 space-y-4">
+            <div className="bg-white rounded-sm shadow-sm p-6">
+              <h1 className="text-2xl font-bold text-[#0F1111] mb-1 pb-3 border-b border-[#D5D9D9]">
+                Contact Customer Service
+              </h1>
+              <p className="text-sm text-[#565959] my-4">
+                We&apos;re here to help. Fill out the form below and we&apos;ll get back to you within 24 hours.
+              </p>
+              <ContactForm />
+            </div>
+
+            <div className="bg-white rounded-sm shadow-sm p-6">
+              <h2 className="text-xl font-bold text-[#0F1111] mb-4 pb-2 border-b border-[#D5D9D9]">
+                Frequently Asked Questions
+              </h2>
+              <div className="space-y-2">
+                {FAQS.map((faq, i) => (
+                  <details key={i} className="group border border-[#D5D9D9] rounded-sm overflow-hidden">
+                    <summary className="flex items-center justify-between px-4 py-3 text-sm font-medium text-[#0F1111] cursor-pointer hover:bg-[#F7F8F8] list-none">
+                      {faq.q}
+                      <svg className="w-4 h-4 text-[#565959] group-open:rotate-180 transition-transform flex-shrink-0 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </summary>
+                    <div className="px-4 py-3 text-sm text-[#565959] bg-[#F7F8F8] border-t border-[#D5D9D9]">
+                      {faq.a}
+                    </div>
+                  </details>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <div className="bg-white rounded-sm shadow-sm p-5">
+              <h3 className="font-bold text-[#0F1111] mb-3 pb-2 border-b border-[#D5D9D9]">Find Us</h3>
+              <div className="rounded-sm overflow-hidden border border-[#D5D9D9] mb-3">
+                <iframe
+                  title="Agu Brothers store location on Google Maps"
+                  src="https://maps.google.com/maps?q=33+Ogui+Road+Enugu+Nigeria&output=embed"
+                  className="w-full h-48"
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
+              </div>
+              <a
+                href={BUSINESS.mapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-[#007185] hover:underline hover:text-[#CC0C39]"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
-                ></path>
-              </svg>
-              Home
-            </Link>
-          </li>
-          <li>
-            <IoIosInformation className="w-4 h-4 mr-2 stroke-current" />
-            Contact Us
-          </li>
-        </ul>
-      </div>
-      <Head>
-        <title>Contact Us | Agu Brothers</title>
-        <meta
-          name="description"
-          content="Contact Agu Brothers for any inquiries or support."
-        />
-      </Head>
-      <div className="container mx-auto p-6 prose">
-        <h1 className="text-4xl font-bold mb-4">Contact Us</h1>
+                View on Google Maps →
+              </a>
+            </div>
 
-        {/* FAQ Section */}
-        <div className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">
-            Frequently Asked Questions
-          </h2>
-          <div className="space-y-4">
-            {/* Dropdown FAQ 1 */}
-            <details className="collapse collapse-arrow bg-base-200 rounded-box">
-              <summary className="collapse-title text-lg font-medium">
-                What is your return policy?
-              </summary>
-              <div className="collapse-content">
-                <p>
-                  We accept returns within 30 days of purchase. The product must
-                  be in its original condition.
-                </p>
+            <div className="bg-white rounded-sm shadow-sm p-5">
+              <h3 className="font-bold text-[#0F1111] mb-3 pb-2 border-b border-[#D5D9D9]">Contact Information</h3>
+              <div className="space-y-4 text-sm">
+                <div className="flex items-start gap-3">
+                  <span className="text-xl flex-shrink-0">📍</span>
+                  <div>
+                    <p className="font-semibold text-[#0F1111]">Store Address</p>
+                    <p className="text-[#565959]">{BUSINESS.address.street}<br />{BUSINESS.address.region}, Nigeria</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="text-xl flex-shrink-0">📞</span>
+                  <div>
+                    <p className="font-semibold text-[#0F1111]">Phone</p>
+                    <p className="text-[#007185]">{BUSINESS.phoneDisplay}</p>
+                    <p className="text-[#007185]">{BUSINESS.phoneSecondary.replace('+234-', '+234 ')}</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="text-xl flex-shrink-0">✉️</span>
+                  <div>
+                    <p className="font-semibold text-[#0F1111]">Email</p>
+                    <p className="text-[#007185]">{BUSINESS.email}</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="text-xl flex-shrink-0">🕐</span>
+                  <div>
+                    <p className="font-semibold text-[#0F1111]">Business Hours</p>
+                    <p className="text-[#565959]">Mon–Sat: 8am – 6pm<br />Sunday: 12pm – 4pm</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="text-xl flex-shrink-0">🔗</span>
+                  <div>
+                    <p className="font-semibold text-[#0F1111]">Follow Us</p>
+                    <SocialLinks />
+                  </div>
+                </div>
               </div>
-            </details>
-            {/* Dropdown FAQ 2 */}
-            <details className="collapse collapse-arrow bg-base-200 rounded-box">
-              <summary className="collapse-title text-lg font-medium">
-                How can I track my order?
-              </summary>
-              <div className="collapse-content">
-                <p>
-                  Once your order has shipped, you will receive an email with
-                  tracking information.
-                </p>
-              </div>
-            </details>
-            {/* Dropdown FAQ 3 */}
-            <details className="collapse collapse-arrow bg-base-200 rounded-box">
-              <summary className="collapse-title text-lg font-medium">
-                Do you offer nationwide shipping?
-              </summary>
-              <div className="collapse-content">
-                <p>
-                  Yes, we offer nationwide shipping to select states across the
-                  country. Shipping fees and delivery times vary based on
-                  location.
-                </p>
-              </div>
-            </details>
-            {/* Dropdown FAQ 4 */}
-            <details className="collapse collapse-arrow bg-base-200 rounded-box">
-              <summary className="collapse-title text-lg font-medium">
-                What payment methods do you accept?
-              </summary>
-              <div className="collapse-content">
-                <p>
-                  We accept major debit cards, Moniepoint, and bank transfers
-                  for online purchases.
-                </p>
-              </div>
-            </details>
-            {/* Dropdown FAQ 5 */}
-            <details className="collapse collapse-arrow bg-base-200 rounded-box">
-              <summary className="collapse-title text-lg font-medium">
-                Can I change my order after it&apos;s been placed?
-              </summary>
-              <div className="collapse-content">
-                <p>
-                  You can modify your order within 24 hours of placing it. After
-                  that, changes are not guaranteed due to processing times.
-                </p>
-              </div>
-            </details>
-            {/* Dropdown FAQ 6 */}
-            <details className="collapse collapse-arrow bg-base-200 rounded-box">
-              <summary className="collapse-title text-lg font-medium">
-                How do I contact customer support?
-              </summary>
-              <div className="collapse-content">
-                <p>
-                  You can contact our customer support team via email at
-                  support@agubrothers.com or by phone at +234 909 993 4242.
-                </p>
-              </div>
-            </details>
-          </div>
-        </div>
+            </div>
 
-        {/* Contact Form */}
-        <ContactForm />
+            <div className="bg-[#FFF8E6] border border-[#FF9900] rounded-sm p-4">
+              <p className="text-sm font-bold text-[#0F1111] mb-1">💡 Tip</p>
+              <p className="text-xs text-[#565959]">
+                For the fastest response, have your order number ready when contacting us.
+              </p>
+            </div>
 
-        {/* Address Details */}
-        <div className="mt-8">
-          <h2 className="text-2xl font-semibold mb-4">Our Address</h2>
-          <div className="bg-base-200 p-4 rounded-box">
-            <p>Agu Brothers,</p>
-            <p>33 Ogui Road,</p>
-            <p>Enugu, Nigeria.</p>
-            <p>Email: info@agubrothers.com</p>
-            <p>WhatsApp: +234 909 993 4242</p>
-            <p>Phone: +234 906 087 7648</p>
+            <div className="bg-white rounded-sm shadow-sm p-4">
+              <p className="text-sm font-bold text-[#0F1111] mb-3">Self-Service Options</p>
+              <ul className="space-y-2">
+                {[
+                  { href: '/order-history', label: '📦 Track your order' },
+                  { href: '/profile', label: '👤 Manage your account' },
+                  { href: '/all-products', label: '🛒 Browse products' },
+                ].map((l) => (
+                  <li key={l.href}>
+                    <Link href={l.href} className="text-sm text-[#007185] hover:underline hover:text-[#CC0C39]">
+                      {l.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
       </div>
+    </div>
     </>
   )
 }
-
-export default Contact

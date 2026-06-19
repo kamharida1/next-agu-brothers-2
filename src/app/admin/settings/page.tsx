@@ -1,21 +1,22 @@
 import AdminLayout from '@/components/admin/AdminLayout'
 import Settings from './Settings'
 import productServices from '@/lib/services/productService'
+import { getSiteSettings } from '@/lib/services/siteSettingsService'
 
 export const metadata = {
-  title: 'Admin Settings',
-  robots: {
-    index: false,
-    follow: true,
-    nocache: true,
-  },
-}
+  robots: { index: false, follow: false },  title: 'Admin Settings',}
 export default async function AdminSettingsPage() {
-  const latestProducts = await productServices.getLatest()
+  const [latestProducts, siteSettings] = await Promise.all([
+    productServices.getLatest(),
+    getSiteSettings(),
+  ])
 
   return (
     <AdminLayout activeItem="settings">
-      <Settings products={latestProducts} />
+      <Settings
+        products={latestProducts}
+        autoCategoryBlogEnabled={siteSettings.autoCategoryBlogEnabled}
+      />
     </AdminLayout>
   )
 }

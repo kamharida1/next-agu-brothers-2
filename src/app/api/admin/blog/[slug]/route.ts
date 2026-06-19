@@ -2,8 +2,8 @@ import { auth } from "@/lib/auth"
 import dbConnect from "@/lib/dbConnect"
 import BlogModel from "@/lib/models/BlogModel"
 
-export const GET = auth(async (...args: any) => {
-  const [req, { params }] = args
+export const GET = auth(async (req: any, context: any) => {
+  const params = await context.params
   if (!req.auth || !req.auth.user?.isAdmin) {
     return Response.json(
       { message: 'unauthorized' },
@@ -25,8 +25,8 @@ export const GET = auth(async (...args: any) => {
   return Response.json(blog)
 }) as any
 
-export const PUT = auth(async (...p: any) => {
-  const [req, { params }] = p
+export const PUT = auth(async (req: any, context: any) => {
+  const params = await context.params
   if (!req.auth || !req.auth.user?.isAdmin) {
     return Response.json(
       { message: 'unauthorized' },
@@ -71,8 +71,8 @@ export const PUT = auth(async (...p: any) => {
   }
 }) as any
 
-export const DELETE = auth(async (...args: any) => {
-  const [req, { params }] = args
+export const DELETE = auth(async (req: any, context: any) => {
+  const params = await context.params
 
   if (!req.auth || !req.auth.user?.isAdmin) {
     return Response.json(

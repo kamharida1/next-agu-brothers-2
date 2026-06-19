@@ -2,8 +2,7 @@ import { auth } from "@/lib/auth";
 import dbConnect from "@/lib/dbConnect";
 import ContactModel from "@/lib/models/ContactModel";
 
-export const PUT = auth(async (...p: any) => {
-  const [req] = p
+export const PUT = auth(async (req: any) => {
   if (!req.auth || !req.auth.user?.isAdmin) {
     return Response.json(
       { message: 'unauthorized' },

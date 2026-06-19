@@ -3,13 +3,7 @@ import Messages from './Messages'
 
 
 export const metadata = {
-  title: 'Admin Messages',
-  robots: {
-    index: false,
-    follow: true,
-    nocache: true,
-  },
-}
+  robots: { index: false, follow: false },  title: 'Admin Messages',}
 
 const AdminMessagesPage = () => {
   return (

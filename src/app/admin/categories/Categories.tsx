@@ -1,93 +1,89 @@
 'use client'
+
 import { Category } from '@/lib/models/CategoryModel'
-import { Product } from '@/lib/models/ProductModel'
 import { formatId } from '@/lib/utils'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import useSWR from 'swr'
 import useSWRMutation from 'swr/mutation'
+import { FiPlus, FiEdit2, FiTrash2 } from 'react-icons/fi'
+import {
+  AdminAlert,
+  AdminBtnPrimary,
+  AdminLinkAction,
+  AdminLoading,
+  AdminTable,
+  AdminToolbar,
+} from '@/components/admin/AdminUI'
 
 export default function Categories() {
   const { data: categories, error } = useSWR(`/api/admin/categories`)
-  const router = useRouter()
 
   const { trigger: deleteCategory } = useSWRMutation(
     `/api/admin/categories`,
     async (url, { arg }: { arg: { categoryId: string } }) => {
-      const toastId = toast.loading('Deleting product...')
-      const res = await fetch(`${url}/${arg.categoryId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
+      const toastId = toast.loading('Deleting category...')
+      const res = await fetch(`${url}/${arg.categoryId}`, { method: 'DELETE' })
       const data = await res.json()
-      res.ok
-        ? toast.success('Category deleted successfully', {
-            id: toastId,
-          })
-        : toast.error(data.message, {
-            id: toastId,
-          })
+      if (res.ok) {
+        toast.success('Category deleted', { id: toastId })
+      } else {
+        toast.error(data.message, { id: toastId })
+      }
     }
   )
 
-  if (error) return 'An error has occurred.'
-  if (!categories) return 'Loading...'
+  if (error) return <AdminAlert>Failed to load categories.</AdminAlert>
+  if (!categories) return <AdminLoading />
 
   return (
-    <div>
-      <div className="flex justify-between items-center">
-        <h1 className="py-4 text-2xl">Categories</h1>
-        <Link
-          href="/admin/categories/create"
-          type="button"
-          className="btn btn-primary"
-        >
-          Create
-        </Link>
-      </div>
+    <div className="space-y-5">
+      <AdminToolbar>
+        <p className="text-sm text-[#565959] flex-1">
+          {categories.length} categor{categories.length === 1 ? 'y' : 'ies'}
+        </p>
+        <AdminBtnPrimary href="/admin/categories/create">
+          <FiPlus className="w-4 h-4" />
+          Add category
+        </AdminBtnPrimary>
+      </AdminToolbar>
 
-      <div className="overflow-x-auto">
-        <table className="table table-zebra">
-          <thead>
-            <tr>
-              <th>id</th>
-              <th>name</th>
-              <th>parent</th>
+      <AdminTable>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Parent</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {categories.map((category: Category) => (
+            <tr key={category._id}>
+              <td className="font-mono text-xs text-[#565959]">{formatId(category._id)}</td>
+              <td className="font-medium text-[#0F1111]">{category.name}</td>
+              <td className="text-[#565959]">{category?.parent?.name || '—'}</td>
+              <td>
+                <div className="flex gap-3">
+                  <AdminLinkAction href={`/admin/categories/${category._id}`}>
+                    <FiEdit2 className="w-3.5 h-3.5" /> Edit
+                  </AdminLinkAction>
+                  <AdminLinkAction
+                    danger
+                    onClick={() => {
+                      if (confirm(`Delete category "${category.name}"?`)) {
+                        deleteCategory({ categoryId: category?._id || '' })
+                      }
+                    }}
+                  >
+                    <FiTrash2 className="w-3.5 h-3.5" /> Delete
+                  </AdminLinkAction>
+                </div>
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {categories.map((category: Category) => (
-              <tr key={category._id}>
-                <td>{formatId(category._id)}</td>
-                <td>{category.name}</td>
-                <td>{category?.parent?.name}</td>
-                <td>
-                  <Link
-                    href={`/admin/categories/${category._id}`}
-                    type="button"
-                    className="btn btn-ghost btn-sm"
-                  >
-                    Edit
-                  </Link>
-                  &nbsp;
-                  <button
-                    onClick={() =>
-                      deleteCategory({ categoryId: category?._id || '' })
-                    }
-                    type="button"
-                    className="btn btn-ghost btn-sm"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+          ))}
+        </tbody>
+      </AdminTable>
     </div>
   )
 }

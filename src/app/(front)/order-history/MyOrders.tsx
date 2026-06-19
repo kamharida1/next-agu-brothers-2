@@ -1,97 +1,118 @@
 'use client'
 import { Order } from '@/lib/models/OrderModel'
-import { format } from 'date-fns'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import useSWR from 'swr'
-import OrderHistorySkeleton from '../ui/skeletons/OrderHistorySkeleton'
-import { formatPrice } from '@/lib/utils'
+import Price from '@/components/products/Price'
+import { format } from 'date-fns'
 
-const formatDate = (dateString: any) => {
-  return format(new Date(dateString), 'MMMM do yyyy, h:mm:ss a')
-}
+const fmt = (d: string) => format(new Date(d), 'MMM d, yyyy')
 
 export default function MyOrders() {
-  const router = useRouter()
-  const { data: orders, error } = useSWR(`/api/orders/mine`)
-
+  const { data: orders, error } = useSWR('/api/orders/mine')
   const [mounted, setMounted] = useState(false)
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  useEffect(() => { setMounted(true) }, [])
 
-  if (!mounted) return <></>
+  if (!mounted) return null
   if (error) return (
-    <div className="flex items-center justify-center h-screen">
-      <div className="alert alert-error shadow-lg w-1/2">
-        <div>
-          <span>An error has occurred.</span>
-        </div>
+    <div className="bg-[#EAEDED] min-h-screen flex items-center justify-center">
+      <div className="bg-white rounded-sm p-8 border border-[#CC0C39] text-center max-w-sm">
+        <p className="text-[#CC0C39] font-bold">Error loading orders</p>
       </div>
     </div>
   )
   if (!orders) return (
-   <OrderHistorySkeleton />
+    <div className="bg-[#EAEDED] min-h-screen flex items-center justify-center">
+      <span className="loading loading-spinner loading-lg text-[#FF9900]"></span>
+    </div>
   )
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="overflow-x-auto">
-        <table className="table table-compact w-full table-zebra">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>DATE</th>
-              <th>TOTAL</th>
-              <th>PAID</th>
-              <th>DELIVERED</th>
-              <th>ACTION</th>
-            </tr>
-          </thead>
-          <tbody>
+    <div className="bg-[#EAEDED] min-h-screen">
+      <div className="max-w-[1200px] mx-auto px-4 py-6">
+        {/* Breadcrumb */}
+        <div className="text-sm text-[#565959] mb-4">
+          <Link href="/" className="text-[#007185] hover:underline hover:text-[#CC0C39]">Home</Link>
+          <span className="mx-1">›</span>
+          <span>Your Orders</span>
+        </div>
+
+        <h1 className="text-3xl font-medium text-[#0F1111] mb-4">Your Orders</h1>
+
+        {orders.length === 0 ? (
+          <div className="bg-white rounded-sm shadow-sm p-12 text-center">
+            <div className="text-6xl mb-4">📦</div>
+            <h2 className="text-2xl font-medium text-[#0F1111] mb-2">No orders yet</h2>
+            <p className="text-[#565959] mb-6">You haven&apos;t placed any orders. Start shopping!</p>
+            <Link href="/" className="btn-amazon px-8 py-3 rounded-md inline-block text-sm">
+              Continue Shopping
+            </Link>
+          </div>
+        ) : (
+          <div className="space-y-3">
             {orders.map((order: Order) => (
-              <tr key={order._id}>
-                <td>{order._id.substring(20, 24)}</td>
-                <td>{formatDate(order.createdAt.substring(0, 10))}</td>
-                <td>
-                  {formatPrice(order.totalPrice)}
-                </td>
-                <td
-                  className={
-                    order.isPaid && order.paidAt
-                      ? 'text-green-500'
-                      : 'text-red-500'
-                  }
-                >
-                  {order.isPaid && order.paidAt
-                    ? `${formatDate(order.paidAt.substring(0, 10))}`
-                    : 'Not Paid'}
-                </td>
-                <td
-                  className={
-                    order.isDelivered && order.deliveredAt
-                      ? 'text-green-500'
-                      : 'text-red-500'
-                  }
-                >
-                  {order.isDelivered && order.deliveredAt
-                    ? `${formatDate(order.deliveredAt.substring(0, 10))}`
-                    : 'Not Delivered'}
-                </td>
-                <td>
-                  <Link
-                    className="btn btn-primary btn-sm"
-                    href={`/order/${order._id}`}
-                    passHref
-                  >
-                    Details
-                  </Link>
-                </td>
-              </tr>
+              <div key={order._id} className="bg-white rounded-sm shadow-sm overflow-hidden">
+                {/* Order header */}
+                <div className="bg-[#F7F8F8] border-b border-[#D5D9D9] px-5 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                  <div className="flex flex-wrap gap-6 text-xs text-[#565959]">
+                    <div>
+                      <p className="uppercase font-bold tracking-wider mb-0.5">Order Placed</p>
+                      <p className="text-[#0F1111]">{fmt(order.createdAt)}</p>
+                    </div>
+                    <div>
+                      <p className="uppercase font-bold tracking-wider mb-0.5">Total</p>
+                      <p><Price amount={order.totalPrice} size="md" /></p>
+                    </div>
+                    <div>
+                      <p className="uppercase font-bold tracking-wider mb-0.5">Payment</p>
+                      <p className={order.isPaid ? 'text-[#007600] font-medium' : 'text-[#CC0C39]'}>
+                        {order.isPaid ? `Paid ${order.paidAt ? fmt(order.paidAt) : ''}` : 'Not Paid'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="uppercase font-bold tracking-wider mb-0.5">Delivery</p>
+                      <p className={order.isDelivered ? 'text-[#007600] font-medium' : 'text-[#565959]'}>
+                        {order.isDelivered ? `Delivered ${order.deliveredAt ? fmt(order.deliveredAt) : ''}` : 'In Progress'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-xs text-[#565959]">
+                    <span className="uppercase font-bold tracking-wider">Order # </span>
+                    <span className="text-[#007185] font-mono">{order._id}</span>
+                  </div>
+                </div>
+
+                {/* Order body */}
+                <div className="px-5 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <div>
+                    {order.isPaid && !order.isDelivered && (
+                      <p className="text-base font-bold text-[#0F1111] mb-1">
+                        Your order is on the way
+                      </p>
+                    )}
+                    {order.isDelivered && (
+                      <p className="text-base font-bold text-[#007600] mb-1">✓ Delivered</p>
+                    )}
+                    {!order.isPaid && (
+                      <p className="text-base font-bold text-[#CC0C39] mb-1">Payment required</p>
+                    )}
+                    <p className="text-sm text-[#565959]">
+                      {order.items?.length || 0} item{(order.items?.length || 0) !== 1 ? 's' : ''} · {order.paymentMethod}
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Link
+                      href={`/order/${order._id}`}
+                      className="btn-amazon-outline px-4 py-2 rounded-md text-sm"
+                    >
+                      View order details
+                    </Link>
+                  </div>
+                </div>
+              </div>
             ))}
-          </tbody>
-        </table>
+          </div>
+        )}
       </div>
     </div>
   )

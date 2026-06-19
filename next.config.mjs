@@ -1,15 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {  serverComponentsExternalPackages: ["mongoose"]},
+  serverExternalPackages: ['mongoose'],
   webpack(config) {
-      config.experiments = { ...config.experiments, topLevelAwait: true };
-      return config;
+    config.experiments = { ...config.experiments, topLevelAwait: true }
+    return config
   },
   images: {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'res.cloudinary.com', // if your website has no www, drop it
+        hostname: 'res.cloudinary.com',
       },
       {
         protocol: 'http',
@@ -19,4 +19,4 @@ const nextConfig = {
   },
 }
 
-export default nextConfig;
+export default nextConfig

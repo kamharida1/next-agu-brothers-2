@@ -2,8 +2,8 @@ import { auth } from "@/lib/auth";
 import dbConnect from "@/lib/dbConnect";
 import OrderModel from "@/lib/models/OrderModel";
 
-export const DELETE = auth(async (...request: any) => {
-  const [req, { params }] = request;
+export const DELETE = auth(async (req: any, context: any) => {
+  const params = await context.params;
 
   // Check if the user is authenticated
   if (!req.auth) {

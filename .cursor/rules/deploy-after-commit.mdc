@@ -1,0 +1,14 @@
+---
+description: Commit and push to git before any production Vercel deploy
+alwaysApply: true
+---
+
+# Deploy only after git commit
+
+Before deploying to production (`vercel --prod` or promoting a deployment):
+
+1. **Commit** all relevant changes with a clear message (never deploy uncommitted local-only work).
+2. **Push** to the remote branch unless the user explicitly asks not to push.
+3. **Then deploy** — prefer git-triggered Vercel deploys from the pushed branch; use `vercel --prod` only when the user asks for an immediate CLI deploy, and only after steps 1–2.
+
+Never run production deploy as the first step after making code changes.

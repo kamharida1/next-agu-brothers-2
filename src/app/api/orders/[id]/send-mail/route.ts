@@ -4,8 +4,8 @@ import OrderModel from "@/lib/models/OrderModel";
 import { mg, payOrderEmailTemplate } from "@/lib/utils";
 
 
-export const POST = auth(async (...request: any) => {
-  const [req, { params }] = request;
+export const POST = auth(async (req: any, context: any) => {
+  const params = await context.params;
   if (!req.auth) {
     return Response.json(
       { message: "unauthorized" },

@@ -3,6 +3,8 @@ import dbConnect from '@/lib/dbConnect'
 import CategoryModel from '@/lib/models/CategoryModel'
 import ProductModel from '@/lib/models/ProductModel'
 import { toPlainObject } from '@/lib/utils'
+import { isAutoCategoryBlogEnabled } from '@/lib/services/siteSettingsService'
+import { syncCategoryBlogFromProduct } from '@/lib/services/syncCategoryBlogFromProduct'
 
 export const GET = auth(async (req: any) => {
   if (!req.auth || !req.auth.user?.isAdmin) {
@@ -81,9 +83,31 @@ export const POST = auth(async (req: any) => {
       banner,
     })
     await product.save()
-    const plainProduct = toPlainObject(product.toObject()); // Assuming Mongoose model, use toObject() to get a plain JS object
+    const plainProduct = toPlainObject(product.toObject())
+
+    let categoryBlog: { slug: string; created: boolean } | null = null
+    if (await isAutoCategoryBlogEnabled()) {
+      try {
+        categoryBlog = await syncCategoryBlogFromProduct({
+          name: plainProduct.name,
+          slug: plainProduct.slug,
+          cat: plainProduct.cat,
+          brand: plainProduct.brand,
+          image: plainProduct.image,
+          images: plainProduct.images,
+          description: plainProduct.description,
+        })
+      } catch (blogErr) {
+        console.error('Category blog sync failed:', blogErr)
+      }
+    }
+
       return Response.json(
-        { message: 'Product created successfully', product: plainProduct },
+        {
+          message: 'Product created successfully',
+          product: plainProduct,
+          categoryBlog,
+        },
         {
           status: 201,
         }

@@ -1,20 +1,26 @@
 import AdminLayout from '@/components/admin/AdminLayout'
 import BlogEditForm from './Form'
 
-export function generateMetadata({ params }: { params: { slug: string } }) {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}) {
+  const { slug } = await params
   return {
-    title: `Edit Product ${params.slug}`,
+    title: `Edit Product ${slug}`,
   }
 }
 
-export default function AdminProductsPage({
+export default async function AdminProductsPage({
   params,
 }: {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }) {
+  const { slug } = await params
   return (
     <AdminLayout activeItem="blog">
-      <BlogEditForm slug={params.slug} />
+      <BlogEditForm slug={slug} />
     </AdminLayout>
   )
 }

@@ -125,7 +125,7 @@ export default function CategoryCreateOrEditForm({
             <div className="md:w-4/5">
               <input
                 type="text"
-                className="input input-bordered w-full max-w-md"
+                className="amazon-input max-w-xl"
                 {...register('name', { required: 'Name is required' })}
               />
             </div>
@@ -160,7 +160,7 @@ export default function CategoryCreateOrEditForm({
                 <button
                   onClick={addProperty}
                   type="button"
-                  className="btn btn-wide btn-outline btn-primary"
+                  className="btn-amazon-outline px-4 py-2 rounded-md text-sm"
                 >
                   Add new Property
                 </button>
@@ -172,7 +172,7 @@ export default function CategoryCreateOrEditForm({
                   <div className="md:w-2/5">
                     <input
                       type="text"
-                      className="input input-bordered w-full max-w-md"
+                      className="amazon-input max-w-xl"
                       placeholder="property name (example: color)"
                       {...register(`properties.${index}.name`)}
                       onChange={(e) =>
@@ -183,7 +183,7 @@ export default function CategoryCreateOrEditForm({
                   <div className="md:w-2/5">
                     <input
                       type="text"
-                      className="input input-bordered w-full max-w-md"
+                      className="amazon-input max-w-xl"
                       placeholder="values, comma separated"
                       {...register(`properties.${index}.values`)}
                       onChange={(e) =>
@@ -205,7 +205,7 @@ export default function CategoryCreateOrEditForm({
           <button
             type="submit"
             disabled={isUpdating}
-            className="btn btn-primary"
+            className="btn-amazon px-6 py-2 rounded-md text-sm"
           >
             {isUpdating && <span className="loading loading-spinner"></span>}
             {editedCategory ? 'Update' : 'Create'}

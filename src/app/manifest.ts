@@ -1,19 +1,26 @@
 import { MetadataRoute } from 'next'
- 
+
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Agu Brothers',
+    name: 'Agu Brothers Electronics',
     short_name: 'Agu Brothers',
-    description: 'Home for all electronics and gadgets',
+    description: 'Nigeria\'s trusted electronics and home appliances store',
     start_url: '/',
     display: 'standalone',
-    background_color: '#fff',
-    theme_color: '#fff',
+    background_color: '#131921',
+    theme_color: '#FF9900',
+    orientation: 'portrait',
+    categories: ['shopping', 'electronics'],
     icons: [
       {
-        src: '/favicon.ico',
-        sizes: 'any',
-        type: 'image/x-icon',
+        src: '/icon',
+        sizes: '32x32',
+        type: 'image/png',
+      },
+      {
+        src: '/apple-icon',
+        sizes: '180x180',
+        type: 'image/png',
       },
     ],
   }

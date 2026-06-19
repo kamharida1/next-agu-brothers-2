@@ -1,6 +1,7 @@
 import { format } from "date-fns";
 import FormData from "form-data";
 import Mailgun from "mailgun.js";
+import type { Blog } from "@/lib/models/BlogModel";
 
 export const mailgun = new Mailgun(FormData);
 export const mg = mailgun.client({
@@ -16,19 +17,16 @@ export function convertDocToObj(doc: any) {
   return doc;
 }
 
-export const formatPrice = (price: number | undefined) => {
-  // Ensure price is a valid number
+/** Plain-text NGN price (matches storefront Price component). */
+export const formatPriceAmount = (price: number | undefined) => {
   if (typeof price !== "number" || isNaN(price)) {
-    return "₦0"; // Fallback value for undefined or invalid price
+    return "₦0";
   }
-
-  // Format the price using toLocaleString
-  return price.toLocaleString("en-NG", {
-    style: "currency",
-    currency: "NGN",
-    minimumFractionDigits: 0,
-  });
+  return `₦${price.toLocaleString("en-NG", { maximumFractionDigits: 0 })}`;
 };
+
+/** @deprecated Prefer `<Price />` in React; use formatPriceAmount for strings (email, labels). */
+export const formatPrice = formatPriceAmount;
 
 export const formatNumber = (x: number) => {
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -45,6 +43,27 @@ export const truncateText = (text: string, wordLimit: number) => {
   }
   return text;
 };
+
+export function serializeBlog(doc: Record<string, unknown>): Blog {
+  const plain = JSON.parse(JSON.stringify(doc)) as Record<string, unknown>
+  return {
+    _id: String(plain._id ?? ''),
+    title: String(plain.title ?? ''),
+    slug: String(plain.slug ?? ''),
+    image: String(plain.image ?? ''),
+    content: String(plain.content ?? ''),
+    category: plain.category ? String(plain.category) : undefined,
+    linkedProductSlug: plain.linkedProductSlug
+      ? String(plain.linkedProductSlug)
+      : undefined,
+    createdAt: new Date(plain.createdAt as string | Date),
+    updatedAt: new Date(plain.updatedAt as string | Date),
+  }
+}
+
+export function serializeBlogs(docs: Record<string, unknown>[]): Blog[] {
+  return docs.map(serializeBlog)
+}
 
 export function toPlainObject(obj: any): any {
   if (obj === null || obj === undefined) return obj;

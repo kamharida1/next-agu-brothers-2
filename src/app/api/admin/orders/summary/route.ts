@@ -4,8 +4,7 @@
    import UserModel from '@/lib/models/UserModel'
    import ProductModel from '@/lib/models/ProductModel'
 
-   export const GET = auth(async (...request: any) => {
-     const [req, { params }] = request
+   export const GET = auth(async (req: any) => {
      if (!req.auth || !req.auth.user?.isAdmin) {
        return Response.json(
          { message: 'unauthorized' },

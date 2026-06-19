@@ -1,16 +1,16 @@
 'use client'
 
-import JobForm from "@/components/JobForm"
-import { Job } from "@/lib/models/JobModel"
-import Head from "next/head"
-import { useEffect, useState } from "react"
+import JobForm from '@/components/JobForm'
+import { Job } from '@/lib/models/JobModel'
+import { useEffect, useState } from 'react'
+import { FiEdit2, FiTrash2 } from 'react-icons/fi'
 
-export default function Jobs() { 
+export default function Jobs() {
   const [jobs, setJobs] = useState<Job[]>([])
   const [selectedJob, setSelectedJob] = useState<Job | null>(null)
 
-  useEffect(() => { 
-    const fetchJobs = async () => { 
+  useEffect(() => {
+    const fetchJobs = async () => {
       const response = await fetch('/api/admin/jobs')
       const data = await response.json()
       setJobs(data)
@@ -18,28 +18,14 @@ export default function Jobs() {
     fetchJobs()
   }, [])
 
-  const handleJobAddedOrUpdated = (job: Job) => { 
-    setJobs((prevJobs) => { 
-      const index = prevJobs.findIndex((j) => j._id === job._id)
-      if (index > -1) {
-        const updatedJobs = prevJobs.map(j => j._id === job._id ? job : j)
-        return updatedJobs
-      } else {
-        return [job, ...prevJobs]
-      }
-    })
-    setSelectedJob(null)
-  }
-
   const handleEditClick = (job: Job) => {
     setSelectedJob(job)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const handleDeleteClick = async (id: string) => {
-    const res = await fetch(`/api/admin/jobs/${id}`, {
-      method: 'DELETE',
-    })
+    if (!confirm('Delete this job listing?')) return
+    const res = await fetch(`/api/admin/jobs/${id}`, { method: 'DELETE' })
     const data = await res.json()
     if (data.success) {
       setJobs((prevJobs) => prevJobs.filter((job) => job._id !== id))
@@ -47,70 +33,65 @@ export default function Jobs() {
   }
 
   return (
-    <>
-      <Head>
-        <title>Careers | Agu Brothers</title>
-        <meta
-          name="description"
-          content="Careers at Agu Brothers. Join our team and help us grow."
-        />
-      </Head>
-      <div className="container mx-auto p-6 prose">
-        <h1 className="text-4xl font-bold mb-4">Careers at Agu Brothers</h1>
-        <p className="text-lg">
-          At Agu Brothers, we are always looking for talented individuals to
-          join our team. If you are passionate about technology and customer
-          service, we would love to hear from you. Check out our current job
-          openings below and apply today.
-        </p>
+    <div className="space-y-6 max-w-4xl">
+      <div className="admin-panel p-5">
+        <h2 className="text-sm font-bold text-[#565959] uppercase tracking-wider mb-4">
+          {selectedJob ? 'Edit job' : 'Add job'}
+        </h2>
         <JobForm job={selectedJob} />
-        <h2 className="text-2xl font-semibold mt-8">Current Job Openings</h2>
+      </div>
+
+      <div className="space-y-4">
+        <h2 className="text-base font-bold text-[#0F1111]">Current openings</h2>
         {jobs.length === 0 ? (
-          <p>No job openings available at the moment. Please check back later.</p>
+          <div className="admin-panel p-8 text-center text-sm text-[#565959]">
+            No job openings yet
+          </div>
         ) : (
-          <ul className="list-disc ml-6 space-y-4">
-            {jobs.map((job: Job) => (
-              <li key={job._id} className="border p-4 rounded-lg shadow-md">
-                <div className="flex justify-between items-center">
-                  <h3 className="text-xl font-semibold">{job.title}</h3>
-                  <div>
-                    <button
-                      className="btn btn-secondary btn-sm mr-2"
-                      onClick={() => handleEditClick(job)}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className="btn btn-danger btn-sm"
-                      onClick={() => handleDeleteClick(job._id)}
-                    >
-                      Delete
-                    </button>
-                  </div>
+          jobs.map((job: Job) => (
+            <article key={job._id} className="admin-panel p-5">
+              <div className="flex flex-wrap justify-between items-start gap-3 mb-3">
+                <h3 className="text-lg font-bold text-[#0F1111]">{job.title}</h3>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    className="btn-amazon-outline px-3 py-1.5 rounded-md text-xs inline-flex items-center gap-1"
+                    onClick={() => handleEditClick(job)}
+                  >
+                    <FiEdit2 className="w-3.5 h-3.5" /> Edit
+                  </button>
+                  <button
+                    type="button"
+                    className="text-xs text-[#CC0C39] hover:underline inline-flex items-center gap-1 px-2"
+                    onClick={() => handleDeleteClick(job._id)}
+                  >
+                    <FiTrash2 className="w-3.5 h-3.5" /> Delete
+                  </button>
                 </div>
-                <p>Location: {job.location}</p>
-                <p>Responsibilities:</p>
-                <ul className="list-disc ml-6">
-                  {(job.responsibilities || []).map((item, index) => (
-                    <li key={`${job._id}-responsibility-${index}`}>{item}</li>
-                  ))}
-                </ul>
-                <p>Requirements:</p>
-                <ul className="list-disc ml-6">
-                  {(job.requirements || []).map((item, index) => (
-                    <li key={`${job._id}-requirement-${index}`}>{item}</li>
-                  ))}
-                </ul>
-                <p>
-                  If you are interested in this position, please send your
-                  resume and cover letter to{' '}
-                  <a href={`mailto:${job.email}`}>{job.email}</a>.
-                </p>
-              </li>
-            ))}
-          </ul>
+              </div>
+              <p className="text-sm text-[#565959] mb-2">Location: {job.location}</p>
+              <p className="text-sm font-medium text-[#0F1111]">Responsibilities</p>
+              <ul className="list-disc ml-5 text-sm text-[#565959] mb-2">
+                {(job.responsibilities || []).map((item, index) => (
+                  <li key={`${job._id}-r-${index}`}>{item}</li>
+                ))}
+              </ul>
+              <p className="text-sm font-medium text-[#0F1111]">Requirements</p>
+              <ul className="list-disc ml-5 text-sm text-[#565959] mb-2">
+                {(job.requirements || []).map((item, index) => (
+                  <li key={`${job._id}-q-${index}`}>{item}</li>
+                ))}
+              </ul>
+              <p className="text-sm">
+                Apply:{' '}
+                <a href={`mailto:${job.email}`} className="text-[#007185]">
+                  {job.email}
+                </a>
+              </p>
+            </article>
+          ))
         )}
       </div>
-    </>
+    </div>
   )
 }

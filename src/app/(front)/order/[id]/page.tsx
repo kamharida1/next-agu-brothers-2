@@ -1,22 +1,23 @@
-import OrderDet from "./OrderDet"
-import OrderDetails from "./OrderDetails"
-import OrderInfo from "./OrderInfo"
+import OrderDetails from './OrderDetails'
+import { ROBOTS_NOINDEX } from '@/lib/seo'
 
-export function generateMetadata({ params }: { params: { id: string } }) {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const { id } = await params
   return {
-    title: `Order ${params.id}`,
-   // description: `Order ${params.id} details`,
+    title: `Order ${id}`,
+    robots: ROBOTS_NOINDEX,
   }
 }
 
-export default function OrderDetailsPage({
-  params
+export default async function OrderDetailsPage({
+  params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
-  return (
-    <OrderDet
-      orderId={params.id}
-    />
-  )
+  const { id } = await params
+  return <OrderDetails orderId={id} />
 }

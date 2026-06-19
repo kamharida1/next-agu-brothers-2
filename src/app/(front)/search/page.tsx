@@ -1,226 +1,350 @@
-import ProductItem from "@/components/products/ProductItem";
-import { Rating } from "@/components/products/Rating";
-import { Product } from "@/lib/models/ProductModel";
-import productServices from "@/lib/services/productService";
-import Link from "next/link";
-import React from "react";
+import { Metadata } from 'next'
+import ProductCard from '@/components/products/ProductCard'
+import ProductPagination from '@/components/products/ProductPagination'
+import { Rating } from '@/components/products/Rating'
+import { Product } from '@/lib/models/ProductModel'
+import productServices, { PAGE_SIZE } from '@/lib/services/productService'
+import { PRICE_RANGES, priceFilterLabel } from '@/lib/searchFilters'
+import { BASE_URL, searchRobots, truncateForMeta } from '@/lib/seo'
+import { categoryHref, categoryToSlug } from '@/lib/categorySlugs'
+import Link from 'next/link'
+import { redirect } from 'next/navigation'
 
-const sortOrders = ["newest", "lowest", "highest", "rating"];
-const prices = [
-  { name: "₦1000 to ₦100000", value: "1000-100000" },
-  { name: "₦101000 to ₦1000000", value: "101000-1000000" },
-  { name: "₦1000000 to ₦20000000", value: "1000000-20000000" },
-];
-const ratings = [5, 4, 3, 2, 1];
+const sortOrders = [
+  { value: 'newest', label: 'Newest Arrivals' },
+  { value: 'lowest', label: 'Price: Low to High' },
+  { value: 'highest', label: 'Price: High to Low' },
+  { value: 'rating', label: 'Avg. Customer Review' },
+] as const
+const ratings = [4, 3, 2, 1] as const
+
+type SearchParams = {
+  q?: string
+  category?: string
+  rating?: string
+  sort?: string
+  page?: string
+  price?: string
+}
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>
+}): Promise<Metadata> {
+  const sp = await searchParams
+  const q = sp.q && sp.q !== 'all' ? sp.q : null
+  const category = sp.category && sp.category !== 'all' ? sp.category : null
+  const price = sp.price && sp.price !== 'all' ? sp.price : null
+
+  const title = q
+    ? `"${q}" results | Agu Brothers`
+    : category
+      ? `${category} | Agu Brothers Electronics`
+      : 'Shop All Electronics | Agu Brothers'
+
+  const description = truncateForMeta(
+    q
+      ? `Search results for "${q}" at Agu Brothers — Nigeria's trusted electronics store.`
+      : category
+        ? `Shop ${category} at Agu Brothers. Best prices, genuine brand-new products, fast delivery across Nigeria.`
+        : 'Browse our full range of electronics and home appliances. TVs, fridges, generators, ACs and more.'
+  )
+
+  const canonicalParams = new URLSearchParams()
+  if (category) canonicalParams.set('category', category)
+  if (price && !q) canonicalParams.set('price', price)
+  const canonicalQuery = canonicalParams.toString()
+  const canonical =
+    category && !q && !price
+      ? `${BASE_URL}${categoryHref(category)}`
+      : `${BASE_URL}/search${canonicalQuery ? `?${canonicalQuery}` : ''}`
+
+  return {
+    title,
+    description,
+    alternates: { canonical },
+    openGraph: { title, description, url: canonical },
+    robots: searchRobots(sp),
+  }
+}
 
 export default async function SearchPage({
-  searchParams: {
-    q = "all",
-    category = "all",
-    price = "all",
-    rating = "all",
-    sort = "newest",
-    page = "1",
-  },
+  searchParams,
 }: {
-  searchParams: {
-    q: string;
-    category: string;
-    price: string;
-    rating: string;
-    sort: string;
-    page: string;
-  };
+  searchParams: Promise<SearchParams>
 }) {
+  const sp = await searchParams
+  const q = sp.q ?? 'all'
+  const category = sp.category ?? 'all'
+  const rating = sp.rating ?? 'all'
+  const sort = sp.sort ?? 'newest'
+  const page = sp.page ?? '1'
+  const price = sp.price ?? 'all'
+
+  if (
+    category !== 'all' &&
+    q === 'all' &&
+    rating === 'all' &&
+    sort === 'newest' &&
+    page === '1' &&
+    price === 'all'
+  ) {
+    redirect(`/categories/${categoryToSlug(category)}`)
+  }
+
   const getFilterUrl = ({
     c,
     s,
-    p,
     r,
     pg,
+    pr,
   }: {
-    c?: string;
-    s?: string;
-    p?: string;
-    r?: string;
-    pg?: string;
+    c?: string
+    s?: string
+    r?: string
+    pg?: string
+    pr?: string
   }) => {
-    const params = { q, category, price, rating, sort, page };
-    if (c) params.category = c;
-    if (p) params.price = p;
-    if (r) params.rating = r;
-    if (pg) params.page = pg;
-    if (s) params.sort = s;
-    return `/search?${new URLSearchParams(params).toString()}`;
-  };
+    const params: Record<string, string> = { q, category, price, rating, sort, page }
+    if (c) params.category = c
+    if (r) params.rating = r
+    if (pg) params.page = pg
+    if (s) params.sort = s
+    if (pr) params.price = pr
+    if (params.page === '1') delete params.page
+    return `/search?${new URLSearchParams(params)}`
+  }
 
-  const categories = JSON.parse(
-    JSON.stringify(await productServices.getCategories())
-  );
+  const categories = JSON.parse(JSON.stringify(await productServices.getCategories()))
   const { countProducts, products, pages } = JSON.parse(
     JSON.stringify(
-      await productServices.getByQuery({
-        category,
-        q,
-        price,
-        rating,
-        page,
-        sort,
-      })
+      await productServices.getByQuery({ category, q, price, rating, page, sort })
     )
-  );
+  )
+
+  const pageNum = Math.max(1, Number(page) || 1)
+  const resultFrom = countProducts === 0 ? 0 : (pageNum - 1) * PAGE_SIZE + 1
+  const resultTo = Math.min(pageNum * PAGE_SIZE, countProducts)
+
+  const hasFilters =
+    q !== 'all' || category !== 'all' || rating !== 'all' || price !== 'all'
+
+  const itemListJsonLd =
+    category !== 'all' && products.length > 0
+      ? {
+          '@context': 'https://schema.org',
+          '@type': 'ItemList',
+          name: `${category} — Agu Brothers`,
+          numberOfItems: countProducts,
+          itemListElement: products.slice(0, 10).map((p: Product, i: number) => ({
+            '@type': 'ListItem',
+            position: i + 1,
+            url: `${BASE_URL}/product/${p.slug}`,
+            name: p.name,
+          })),
+        }
+      : null
+
+  const filterChip = (label: string, href: string, active: boolean) => (
+    <Link
+      href={href}
+      className={`px-3 py-1 rounded-full text-xs border whitespace-nowrap flex-shrink-0 transition-colors ${
+        active
+          ? 'bg-[#131921] text-white border-[#131921]'
+          : 'border-[#D5D9D9] text-[#0F1111] hover:border-[#AAAAAA]'
+      }`}
+    >
+      {label}
+    </Link>
+  )
 
   return (
-    <div className="grid md:grid-cols-5 gap-5">
-      <div className="p-4 md:col-span-1 bg-base-100 rounded-md">
-        {/* Department Filter */}
-        <div tabIndex={0} className="collapse collapse-arrow mb-4">
-          <input type="checkbox" />
-          <div className="collapse-title btn text-lg font-semibold">
-            Department
-          </div>
-          <div className="collapse-content">
-            <ul className="space-y-2">
-              <li>
-                <Link
-                  className={`link ${"all" === category ? "link-primary" : ""}`}
-                  href={getFilterUrl({ c: "all" })}
-                >
-                  Any
-                </Link>
-              </li>
-              {categories.map((c: string) => (
-                <li key={c}>
-                  <Link
-                    className={`link ${c === category ? "link-primary" : ""}`}
-                    href={getFilterUrl({ c })}
-                  >
-                    {c}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-        {/* Price Filter */}
-        <div tabIndex={0} className="collapse collapse-arrow mb-4">
-          <input type="checkbox" />
-          <div className="collapse-title btn text-lg font-semibold">Price</div>
-          <div className="collapse-content">
-            <ul className="space-y-2">
-              {prices.map((p) => (
-                <li key={p.value}>
-                  <Link
-                    className={`link ${
-                      p.value === price ? "link-primary" : ""
-                    }`}
-                    href={getFilterUrl({ p: p.value })}
-                  >
-                    {p.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-        {/* Customer Review Filter */}
-        <div tabIndex={0} className="collapse collapse-arrow mb-4">
-          <input type="checkbox" />
-          <div className="collapse-title btn text-lg font-semibold">
-            Customer Review
-          </div>
-          <div className="collapse-content">
-            <ul className="space-y-2">
-              {ratings.map((r) => (
-                <li key={r}>
-                  <Link
-                    className={`link ${
-                      `${r}` === rating ? "link-primary" : ""
-                    }`}
-                    href={getFilterUrl({ r: `${r}` })}
-                  >
-                    <Rating caption=" & up" value={r} />
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </div>
-      <div className="md:col-span-4 p-4 bg-base-100 rounded-lg shadow-md">
-        {/* Results Info and Sort */}
-        <div className="flex flex-col sm:flex-row items-center justify-between py-4 border-b border-gray-300 mb-4">
-          {/* Results Info */}
-          <div className="text-sm md:text-base text-center sm:text-left mb-4 sm:mb-0">
-            <span className="font-semibold">
-              {products.length === 0 ? "No" : countProducts} Results
-            </span>
-            {q !== "all" && ` : ${q}`}
-            {category !== "all" && ` : ${category}`}
-            {price !== "all" && ` : Price ${price}`}
-            {rating !== "all" && ` : Rating ${rating} & up`}
-            {(q !== "all" ||
-              category !== "all" ||
-              price !== "all" ||
-              rating !== "all") && (
-              <Link href="/search" className="btn btn-xs btn-ghost ml-2">
-                Clear
-              </Link>
-            )}
-          </div>
+    <>
+      {itemListJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
+        />
+      )}
+      <div className="bg-[#EAEDED] min-h-screen">
+        <div className="max-w-[1500px] mx-auto px-4 py-4">
+          <div className="flex gap-4">
+            <aside className="hidden md:block w-52 flex-shrink-0">
+              <div className="bg-white rounded-sm shadow-sm p-4 sticky top-[120px] space-y-5">
+                <div>
+                  <h3 className="font-bold text-sm text-[#0F1111] mb-2">Department</h3>
+                  <ul className="space-y-1.5">
+                    <li>
+                      <Link
+                        href={getFilterUrl({ c: 'all', pr: 'all' })}
+                        className={`text-sm block ${category === 'all' ? 'font-bold text-[#0F1111]' : 'text-[#007185] hover:underline hover:text-[#CC0C39]'}`}
+                      >
+                        Any Department
+                      </Link>
+                    </li>
+                    {categories.map((c: string) => (
+                      <li key={c}>
+                        <Link
+                          href={getFilterUrl({ c })}
+                          className={`text-sm block ${c === category ? 'font-bold text-[#0F1111]' : 'text-[#007185] hover:underline hover:text-[#CC0C39]'}`}
+                        >
+                          {c}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
 
-          {/* Sort By */}
-          <div
-            tabIndex={0}
-            className="collapse collapse-arrow w-full sm:w-auto"
-          >
-            <input type="checkbox" />
-            <div className="collapse-title btn w-full sm:w-auto">
-              Sort by: {sort.charAt(0).toUpperCase() + sort.slice(1)}
-            </div>
-            <div className="collapse-content w-full sm:w-auto bg-base-100 rounded-md shadow-md">
-              <ul className="menu p-2 space-y-1 text-sm">
-                {sortOrders.map((s) => (
-                  <li key={s} className="flex justify-center">
+                <div className="border-t border-[#D5D9D9]" />
+
+                <div>
+                  <h3 className="font-bold text-sm text-[#0F1111] mb-2">Price</h3>
+                  <ul className="space-y-1.5">
+                    {PRICE_RANGES.map((range) => (
+                      <li key={range.value}>
+                        <Link
+                          href={getFilterUrl({ pr: range.value, pg: '1' })}
+                          className={`text-sm block ${price === range.value ? 'font-bold text-[#0F1111]' : 'text-[#007185] hover:underline hover:text-[#CC0C39]'}`}
+                        >
+                          {range.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="border-t border-[#D5D9D9]" />
+
+                <div>
+                  <h3 className="font-bold text-sm text-[#0F1111] mb-2">Customer Review</h3>
+                  <ul className="space-y-1.5">
+                    <li>
+                      <Link
+                        href={getFilterUrl({ r: 'all' })}
+                        className={`text-sm block ${rating === 'all' ? 'font-bold text-[#0F1111]' : 'text-[#007185] hover:underline hover:text-[#CC0C39]'}`}
+                      >
+                        All Reviews
+                      </Link>
+                    </li>
+                    {ratings.map((r) => (
+                      <li key={r}>
+                        <Link
+                          href={getFilterUrl({ r: `${r}` })}
+                          className={`flex items-center gap-1 text-sm ${`${r}` === rating ? 'font-bold' : 'text-[#007185] hover:underline hover:text-[#CC0C39]'}`}
+                        >
+                          <Rating value={r} caption="" />
+                          <span className="text-xs">& Up</span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </aside>
+
+            <main className="flex-1 min-w-0">
+              {category !== 'all' && (
+                <h1 className="sr-only">{category} — Agu Brothers Electronics</h1>
+              )}
+
+              <div className="bg-white rounded-sm shadow-sm p-4 mb-4 space-y-3">
+                <div className="text-sm text-[#0F1111] flex flex-wrap items-center gap-2">
+                  <span className="font-bold">
+                    {countProducts === 0
+                      ? 'No'
+                      : `${resultFrom}-${resultTo} of ${countProducts}`}
+                  </span>
+                  <span>results</span>
+                  {q !== 'all' && (
+                    <span className="text-[#565959]">for &quot;{q}&quot;</span>
+                  )}
+                  {category !== 'all' && (
+                    <span className="text-[#565959]">in {category}</span>
+                  )}
+                  {price !== 'all' && (
+                    <span className="text-[#565959]">{priceFilterLabel(price)}</span>
+                  )}
+                  {rating !== 'all' && (
+                    <span className="text-[#565959]">{rating}★ & up</span>
+                  )}
+                  {hasFilters && (
                     <Link
-                      href={getFilterUrl({ s })}
-                      className={`link ${
-                        sort === s ? "link-primary font-semibold" : ""
-                      }`}
+                      href="/search"
+                      className="text-xs text-[#007185] hover:underline border border-[#D5D9D9] px-2 py-0.5 rounded-sm"
                     >
-                      {s.charAt(0).toUpperCase() + s.slice(1)}
+                      Clear all
                     </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
+                  )}
+                </div>
+
+                <div className="flex md:hidden gap-2 overflow-x-auto pb-1 no-scrollbar">
+                  {filterChip('All', getFilterUrl({ c: 'all' }), category === 'all')}
+                  {categories.map((c: string) =>
+                    filterChip(c, getFilterUrl({ c }), c === category)
+                  )}
+                </div>
+
+                <div className="flex md:hidden gap-2 overflow-x-auto pb-1 no-scrollbar">
+                  {PRICE_RANGES.map((range) =>
+                    filterChip(
+                      range.label,
+                      getFilterUrl({ pr: range.value, pg: '1' }),
+                      price === range.value
+                    )
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-[#565959] text-sm flex-shrink-0">Sort by:</span>
+                  <div className="flex gap-1 flex-wrap">
+                    {sortOrders.map((s) => (
+                      <Link
+                        key={s.value}
+                        href={getFilterUrl({ s: s.value })}
+                        className={`px-2.5 py-1 rounded-sm text-xs border transition-colors ${
+                          sort === s.value
+                            ? 'bg-[#FF9900] border-[#FF9900] text-[#131921] font-bold'
+                            : 'border-[#D5D9D9] text-[#007185] hover:border-[#AAAAAA]'
+                        }`}
+                      >
+                        {s.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {products.length === 0 ? (
+                <div className="bg-white rounded-sm shadow-sm p-12 text-center">
+                  <p className="text-xl text-[#565959] mb-2">No results found</p>
+                  <p className="text-sm text-[#565959] mb-4">
+                    Try adjusting your search or filters
+                  </p>
+                  <Link
+                    href="/search"
+                    className="btn-amazon px-6 py-2 rounded-md inline-block text-sm"
+                  >
+                    See all products
+                  </Link>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1">
+                  {products.map((product: Product) => (
+                    <ProductCard key={product.slug} product={product} showDetailsButton />
+                  ))}
+                </div>
+              )}
+
+              <ProductPagination
+                page={pageNum}
+                pages={pages}
+                getHref={(p) => getFilterUrl({ pg: `${p}` })}
+              />
+            </main>
           </div>
         </div>
-
-        {/* Product Grid */}
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {products.map((product: Product) => (
-            <ProductItem key={product.slug} product={product} />
-          ))}
-        </div>
-
-        {/* Pagination */}
-        {products.length > 0 && (
-          <div className="join flex justify-center mt-6">
-            {Array.from(Array(pages).keys()).map((p) => (
-              <Link
-                key={p}
-                className={`join-item btn ${
-                  Number(page) === p + 1 ? "btn-active" : ""
-                }`}
-                href={getFilterUrl({ pg: `${p + 1}` })}
-              >
-                {p + 1}
-              </Link>
-            ))}
-          </div>
-        )}
       </div>
-    </div>
-  );
+    </>
+  )
 }

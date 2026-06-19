@@ -21,7 +21,7 @@ const initialState: Cart = {
   shippingPrice: 0,
   taxPrice: 0,
   totalPrice: 0,
-  paymentMethod: "PayPal",
+  paymentMethod: "Paystack",
   shippingAddress: {
     fullName: "",
     address: "",
@@ -63,12 +63,18 @@ export default function useCartService() {
     shippingAddress,
 
     increase: (item: OrderItem) => {
-      const exist = items.find((x) => x.slug === item.slug);
+      const normalized: OrderItem = {
+        ...item,
+        image: item.image || item.images?.[0] || "",
+      };
+      const exist = items.find((x) => x.slug === normalized.slug);
 
       if (exist) {
-        if (exist.qty < item.countInStock) {
+        if (exist.qty < normalized.countInStock) {
           const updatedCartItems = items.map((x) =>
-            x.slug === item.slug ? { ...exist, qty: exist.qty + 1 } : x
+            x.slug === normalized.slug
+              ? { ...exist, qty: exist.qty + 1, price: normalized.price ?? exist.price }
+              : x
           );
           const { itemsPrice, shippingPrice, taxPrice, totalPrice } = calcPrice(updatedCartItems, shippingAddress);
           cartStore.setState({
@@ -82,8 +88,8 @@ export default function useCartService() {
           console.log("Cannot add more than the available stock.");
         }
       } else {
-        if (item.countInStock > 0) {
-          const updatedCartItems = [...items, { ...item, qty: 1 }];
+        if (normalized.countInStock > 0) {
+          const updatedCartItems = [...items, { ...normalized, qty: 1 }];
           const { itemsPrice, shippingPrice, taxPrice, totalPrice } = calcPrice(updatedCartItems, shippingAddress);
           cartStore.setState({
             items: updatedCartItems,

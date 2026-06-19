@@ -1,146 +1,174 @@
 'use client'
-import useCartService from "@/lib/hooks/useCartStore"
-import useLayoutService from "@/lib/hooks/useLayout"
-import { signIn, signOut, useSession } from "next-auth/react"
-import Link from "next/link"
-import { useEffect, useState } from "react"
-import { SearchBox } from "./SearchBox"
-import useWishListStore from "@/lib/hooks/useWishListStore"
+import useCartService from '@/lib/hooks/useCartStore'
+import useLayoutService from '@/lib/hooks/useLayout'
+import { signIn, signOut, useSession } from 'next-auth/react'
+import Link from 'next/link'
+import { useEffect, useRef, useState } from 'react'
+import useWishListStore from '@/lib/hooks/useWishListStore'
 
 const Menu = () => {
   const { theme, toggleTheme } = useLayoutService()
   const { items } = useCartService()
-  const {items: wishlist} = useWishListStore()
+  const { items: wishlist } = useWishListStore()
   const [mounted, setMounted] = useState(false)
-  useEffect(() => { 
-    setMounted(true)
-  }, [])
-
+  const [accountOpen, setAccountOpen] = useState(false)
   const { data: session } = useSession()
   const { init } = useCartService()
+  const dropdownRef = useRef<HTMLDivElement>(null)
 
-  const handleClick = () => {
-    ;(document.activeElement as HTMLElement).blur()
-  }
+  useEffect(() => { setMounted(true) }, [])
+
+  // Close when clicking outside
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setAccountOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  const close = () => setAccountOpen(false)
 
   const signoutHandler = () => {
     signOut({ callbackUrl: '/signin' })
     init()
+    close()
   }
 
+  const cartCount = items.reduce((a, c) => a + c.qty, 0)
+
   return (
-    <>
-      <div className="hidden md:block">
-        <SearchBox />
-      </div>
-      <div>
-        <ul className="flex items-stretch">
-          <li>
-            {mounted && (
-              <label className="swap swap-rotate invisible md:visible">
-                {/* this hidden checkbox controls the state */}
-                <input
-                  type="checkbox"
-                  checked={theme === 'light'}
-                  onChange={toggleTheme}
-                />
-                {/* moon icon */}
-                <svg
-                  className="swap-off fill-current w-10 h-10"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z" />
-                </svg>
-                {/* sun icon */}
-                <svg
-                  className="swap-on fill-current w-10 h-10"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z" />
-                </svg>
-              </label>
-            )}
-          </li>
-          {/* Favorites link*/}
-          <li>
-            <Link className="btn btn-ghost rounded-btn" href="/wishlist">
-              Favorites
-              {mounted && wishlist.length != 0 && (
-                <div className="badge badge-primary">{wishlist.length}</div>
-              )}
-            </Link>
-          </li>
-          <li>
-            <Link className="btn btn-ghost rounded-btn" href="/cart">
-              Cart
-              {mounted && items.length != 0 && (
-                <div className="badge badge-secondary">
-                  {items.reduce((a, c) => a + c.qty, 0)}{' '}
-                </div>
-              )}
-            </Link>
-          </li>
-          {session && session.user ? (
+    <div className="flex items-center gap-1 flex-shrink-0">
+
+      {/* Theme toggle */}
+      {mounted && (
+        <button
+          onClick={toggleTheme}
+          className="btn-amazon-nav hidden md:flex flex-col leading-none px-2 py-1"
+          title="Toggle theme"
+        >
+          <span className="text-[10px] text-[#CCCCCC]">{theme === 'dark' ? '☀️ Light' : '🌙 Dark'}</span>
+        </button>
+      )}
+
+      {/* Account */}
+      {session?.user ? (
+        <div ref={dropdownRef} className="relative">
+          {/* Trigger */}
+          <button
+            onClick={() => setAccountOpen((o) => !o)}
+            className="btn-amazon-nav flex flex-col leading-none cursor-pointer px-2 py-1"
+          >
+            <span className="hidden md:block text-[10px] text-[#CCCCCC]">
+              Hello, {session.user.name?.split(' ')[0]}
+            </span>
+            {/* Mobile: person icon */}
+            <svg className="md:hidden w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            <span className="hidden md:flex text-white text-sm font-bold items-center gap-0.5">
+              Account &amp; Lists
+              <svg className="w-3 h-3 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </span>
+          </button>
+
+          {/* Dropdown — fixed on mobile so it never overflows */}
+          {accountOpen && (
             <>
-              <li>
-                <div className="dropdown dropdown-bottom dropdown-end">
-                  <label tabIndex={0} className="btn btn-ghost rounded-btn">
-                    {session.user.name}
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="w-6 h-6"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M19.5 8.25l-7.5 7.5-7.5-7.5"
-                      />
-                    </svg>
-                  </label>
-                  <ul
-                    tabIndex={0}
-                    className="menu dropdown-content z-[1] p-2 shadow bg-base-300 rounded-box w-52 "
-                  >
-                    {session.user.isAdmin && (
-                      <li onClick={handleClick}>
-                        <Link href="/admin/dashboard">Admin Dashboard</Link>
-                      </li>
+              {/* Backdrop for mobile */}
+              <div className="fixed inset-0 z-[98] md:hidden" onClick={close} />
+
+              <ul className="
+                fixed right-2 z-[99] py-2 mt-1
+                bg-white shadow-2xl border border-[#D5D9D9] rounded-sm
+                w-56 text-[#0F1111]
+                md:absolute md:right-0 md:fixed-none
+              " style={{ top: 'var(--header-height, 104px)' }}>
+                <li className="px-4 py-2 border-b border-[#D5D9D9]">
+                  <p className="text-xs font-semibold text-[#0F1111] truncate">{session.user.name}</p>
+                  <p className="text-xs text-[#565959] truncate">{session.user.email}</p>
+                </li>
+                {session.user.isAdmin && (
+                  <li className="hover:bg-[#F3F3F3]">
+                    <Link href="/admin/dashboard" onClick={close} className="block px-4 py-2.5 text-sm">
+                      Admin Dashboard
+                    </Link>
+                  </li>
+                )}
+                <li className="hover:bg-[#F3F3F3]">
+                  <Link href="/order-history" onClick={close} className="block px-4 py-2.5 text-sm">
+                    Returns &amp; Orders
+                  </Link>
+                </li>
+                <li className="hover:bg-[#F3F3F3]">
+                  <Link href="/wishlist" onClick={close} className="flex items-center justify-between px-4 py-2.5 text-sm">
+                    Wish List
+                    {mounted && wishlist.length > 0 && (
+                      <span className="text-[#CC0C39] font-bold text-xs">({wishlist.length})</span>
                     )}
-                    <li onClick={handleClick}>
-                      <Link href="/order-history">Order history </Link>
-                    </li>
-                    <li onClick={handleClick}>
-                      <Link href="/profile">Profile</Link>
-                    </li>
-                    <li>
-                      <button type="button" onClick={signoutHandler}>
-                        Sign out
-                      </button>
-                    </li>
-                  </ul>
-                </div>
-              </li>
+                  </Link>
+                </li>
+                <li className="hover:bg-[#F3F3F3]">
+                  <Link href="/profile" onClick={close} className="block px-4 py-2.5 text-sm">
+                    Account Settings
+                  </Link>
+                </li>
+                <li className="border-t border-[#D5D9D9] mt-1">
+                  <button onClick={signoutHandler} className="w-full text-left px-4 py-2.5 text-sm hover:bg-[#F3F3F3]">
+                    Sign Out
+                  </button>
+                </li>
+              </ul>
             </>
-          ) : (
-            <li>
-              <button
-                className="btn btn-ghost rounded-btn"
-                type="button"
-                onClick={() => signIn()}
-              >
-                Sign in
-              </button>
-            </li>
           )}
-        </ul>
-      </div>
-    </>
+        </div>
+      ) : (
+        <button
+          onClick={() => signIn()}
+          className="btn-amazon-nav flex flex-col leading-none px-2 py-1"
+        >
+          <span className="hidden md:block text-[10px] text-[#CCCCCC]">Hello, sign in</span>
+          <svg className="md:hidden w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+          <span className="hidden md:flex text-white text-sm font-bold items-center gap-0.5">
+            Account &amp; Lists
+            <svg className="w-3 h-3 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+            </svg>
+          </span>
+        </button>
+      )}
+
+      {/* Returns & Orders */}
+      <Link href="/order-history" className="btn-amazon-nav hidden md:flex flex-col leading-none px-2 py-1">
+        <span className="text-[10px] text-[#CCCCCC]">Returns</span>
+        <span className="text-white text-sm font-bold">&amp; Orders</span>
+      </Link>
+
+      {/* Cart */}
+      <Link href="/cart" className="btn-amazon-nav flex items-end gap-1 px-2 py-1 relative">
+        <div className="relative">
+          <svg className="w-9 h-9 text-white" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <line x1="3" y1="6" x2="21" y2="6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M16 10a4 4 0 01-8 0" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          {mounted && cartCount > 0 && (
+            <span className="absolute -top-1 left-1/2 -translate-x-1/2 bg-[#FF9900] text-[#131921] text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center leading-none">
+              {cartCount > 99 ? '99+' : cartCount}
+            </span>
+          )}
+        </div>
+        <span className="text-white text-sm font-bold hidden sm:block pb-1">Cart</span>
+      </Link>
+    </div>
   )
 }
 

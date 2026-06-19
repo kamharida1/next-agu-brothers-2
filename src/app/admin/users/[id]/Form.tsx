@@ -74,7 +74,7 @@ export default function UserEditForm({ userId }: { userId: string }) {
             required: required && `${name} is required`,
             pattern,
           })}
-          className="input input-bordered w-full max-w-md"
+          className="amazon-input max-w-xl"
         />
         {errors[id]?.message && (
           <div className="text-error">{errors[id]?.message}</div>
@@ -108,7 +108,7 @@ export default function UserEditForm({ userId }: { userId: string }) {
           <button
             type="submit"
             disabled={isUpdating}
-            className="btn btn-primary"
+            className="btn-amazon px-6 py-2 rounded-md text-sm"
           >
             {isUpdating && <span className="loading loading-spinner"></span>}
             Update

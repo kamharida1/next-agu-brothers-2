@@ -91,7 +91,7 @@ export default function BlogCreateForm() {
               required: required && `${name} is required`,
               pattern,
             })}
-            className="textarea h-24 input input-bordered w-full max-w-md"
+            className="admin-textarea max-w-xl"
           />
           {errors[id]?.message && (
             <div className="text-error">{errors[id]?.message}</div>
@@ -106,7 +106,7 @@ export default function BlogCreateForm() {
               required: required && `${name} is required`,
               pattern,
             })}
-            className="input input-bordered w-full max-w-md"
+            className="amazon-input max-w-xl"
           />
         </div>
       )}
@@ -181,7 +181,7 @@ export default function BlogCreateForm() {
           <button
             type="submit"
             disabled={isCreating}
-            className="btn btn-primary"
+            className="btn-amazon px-6 py-2 rounded-md text-sm"
           >
             {isCreating && <span className="loading loading-spinner"></span>}
             Create

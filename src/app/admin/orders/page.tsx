@@ -2,13 +2,7 @@ import AdminLayout from '@/components/admin/AdminLayout'
 import Orders from './Orders'
 
 export const metadata = {
-  title: 'Admin Orders',
-  robots: {
-    index: false,
-    follow: true,
-    nocache: true,
-  },
-}
+  robots: { index: false, follow: false },  title: 'Admin Orders',}
 
 const AdminOrdersPage = () => {
   return (
