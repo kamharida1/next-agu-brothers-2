@@ -64,7 +64,7 @@ async function fillShipping(page: Page, email: string) {
   await page.getByLabel(/mobile number/i).fill(shipping.phone)
   await page.getByLabel(/^address$/i).fill(shipping.address)
   await page.getByLabel(/email address/i).fill(shipping.email)
-  await page.locator('#city').selectOption(shipping.city)
+  await page.locator('#city').first().selectOption(shipping.city)
   await page.getByLabel(/postal code/i).fill(shipping.postalCode)
   await page.getByRole('button', { name: /use this address/i }).click()
   await expect(page).toHaveURL(/\/payment/, { timeout: 15000 })
@@ -130,6 +130,6 @@ test.describe('Checkout flow', () => {
 
     const payBtn = page.getByRole('button', { name: /pay .* with paystack/i }).first()
     const unavailable = page.getByText(/temporarily unavailable/i)
-    await expect(payBtn.or(unavailable)).toBeVisible({ timeout: 10000 })
+    await expect(payBtn.or(unavailable).first()).toBeVisible({ timeout: 15000 })
   })
 })

@@ -9,6 +9,13 @@ import {
   categoryToSlug,
   resolveCategoryFromSlug,
 } from '@/lib/categorySlugs'
+import ProductListingToolbar from '@/components/products/ProductListingToolbar'
+import {
+  buildListingUrl,
+  buildQuickSortLinks,
+  buildSortLinks,
+  normalizeSort,
+} from '@/lib/productSort'
 import {
   getCategoryGuidePath,
   getCategoryLandingCopy,
@@ -61,16 +68,24 @@ export async function generateMetadata({
 
 export default async function CategoryPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>
+  searchParams: Promise<{ sort?: string }>
 }) {
   const { slug } = await params
+  const { sort: sortParam } = await searchParams
+  const sort = normalizeSort(sortParam)
   const categories = await productServices.getCategories()
   const category = resolveCategoryFromSlug(slug, categories)
   if (!category) notFound()
 
+  const basePath = `/categories/${slug}`
+  const listingParams = { sort }
+  const filterHref = buildListingUrl('/search', { category, sort })
+
   const [productsRaw, categoryThumbnails] = await Promise.all([
-    productServices.getByCategory(category),
+    productServices.getByCategory(category, sort),
     productServices.getCategoryThumbnails(),
   ])
   const products: Product[] = JSON.parse(JSON.stringify(productsRaw))
@@ -79,6 +94,8 @@ export default async function CategoryPage({
   const copy = getCategoryLandingCopy(category)
   const guidePath = getCategoryGuidePath(category)
   const url = `${BASE_URL}/categories/${slug}`
+  const sortLinks = buildSortLinks(basePath, listingParams, sort)
+  const quickSortLinks = buildQuickSortLinks(basePath, listingParams, sort)
 
   const collectionJsonLd = {
     '@context': 'https://schema.org',
@@ -186,14 +203,15 @@ export default async function CategoryPage({
               </div>
             ) : (
               <>
-                <div className="flex items-center justify-between mb-5 pb-3 border-b border-[#D5D9D9]">
+                <div className="flex flex-col gap-3 mb-5 pb-3 border-b border-[#D5D9D9] md:flex-row md:items-center md:justify-between">
                   <h2 className="text-lg font-semibold text-[#0F1111]">Shop {category}</h2>
-                  <Link
-                    href={`/search?category=${encodeURIComponent(category)}`}
-                    className="text-sm text-[#007185] hover:text-[#CC0C39] hover:underline"
-                  >
-                    Filter &amp; sort
-                  </Link>
+                  <ProductListingToolbar
+                    currentSort={sort}
+                    sortLinks={sortLinks}
+                    quickSortLinks={quickSortLinks}
+                    filterHref={filterHref}
+                    showFilter
+                  />
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-1">
                   {products.map((product) => (

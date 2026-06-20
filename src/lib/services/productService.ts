@@ -1,6 +1,7 @@
 import dbConnect from '@/lib/dbConnect'
 import ProductModel, { Product } from '@/lib/models/ProductModel'
 import { brandMatchRegex, dedupeBrands } from '@/lib/brandUtils'
+import { getMongoSortOrder, normalizeSort } from '@/lib/productSort'
 import { cache } from 'react'
 import ReviewModel from '../models/ReviewModel'
 import { toPlainObject } from '../utils'
@@ -20,11 +21,13 @@ const getLatest = cache(async () => {
 })
 
 // get products by brand
-const getByBrand = cache(async (brand: string) => {
+const getByBrand = cache(async (brand: string, sort = 'newest') => {
   await dbConnect()
   const products = await ProductModel.find({
     brand: brandMatchRegex(decodeURIComponent(brand)),
-  }).lean()
+  }, '-reviews')
+    .sort(getMongoSortOrder(normalizeSort(sort)))
+    .lean()
   return products as Product[]
 })
 
@@ -46,12 +49,12 @@ const getBySlug = cache(async (slug: string) => {
 export const PAGE_SIZE = 8
 export const CATALOG_PAGE_SIZE = 24
 
-const getAllPaginated = cache(async ({ page = '1' }: { page?: string }) => {
+const getAllPaginated = cache(async ({ page = '1', sort = 'newest' }: { page?: string; sort?: string }) => {
   await dbConnect()
   const pageNum = Math.max(1, Number(page) || 1)
 
   const products = await ProductModel.find({}, '-reviews')
-    .sort({ _id: -1 })
+    .sort(getMongoSortOrder(normalizeSort(sort)))
     .skip(CATALOG_PAGE_SIZE * (pageNum - 1))
     .limit(CATALOG_PAGE_SIZE)
     .lean()
@@ -111,15 +114,7 @@ const getByQuery = cache(
             },
           }
         : {}
-    const order: Record<string, 1 | -1> =
-      sort === 'lowest'
-        ? { price: 1 }
-        : sort === 'highest'
-        ? { price: -1 }
-        : sort === 'rating' || sort === 'toprated'
-        ? { rating: -1 }
-        : { _id: -1 }
-
+    const order = getMongoSortOrder(normalizeSort(sort))
     const categories = await ProductModel.find().distinct('cat')
     const products = await ProductModel.find(
       {
@@ -223,10 +218,11 @@ const getOneByCategory = cache(async (category: string) => {
   return (fallback as Product) ?? null
 })
 
-const getByCategory = cache(async (category: string) => {
+const getByCategory = cache(async (category: string, sort = 'newest') => {
   await dbConnect()
+  const order = getMongoSortOrder(normalizeSort(sort))
   const products = await ProductModel.find({ cat: category }, '-reviews')
-    .sort({ isFeatured: -1, sold: -1, _id: -1 })
+    .sort(order)
     .lean()
   return products as Product[]
 })

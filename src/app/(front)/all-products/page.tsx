@@ -2,19 +2,27 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import ProductCard from '@/components/products/ProductCard'
 import ProductPagination from '@/components/products/ProductPagination'
+import ProductListingToolbar from '@/components/products/ProductListingToolbar'
 import productServices from '@/lib/services/productService'
 import { Product } from '@/lib/models/ProductModel'
+import {
+  buildListingUrl,
+  buildQuickSortLinks,
+  buildSortLinks,
+  normalizeSort,
+} from '@/lib/productSort'
 
 import { BASE_URL, ROBOTS_INDEX, ROBOTS_NOINDEX_FOLLOW } from '@/lib/seo'
 
 export async function generateMetadata({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>
+  searchParams: Promise<{ page?: string; sort?: string }>
 }): Promise<Metadata> {
-  const { page: pageParam } = await searchParams
+  const { page: pageParam, sort: sortParam } = await searchParams
   const pageNum = Math.max(1, Number(pageParam) || 1)
-  const isPaginated = pageNum > 1
+  const sort = normalizeSort(sortParam)
+  const isPaginated = pageNum > 1 || sort !== 'newest'
 
   return {
     title: isPaginated
@@ -35,14 +43,20 @@ export async function generateMetadata({
 export default async function AllProductsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>
+  searchParams: Promise<{ page?: string; sort?: string }>
 }) {
-  const { page: pageParam } = await searchParams
+  const { page: pageParam, sort: sortParam } = await searchParams
   const page = pageParam ?? '1'
+  const sort = normalizeSort(sortParam)
+  const basePath = '/all-products'
+  const listingParams = { page, sort }
+
   const { products, pages } = JSON.parse(
-    JSON.stringify(await productServices.getAllPaginated({ page }))
+    JSON.stringify(await productServices.getAllPaginated({ page, sort }))
   )
   const pageNum = Number(page)
+  const sortLinks = buildSortLinks(basePath, listingParams, sort)
+  const quickSortLinks = buildQuickSortLinks(basePath, listingParams, sort)
 
   return (
     <div className="bg-[#EAEDED] min-h-screen">
@@ -57,7 +71,12 @@ export default async function AllProductsPage({
 
         <div className="bg-white rounded-sm shadow-sm p-4">
           <div className="mb-4 pb-3 border-b border-[#D5D9D9]">
-            <h1 className="text-2xl font-medium text-[#0F1111]">All Products</h1>
+            <h1 className="text-2xl font-medium text-[#0F1111] mb-3">All Products</h1>
+            <ProductListingToolbar
+              currentSort={sort}
+              sortLinks={sortLinks}
+              quickSortLinks={quickSortLinks}
+            />
           </div>
 
           {products.length === 0 ? (
@@ -78,7 +97,9 @@ export default async function AllProductsPage({
           <ProductPagination
             page={pageNum}
             pages={pages}
-            getHref={(p) => (p === 1 ? '/all-products' : `/all-products?page=${p}`)}
+            getHref={(p) =>
+              buildListingUrl(basePath, { ...listingParams, page: String(p) })
+            }
           />
         </div>
       </div>

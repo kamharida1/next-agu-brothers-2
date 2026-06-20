@@ -6,7 +6,7 @@ import { categoryHref } from '@/lib/categorySlugs'
 const STATIC_LINKS = [
   { label: '☰ All', href: '/all-products' },
   { label: 'Departments', href: '/categories' },
-  { label: "Today's Deals", href: '/search?sort=lowest' },
+  { label: 'Best Prices', href: '/search?sort=lowest' },
   { label: 'Blog', href: '/blog' },
 ]
 

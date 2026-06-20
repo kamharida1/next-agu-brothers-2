@@ -3,19 +3,20 @@ import ProductCard from '@/components/products/ProductCard'
 import ProductPagination from '@/components/products/ProductPagination'
 import { Rating } from '@/components/products/Rating'
 import { Product } from '@/lib/models/ProductModel'
+import ProductListingToolbar from '@/components/products/ProductListingToolbar'
 import productServices, { PAGE_SIZE } from '@/lib/services/productService'
 import { PRICE_RANGES, priceFilterLabel } from '@/lib/searchFilters'
+import {
+  buildListingUrl,
+  buildQuickSortLinks,
+  buildSortLinks,
+  normalizeSort,
+} from '@/lib/productSort'
 import { BASE_URL, searchRobots, truncateForMeta } from '@/lib/seo'
 import { categoryHref, categoryToSlug } from '@/lib/categorySlugs'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
-const sortOrders = [
-  { value: 'newest', label: 'Newest Arrivals' },
-  { value: 'lowest', label: 'Price: Low to High' },
-  { value: 'highest', label: 'Price: High to Low' },
-  { value: 'rating', label: 'Avg. Customer Review' },
-] as const
 const ratings = [4, 3, 2, 1] as const
 
 type SearchParams = {
@@ -78,9 +79,11 @@ export default async function SearchPage({
   const q = sp.q ?? 'all'
   const category = sp.category ?? 'all'
   const rating = sp.rating ?? 'all'
-  const sort = sp.sort ?? 'newest'
+  const sort = normalizeSort(sp.sort)
   const page = sp.page ?? '1'
   const price = sp.price ?? 'all'
+  const basePath = '/search'
+  const listingParams = { q, category, price, rating, sort, page }
 
   if (
     category !== 'all' &&
@@ -113,8 +116,12 @@ export default async function SearchPage({
     if (s) params.sort = s
     if (pr) params.price = pr
     if (params.page === '1') delete params.page
+    if (params.sort === 'newest') delete params.sort
     return `/search?${new URLSearchParams(params)}`
   }
+
+  const sortLinks = buildSortLinks(basePath, listingParams, sort)
+  const quickSortLinks = buildQuickSortLinks(basePath, listingParams, sort)
 
   const categories = JSON.parse(JSON.stringify(await productServices.getCategories()))
   const { countProducts, products, pages } = JSON.parse(
@@ -278,7 +285,7 @@ export default async function SearchPage({
                   )}
                 </div>
 
-                <div className="flex md:hidden gap-2 overflow-x-auto pb-1 no-scrollbar">
+                <div id="listing-filters" className="flex md:hidden gap-2 overflow-x-auto pb-1 no-scrollbar scroll-mt-28">
                   {filterChip('All', getFilterUrl({ c: 'all' }), category === 'all')}
                   {categories.map((c: string) =>
                     filterChip(c, getFilterUrl({ c }), c === category)
@@ -295,24 +302,13 @@ export default async function SearchPage({
                   )}
                 </div>
 
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-[#565959] text-sm flex-shrink-0">Sort by:</span>
-                  <div className="flex gap-1 flex-wrap">
-                    {sortOrders.map((s) => (
-                      <Link
-                        key={s.value}
-                        href={getFilterUrl({ s: s.value })}
-                        className={`px-2.5 py-1 rounded-sm text-xs border transition-colors ${
-                          sort === s.value
-                            ? 'bg-[#FF9900] border-[#FF9900] text-[#131921] font-bold'
-                            : 'border-[#D5D9D9] text-[#007185] hover:border-[#AAAAAA]'
-                        }`}
-                      >
-                        {s.label}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
+                <ProductListingToolbar
+                  currentSort={sort}
+                  sortLinks={sortLinks}
+                  quickSortLinks={quickSortLinks}
+                  filterHref="#listing-filters"
+                  showFilter
+                />
               </div>
 
               {products.length === 0 ? (

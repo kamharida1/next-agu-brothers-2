@@ -3,6 +3,13 @@ import { Product } from '@/lib/models/ProductModel'
 import productServices from '@/lib/services/productService'
 import Link from 'next/link'
 import ProductCard from '@/components/products/ProductCard'
+import ProductListingToolbar from '@/components/products/ProductListingToolbar'
+import {
+  buildListingUrl,
+  buildQuickSortLinks,
+  buildSortLinks,
+  normalizeSort,
+} from '@/lib/productSort'
 
 import {
   BASE_URL,
@@ -60,15 +67,25 @@ export async function generateMetadata({
 
 export default async function ProductsByBrand({
   params,
+  searchParams,
 }: {
   params: Promise<{ brand: string }>
+  searchParams: Promise<{ sort?: string }>
 }) {
   const { brand: brandParam } = await params
-  const items: Product[] = JSON.parse(
-    JSON.stringify(await productServices.getByBrand(brandParam))
-  )
+  const { sort: sortParam } = await searchParams
+  const sort = normalizeSort(sortParam)
   const brand = decodeURIComponent(brandParam)
+  const basePath = `/${brandParam}`
+  const listingParams = { sort }
+  const filterHref = buildListingUrl('/search', { q: brand, sort })
+
+  const items: Product[] = JSON.parse(
+    JSON.stringify(await productServices.getByBrand(brandParam, sort))
+  )
   const url = `${BASE_URL}/${brandParam}`
+  const sortLinks = buildSortLinks(basePath, listingParams, sort)
+  const quickSortLinks = buildQuickSortLinks(basePath, listingParams, sort)
 
   const collectionJsonLd = {
     '@context': 'https://schema.org',
@@ -123,13 +140,22 @@ export default async function ProductsByBrand({
           </div>
 
           <div className="bg-white rounded-sm shadow-sm p-4 md:p-5">
-            <div className="flex items-center justify-between mb-5 pb-3 border-b border-[#D5D9D9]">
+            <div className="flex flex-col gap-3 mb-5 pb-3 border-b border-[#D5D9D9] md:flex-row md:items-start md:justify-between">
               <div>
                 <h1 className="text-2xl font-medium text-[#0F1111]">{brand}</h1>
                 <p className="text-sm text-[#565959] mt-0.5">
                   {items.length} result{items.length !== 1 ? 's' : ''}
                 </p>
               </div>
+              {items.length > 0 && (
+                <ProductListingToolbar
+                  currentSort={sort}
+                  sortLinks={sortLinks}
+                  quickSortLinks={quickSortLinks}
+                  filterHref={filterHref}
+                  showFilter
+                />
+              )}
             </div>
 
             {items.length === 0 ? (
