@@ -264,19 +264,26 @@ export function AdminLinkAction({
 }: {
   children: React.ReactNode
   href?: string
-  onClick?: () => void
+  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void
   danger?: boolean
 }) {
   const cls = `admin-btn-link inline-flex items-center gap-1 ${danger ? '!text-[#CC0C39]' : ''}`
   if (href) {
     return (
-      <Link href={href} className={cls}>
+      <Link href={href} className={cls} onClick={(e) => e.stopPropagation()}>
         {children}
       </Link>
     )
   }
   return (
-    <button type="button" onClick={onClick} className={cls}>
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation()
+        onClick?.(e)
+      }}
+      className={cls}
+    >
       {children}
     </button>
   )

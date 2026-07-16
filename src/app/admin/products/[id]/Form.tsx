@@ -16,7 +16,7 @@ import {
   normalizeImageList,
   toCloudinaryPublicId,
 } from '@/lib/cloudinaryImage'
-import { FiUpload, FiX } from 'react-icons/fi'
+import { FiTrash2, FiUpload, FiX } from 'react-icons/fi'
 import CategoryPicker from '@/components/admin/CategoryPicker'
 
 interface ProductFormValues {
@@ -195,6 +195,32 @@ export default function ProductEditForm({ productId }: { productId: string }) {
       return data
     }
   )
+
+  const { trigger: deleteProduct, isMutating: isDeleting } = useSWRMutation(
+    `/api/admin/products/${productId}`,
+    async (url) => {
+      const toastId = toast.loading('Deleting product...')
+      try {
+        const res = await fetch(url, { method: 'DELETE' })
+        const data = await res.json().catch(() => ({}))
+        if (res.ok) {
+          toast.success('Product deleted', { id: toastId })
+          router.push('/admin/products')
+        } else {
+          toast.error(data.message || 'Failed to delete product', { id: toastId })
+        }
+      } catch {
+        toast.error('Failed to delete product', { id: toastId })
+      }
+    }
+  )
+
+  const handleDelete = () => {
+    const name = productData?.name || 'this product'
+    if (confirm(`Delete "${name}"? This cannot be undone.`)) {
+      void deleteProduct()
+    }
+  }
 
   const setProductProp = (propName: string, value: string) => {
     setProductProperties((prev) => ({ ...prev, [propName]: value }))
@@ -485,14 +511,36 @@ export default function ProductEditForm({ productId }: { productId: string }) {
           </label>
         </div>
 
-        <div className="flex flex-wrap gap-3 pt-4">
-          <button type="submit" disabled={isUpdating} className="btn-amazon px-8 py-2.5 rounded-md text-sm">
-            {isUpdating && <span className="loading loading-spinner loading-sm" />}
-            Save changes
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-[#EAEDED]">
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="submit"
+              disabled={isUpdating || isDeleting}
+              className="btn-amazon px-8 py-2.5 rounded-md text-sm"
+            >
+              {isUpdating && <span className="loading loading-spinner loading-sm" />}
+              Save changes
+            </button>
+            <Link
+              className="btn-amazon-outline px-8 py-2.5 rounded-md text-sm inline-flex items-center"
+              href="/admin/products"
+            >
+              Cancel
+            </Link>
+          </div>
+          <button
+            type="button"
+            onClick={handleDelete}
+            disabled={isUpdating || isDeleting}
+            className="btn-amazon-outline inline-flex items-center gap-2 px-6 py-2.5 rounded-md text-sm text-[#CC0C39] border-[#CC0C39] hover:bg-[#FFF4F4] disabled:opacity-50"
+          >
+            {isDeleting ? (
+              <span className="loading loading-spinner loading-sm" />
+            ) : (
+              <FiTrash2 className="w-4 h-4" />
+            )}
+            Delete product
           </button>
-          <Link className="btn-amazon-outline px-8 py-2.5 rounded-md text-sm inline-flex items-center" href="/admin/products">
-            Cancel
-          </Link>
         </div>
       </form>
     </div>

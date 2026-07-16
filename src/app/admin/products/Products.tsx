@@ -49,21 +49,52 @@ export default function Products() {
     '/api/admin/products',
     async (url, { arg }: { arg: { productId: string } }) => {
       const toastId = toast.loading('Deleting product...')
-      const res = await fetch(`${url}/${arg.productId}`, { method: 'DELETE' })
-      const data = await res.json()
-      if (res.ok) {
-        toast.success('Product deleted', { id: toastId })
-        mutate()
-      } else {
-        toast.error(data.message, { id: toastId })
+      try {
+        const res = await fetch(`${url}/${encodeURIComponent(arg.productId)}`, {
+          method: 'DELETE',
+        })
+        const data = await res.json().catch(() => ({}))
+        if (res.ok) {
+          toast.success('Product deleted', { id: toastId })
+          await mutate(
+            (current: Array<{ _id: string }> | undefined) =>
+              current?.filter(
+                (p) => String(p._id) !== String(arg.productId)
+              ),
+            { revalidate: true }
+          )
+        } else {
+          toast.error(data.message || 'Failed to delete product', { id: toastId })
+        }
+      } catch {
+        toast.error('Failed to delete product', { id: toastId })
       }
     }
   )
 
-  const handleDelete = (productId: string, productName: string) => {
+  const handleDelete = (
+    e: React.MouseEvent,
+    productId: string,
+    productName: string
+  ) => {
+    e.stopPropagation()
+    e.preventDefault()
     if (confirm(`Delete "${productName}"? This cannot be undone.`)) {
-      deleteProduct({ productId })
+      void deleteProduct({ productId: String(productId) })
     }
+  }
+
+  const handleRowNavigate = (
+    e: React.MouseEvent<HTMLTableRowElement> | React.KeyboardEvent<HTMLTableRowElement>,
+    href: string
+  ) => {
+    if ('key' in e && e.key !== 'Enter' && e.key !== ' ') return
+    if ('key' in e) e.preventDefault()
+
+    const target = e.target as HTMLElement
+    if (target.closest('a, button, input, select, textarea, [data-no-row-nav]')) return
+
+    router.push(href)
   }
 
   if (error) return <AdminAlert>Failed to load products: {error.message}</AdminAlert>
@@ -159,13 +190,8 @@ export default function Products() {
               <tr
                 key={product._id}
                 className="cursor-pointer"
-                onClick={() => router.push(editHref)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault()
-                    router.push(editHref)
-                  }
-                }}
+                onClick={(e) => handleRowNavigate(e, editHref)}
+                onKeyDown={(e) => handleRowNavigate(e, editHref)}
                 tabIndex={0}
                 role="link"
                 aria-label={`Edit ${product.name}`}
@@ -219,7 +245,7 @@ export default function Products() {
                     {product.rating?.toFixed(1) || '0.0'}
                   </span>
                 </td>
-                <td onClick={(e) => e.stopPropagation()}>
+                <td data-no-row-nav>
                   <div className="flex items-center gap-3 flex-wrap">
                     <AdminLinkAction href={editHref}>
                       <FiEdit2 className="w-3.5 h-3.5" /> Edit
@@ -237,7 +263,9 @@ export default function Products() {
                     )}
                     <AdminLinkAction
                       danger
-                      onClick={() => handleDelete(product._id, product.name)}
+                      onClick={(e) =>
+                        handleDelete(e, String(product._id), product.name)
+                      }
                     >
                       <FiTrash2 className="w-3.5 h-3.5" /> Delete
                     </AdminLinkAction>
